@@ -38,6 +38,8 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Prototypes\Unpacker\AtomicUnpackerTest.cs" />
+    <Compile Include="Prototypes\Unpacker\ListUnpackerTest.cs" />
     <Compile Include="Prototypes\Unpacker\NativeLuaBridge.cs" />
     <Compile Include="Prototypes\Unpacker\DictionaryUnpackerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

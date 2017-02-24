@@ -23,15 +23,6 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
       }
 
       [Test]
-      public void TestNumericValues() { // TODO : move to dedicate test for primitive unpacker
-         var unpacked = Unpack<string, int>(new Dictionary<object, object>() {
-            ["key1"] = 100
-         });
-
-         Assert.AreEqual(100, unpacked["key1"]);
-      }
-
-      [Test]
       public void TestNestedDictionary() {
          var unpacked = Unpack<string, IDictionary<string, string>>(new Dictionary<object, object>()
          {

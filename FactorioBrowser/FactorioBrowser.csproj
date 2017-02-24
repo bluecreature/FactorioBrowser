@@ -44,10 +44,12 @@
     <Compile Include="Prototypes\FcEntity.cs" />
     <Compile Include="Prototypes\FcItem.cs" />
     <Compile Include="Prototypes\FcTechnology.cs" />
+    <Compile Include="Prototypes\Unpacker\AtomicValueUnpacker.cs" />
     <Compile Include="Prototypes\Unpacker\MoonSharpBridge.cs" />
     <Compile Include="Prototypes\Unpacker\LuaBridge.cs" />
     <Compile Include="Prototypes\Unpacker\StructureUnpacker.cs" />
-    <Compile Include="Prototypes\Unpacker\TableUnpackers.cs" />
+    <Compile Include="Prototypes\Unpacker\CollectionUnpackers.cs" />
+    <Compile Include="Prototypes\Unpacker\InternalAPI.cs" />
     <Compile Include="Prototypes\Unpacker\UnpackerDispatcher.cs" />
     <Compile Include="Prototypes\Unpacker\FcPrototypeDataUnpacker.cs" />
     <Compile Include="ModFinder\DefaultFcModFinder.cs" />
