@@ -7,6 +7,11 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
    public class AtomicUnpackerTest {
 
       [Test]
+      public void TestUnpackNull() {
+         Assert.IsNull(Unpack<object>(null));
+      }
+
+      [Test]
       public void TestUnpackString() {
          string value = "value";
          string unpacked = Unpack<string>("value");
