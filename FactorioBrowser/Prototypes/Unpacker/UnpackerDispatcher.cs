@@ -7,21 +7,15 @@ namespace FactorioBrowser.Prototypes.Unpacker {
 
       public override object Unpack(Type targetType, ILuaVariant data, string path) {
          switch (data.ValueType) {
-
             case LuaValueType.Nil:
-               return null;
-
             case LuaValueType.Boolean:
-               return false; // TODO
-
             case LuaValueType.Number:
-               return UnpackNumber(targetType, data, path);
-
             case LuaValueType.String:
-               return UnpackString(targetType, data, path);
+               return new AtomicValueUnpacker().Unpack(targetType, data, path); // TODO : reuse instances
+
 
             case LuaValueType.Table:
-               return Unpack(targetType, data.AsTable, path);
+               return UnpackTable(targetType, data.AsTable, path);
 
             default:
                throw new PrototypeUnpackException(
@@ -29,7 +23,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
          }
       }
 
-      private object Unpack(Type targetType, ILuaTable data, string path) {
+      private object UnpackTable(Type targetType, ILuaTable data, string path) {
          Type mirrorImpl = GetUnpackerFor(targetType);
          ITableUnpacker<object> unpacker = (ITableUnpacker<object>)Activator.CreateInstance(mirrorImpl, this);
          return unpacker.Unpack(data, path);
@@ -62,25 +56,6 @@ namespace FactorioBrowser.Prototypes.Unpacker {
          }
 
          return unpackerImpl;
-      }
-
-      private object UnpackString(Type targetType, ILuaVariant data, string path) {
-         if (targetType != typeof(string)) {
-            throw new PrototypeUnpackException(path);
-         }
-
-         return data.AsString;
-      }
-      private object UnpackNumber(Type targetType, ILuaVariant data, string path) {
-         if (targetType == typeof(Int32) || targetType == typeof(int)) {
-            return Convert.ToInt32(data.AsNumber);
-
-         } else if (targetType == typeof(double)) {
-            return data.AsNumber;
-
-         } else {
-            throw new PrototypeUnpackException(path);
-         }
       }
    }
 }
