@@ -2,33 +2,29 @@ using System.Collections.Generic;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
 
-   internal interface ITableUnpacker<out T> {
-      T Unpack(ILuaTable data, string path);
-   }
-
    internal sealed class DictionaryUnpacker<TKey, TValue> : ITableUnpacker<IDictionary<TKey, TValue>> {
-      private readonly UnpackerDispatcher _dispatcher;
+      private readonly VariantUnpacker _dispatcher;
 
-      public DictionaryUnpacker(UnpackerDispatcher dispatcher) {
+      public DictionaryUnpacker(VariantUnpacker dispatcher) {
          _dispatcher = dispatcher;
       }
 
       public IDictionary<TKey, TValue> Unpack(ILuaTable data, string path) {
-         IDictionary<TKey, TValue> mirrorData = new Dictionary<TKey, TValue>();
+         IDictionary<TKey, TValue> unpackedData = new Dictionary<TKey, TValue>();
          foreach (var entry in data.Entries()) {
             var key = _dispatcher.Unpack<TKey>(entry.Key, path);
             var value = _dispatcher.Unpack<TValue>(entry.Value, path + "." + key);
-            mirrorData[key] = value;
+            unpackedData[key] = value;
          }
 
-         return mirrorData;
+         return unpackedData;
       }
    }
 
    internal sealed class ListUnpacker<T> : ITableUnpacker<IList<T>> {
-      private readonly UnpackerDispatcher _dispatcher;
+      private readonly VariantUnpacker _dispatcher;
 
-      public ListUnpacker(UnpackerDispatcher dispatcher) {
+      public ListUnpacker(VariantUnpacker dispatcher) {
          _dispatcher = dispatcher;
       }
 

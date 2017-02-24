@@ -19,13 +19,13 @@ namespace FactorioBrowser.Prototypes.Unpacker {
       }
    }
 
-   public sealed class FcPrototypeDataUnpacker {
-      public static T UnpackAs<T>(ILuaTable data, string rootPath) {
+   public static class FcPrototypeDataUnpacker {
+      public static T UnpackAs<T>(ILuaVariant data, string rootPath) {
          return new UnpackerDispatcher().Unpack<T>(data, rootPath);
       }
    }
 
-   internal sealed class TypeTools {
+   internal static class TypeTools { // TODO : move away from public API file
       internal static bool IsStructureType<T>() {
          return IsStructureType(typeof(T));
       }

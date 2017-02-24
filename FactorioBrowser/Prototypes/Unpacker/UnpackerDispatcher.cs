@@ -3,16 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
-   internal sealed class UnpackerDispatcher { // TODO : refactor and minimize the class' interface
-      public T Unpack<T>(ILuaTable data, string path) {
-         return (T) Unpack(typeof(T), data, path);
-      }
+   internal sealed class UnpackerDispatcher : VariantUnpacker {
 
-      public T Unpack<T>(ILuaVariant data, String path) {
-         return (T) Unpack(typeof(T), data, path);
-      }
-
-      public object Unpack(Type targetType, ILuaVariant data, string path) {
+      public override object Unpack(Type targetType, ILuaVariant data, string path) {
          switch (data.ValueType) {
 
             case LuaValueType.Nil:
@@ -53,7 +46,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
                unpackerImpl = typeof(ListUnpacker<>);
 
             } else {
-               throw  new NotImplementedException();
+               throw new NotImplementedException();
             }
 
          } else if (TypeTools.IsStructureType(targetType)) {
