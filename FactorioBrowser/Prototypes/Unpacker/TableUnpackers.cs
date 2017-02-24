@@ -1,8 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-using FactorioBrowser.Mirror;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
 
@@ -47,54 +43,6 @@ namespace FactorioBrowser.Prototypes.Unpacker {
          }
 
          return mirror;
-      }
-   }
-
-   internal sealed class StructureUnpacker<T> : ITableUnpacker<T> where T : class {
-      private readonly UnpackerDispatcher _dispatcher;
-
-      public StructureUnpacker(UnpackerDispatcher dispatcher) {
-         _dispatcher = dispatcher;
-      }
-
-      public T Unpack(ILuaTable data, string path) {
-         Debug.Assert(TypeTools.IsStructureType<T>());
-
-         Type targetType = typeof(T);
-         T target = Activator.CreateInstance<T>();
-
-         foreach (var propInfo in targetType.GetProperties()) {
-            FcDataFieldMirror dataFieldDef = propInfo.GetCustomAttribute<FcDataFieldMirror>();
-            if (dataFieldDef != null) {
-               PopulateDataField(data, path, target, propInfo, dataFieldDef);
-            }
-         }
-
-         return target;
-      }
-
-      private void PopulateDataField(ILuaTable data, string path, T target, PropertyInfo propInfo,
-         FcDataFieldMirror dataFieldDef) {
-
-         string propName = dataFieldDef.Name?.ToString() ?? propInfo.Name;
-         ILuaVariant rawValue = data.Get(propName);
-
-         if (rawValue == null) {
-            if (dataFieldDef.Required) {
-               throw new PrototypeUnpackException(path);
-            } else {
-               PopulateDataField(target, propInfo, null);
-            }
-
-         } else {
-            object value = _dispatcher.Unpack(propInfo.PropertyType, rawValue, path); // XXX : Make Mirror() support null-s?
-            PopulateDataField(target, propInfo, value);
-         }
-      }
-
-      private void PopulateDataField(T target, PropertyInfo propInfo, object value) {
-         propInfo.SetValue(target, value,
-            BindingFlags.Public | BindingFlags.NonPublic, null, null, null);
       }
    }
 }

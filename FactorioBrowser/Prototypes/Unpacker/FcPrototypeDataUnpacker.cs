@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using FactorioBrowser.Mirror;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
    public class PrototypeUnpackException : Exception {
@@ -33,7 +32,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
 
       internal static bool IsStructureType(Type typeId) {
          return typeId.IsClass &&
-            typeId.GetCustomAttributes(typeof(FcModelMirror)).FirstOrDefault() != null;
+            typeId.GetCustomAttributes(typeof(ModelMirror)).FirstOrDefault() != null;
       }
    }
 }

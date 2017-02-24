@@ -3,33 +3,43 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
-   internal sealed class UnpackerDispatcher {
+   internal sealed class UnpackerDispatcher { // TODO : refactor and minimize the class' interface
       public T Unpack<T>(ILuaTable data, string path) {
          return (T) Unpack(typeof(T), data, path);
       }
 
       public T Unpack<T>(ILuaVariant data, String path) {
-         Type targetType = typeof(T);
-         return (T) Unpack(targetType, data, path);
+         return (T) Unpack(typeof(T), data, path);
       }
 
-      internal object Unpack(Type targetType, ILuaTable data, string path) {
+      public object Unpack(Type targetType, ILuaVariant data, string path) {
+         switch (data.ValueType) {
+
+            case LuaValueType.Nil:
+               return null;
+
+            case LuaValueType.Boolean:
+               return false; // TODO
+
+            case LuaValueType.Number:
+               return UnpackNumber(targetType, data, path);
+
+            case LuaValueType.String:
+               return UnpackString(targetType, data, path);
+
+            case LuaValueType.Table:
+               return Unpack(targetType, data.AsTable, path);
+
+            default:
+               throw new PrototypeUnpackException(
+                  path, $"Unable to unpack value at {path}: unsupported Lua value type.");
+         }
+      }
+
+      private object Unpack(Type targetType, ILuaTable data, string path) {
          Type mirrorImpl = GetUnpackerFor(targetType);
          ITableUnpacker<object> unpacker = (ITableUnpacker<object>)Activator.CreateInstance(mirrorImpl, this);
          return unpacker.Unpack(data, path);
-      }
-
-      internal object Unpack(Type targetType, ILuaVariant data, string path) {
-         switch (data.ValueType) {
-            case LuaValueType.String:
-               return Unpack(targetType, data.AsTable, path);
-
-            case LuaValueType.Table:
-               return UnpackString(targetType, data, path);
-
-            default:
-               throw new NotImplementedException("Unsupported value type: " + data.ValueType);
-         }
       }
 
       private Type GetUnpackerFor(Type targetType) {
@@ -67,6 +77,17 @@ namespace FactorioBrowser.Prototypes.Unpacker {
          }
 
          return data.AsString;
+      }
+      private object UnpackNumber(Type targetType, ILuaVariant data, string path) {
+         if (targetType == typeof(Int32) || targetType == typeof(int)) {
+            return Convert.ToInt32(data.AsNumber);
+
+         } else if (targetType == typeof(double)) {
+            return data.AsNumber;
+
+         } else {
+            throw new PrototypeUnpackException(path);
+         }
       }
    }
 }

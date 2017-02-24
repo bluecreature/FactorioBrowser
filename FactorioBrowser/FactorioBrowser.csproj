@@ -37,12 +37,28 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FcVersion.cs" />
+    <Compile Include="Prototypes\Attributes.cs" />
+    <Compile Include="Prototypes\FcRecipe.cs" />
+    <Compile Include="Prototypes\FcEntity.cs" />
+    <Compile Include="Prototypes\FcItem.cs" />
+    <Compile Include="Prototypes\FcTechnology.cs" />
+    <Compile Include="Prototypes\Unpacker\MoonSharpBridge.cs" />
+    <Compile Include="Prototypes\Unpacker\LuaBridge.cs" />
+    <Compile Include="Prototypes\Unpacker\StructureUnpacker.cs" />
+    <Compile Include="Prototypes\Unpacker\TableUnpackers.cs" />
+    <Compile Include="Prototypes\Unpacker\UnpackerDispatcher.cs" />
+    <Compile Include="Prototypes\Unpacker\FcPrototypeDataUnpacker.cs" />
     <Compile Include="ModFinder\DefaultFcModFinder.cs" />
     <Compile Include="ModFinder\IFcModFinder.cs" />
     <Compile Include="ModFinder\InfoJsonReader.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="MoonSharp.Interpreter, Version=2.0.0.0, Culture=neutral, PublicKeyToken=921e73ce94aa17f8, processorArchitecture=MSIL">
+      <HintPath>..\packages\MoonSharp.2.0.0.0\lib\net40-client\MoonSharp.Interpreter.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -55,6 +71,7 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
