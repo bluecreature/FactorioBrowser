@@ -21,7 +21,7 @@ namespace FactorioBrowser.ModFinder {
       ZipFile,
    }
 
-   public enum FcVersionRequirement {
+   public enum FcVersionRange {
       After,
       AtLeast,
       Exactly,
@@ -30,15 +30,15 @@ namespace FactorioBrowser.ModFinder {
    public sealed class FcModDependency {
       public string ModName { get; }
       public FcVersion Version { get; }
-      public FcVersionRequirement VersionRequirement { get; }
+      public FcVersionRange VersionRange { get; }
       public bool Optional { get; }
 
       public FcModDependency(string modName, FcVersion version,
-         FcVersionRequirement versionRequirement, bool optional) {
+         FcVersionRange versionRange, bool optional) {
 
          this.ModName = modName;
          this.Version = version;
-         this.VersionRequirement = versionRequirement;
+         this.VersionRange = versionRange;
          Optional = optional;
       }
    }

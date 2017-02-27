@@ -97,22 +97,22 @@ namespace FactorioBrowser.ModFinder {
 
          bool optional = match.Groups[1].Value.Trim().Equals("?");
          string modName = match.Groups[2].Value.Trim();
-         FcVersionRequirement req = ParseReqOperator(match.Groups[3].Value);
+         FcVersionRange req = ParseReqOperator(match.Groups[3].Value);
          FcVersion version = FcVersion.FromDotNotation(match.Groups[4].Value);
 
          return new FcModDependency(modName, version, req, optional);
       }
 
-      private FcVersionRequirement ParseReqOperator(string op) {
+      private FcVersionRange ParseReqOperator(string op) {
          switch (op) {
             case ">":
-               return  FcVersionRequirement.After;
+               return  FcVersionRange.After;
             case "=>":
             case ">=":
-               return FcVersionRequirement.AtLeast;
+               return FcVersionRange.AtLeast;
             default:
                Debug.Assert(op.Equals("="), $"op is `${op}', should be `='");
-               return FcVersionRequirement.Exactly;
+               return FcVersionRange.Exactly;
          }
       }
    }
