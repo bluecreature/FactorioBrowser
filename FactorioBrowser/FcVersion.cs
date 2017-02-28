@@ -79,12 +79,13 @@ namespace FactorioBrowser {
 
          int major = Int32.Parse(match.Groups[1].Value);
          int minor = Int32.Parse(match.Groups[2].Value);
-         int patch = Int32.Parse(match.Groups[3].Value);
+         string patchStr = match.Groups[4].Value;
+         int patch = patchStr.Length > 0 ? Int32.Parse(patchStr) : 0;
          return new FcVersion(major, minor, patch);
       }
 
       private static readonly Regex DotNotationRegEx = new Regex(
-         "^(\\d+).(\\d+).(\\d+)$", RegexOptions.Compiled);
+         "^(\\d+)\\.(\\d+)(\\.(\\d+))?$", RegexOptions.Compiled);
 
    }
 }
