@@ -5,9 +5,9 @@ using Priority_Queue;
 
 namespace FactorioBrowser.ModFinder {
    internal sealed class TopologicalSortAlgorithm {
-      private readonly IDictionary<string, IList<string>> _adjList;
+      private readonly IDictionary<string, ICollection<string>> _adjList;
 
-      public TopologicalSortAlgorithm(IDictionary<string, IList<string>> adjList) {
+      public TopologicalSortAlgorithm(IDictionary<string, ICollection<string>> adjList) {
          _adjList = adjList;
       }
 

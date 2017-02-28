@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace FactorioBrowser.ModFinder {
    internal sealed class CycleFinderAlgorithm {
-      private readonly IDictionary<string, IList<string>> _adjList;
+      private readonly IDictionary<string, ICollection<string>> _adjList;
 
-      public CycleFinderAlgorithm(IDictionary<string, IList<string>> adjList) {
+      public CycleFinderAlgorithm(IDictionary<string, ICollection<string>> adjList) {
          _adjList = adjList;
       }
 
@@ -43,7 +43,7 @@ namespace FactorioBrowser.ModFinder {
          }
 
          walkPath.AddLast(node);
-         IList<string> neighbours = null;
+         ICollection<string> neighbours = null;
          _adjList.TryGetValue(node, out neighbours);
          foreach (var neighbour in neighbours ?? Enumerable.Empty<string>()) {
             WalkDepthFirst(neighbour, completeNodes, walkPath, cycles);

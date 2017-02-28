@@ -2,8 +2,8 @@ using System;
 using System.Diagnostics;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
-   internal sealed class AtomicValueUnpacker : VariantUnpacker {
-      public override object Unpack(Type targetType, ILuaVariant data, string path) {
+   internal sealed class AtomicValueUnpacker : IVariantUnpacker {
+      public object Unpack(Type targetType, ILuaVariant data, string path) {
          switch (data.ValueType) {
             case LuaValueType.Nil:
                return null; // TODO : check if targetType allows null-s
