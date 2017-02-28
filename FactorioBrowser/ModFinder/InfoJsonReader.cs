@@ -97,10 +97,11 @@ namespace FactorioBrowser.ModFinder {
 
          bool optional = match.Groups[1].Value.Trim().Equals("?");
          string modName = match.Groups[2].Value.Trim();
-         FcVersionRange req = ParseReqOperator(match.Groups[3].Value);
+         FcVersionRange range = ParseReqOperator(match.Groups[3].Value);
          FcVersion version = FcVersion.FromDotNotation(match.Groups[4].Value);
+         // TODO : support optional version requirement
 
-         return new FcModDependency(modName, version, req, optional);
+         return new FcModDependency(modName, new FcVersionRequirement(version, range), optional);
       }
 
       private FcVersionRange ParseReqOperator(string op) {

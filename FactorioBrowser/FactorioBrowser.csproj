@@ -37,6 +37,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ModFinder\CycleFinderAlgorithm.cs" />
     <Compile Include="Mod\Loader\ModFileResolvers.cs" />
     <Compile Include="Mod\Loader\LegacyLuaModuleEmulator.cs" />
     <Compile Include="Mod\Loader\ReadStage.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="ModFinder\DefaultFcModFinder.cs" />
     <Compile Include="ModFinder\IFcModFinder.cs" />
     <Compile Include="ModFinder\InfoJsonReader.cs" />
+    <Compile Include="ModFinder\TopologicalSortAlgorithm.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MoonSharp.Interpreter, Version=2.0.0.0, Culture=neutral, PublicKeyToken=921e73ce94aa17f8, processorArchitecture=MSIL">
@@ -70,6 +72,10 @@
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.4.3\lib\net45\NLog.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Priority Queue, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\OptimizedPriorityQueue.4.0.0\lib\net45\Priority Queue.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

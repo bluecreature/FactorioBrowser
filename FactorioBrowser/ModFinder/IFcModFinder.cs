@@ -27,18 +27,27 @@ namespace FactorioBrowser.ModFinder {
       Exactly,
    }
 
+   public sealed class FcVersionRequirement {
+      public FcVersion Version { get; }
+
+      public FcVersionRange Range { get; }
+      public FcVersionRequirement(FcVersion version, FcVersionRange range) {
+         Version = version;
+         Range = range;
+      }
+   }
+
    public sealed class FcModDependency {
       public string ModName { get; }
-      public FcVersion Version { get; }
-      public FcVersionRange VersionRange { get; }
+
+      public FcVersionRequirement RequiredVersion { get; }
+
       public bool Optional { get; }
 
-      public FcModDependency(string modName, FcVersion version,
-         FcVersionRange versionRange, bool optional) {
+      public FcModDependency(string modName, FcVersionRequirement requiredVersion, bool optional) {
 
          this.ModName = modName;
-         this.Version = version;
-         this.VersionRange = versionRange;
+         this.RequiredVersion = requiredVersion;
          Optional = optional;
       }
    }
