@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 
-namespace FactorioBrowser.ModFinder {
+namespace FactorioBrowser.Mod.Finder {
 
    public class FcModInfoException : Exception {
       public FcModInfoException() {

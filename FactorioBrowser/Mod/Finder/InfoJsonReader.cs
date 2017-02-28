@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace FactorioBrowser.ModFinder {
+namespace FactorioBrowser.Mod.Finder {
 
    public class InfoJson {
       public string Name { get; }

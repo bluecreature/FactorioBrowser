@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace FactorioBrowser.ModFinder {
+namespace FactorioBrowser.Mod.Finder {
    internal sealed class CycleFinderAlgorithm {
       private readonly IDictionary<string, ICollection<string>> _adjList;
 

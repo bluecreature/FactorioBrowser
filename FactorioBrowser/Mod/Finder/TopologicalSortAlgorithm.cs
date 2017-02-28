@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using Priority_Queue;
 
-namespace FactorioBrowser.ModFinder {
+namespace FactorioBrowser.Mod.Finder {
    internal sealed class TopologicalSortAlgorithm {
       private readonly IDictionary<string, ICollection<string>> _adjList;
 

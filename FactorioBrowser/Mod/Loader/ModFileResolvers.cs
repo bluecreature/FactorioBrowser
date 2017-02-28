@@ -1,11 +1,10 @@
-using FactorioBrowser.ModFinder;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Loaders;
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
+using FactorioBrowser.Mod.Finder;
 using NLog;
 
 namespace FactorioBrowser.Mod.Loader {

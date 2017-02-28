@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 
-namespace FactorioBrowser.ModFinder {
+namespace FactorioBrowser.Mod.Finder {
 
    public class DefaultFcModFinder : IFcModFinder {
       private const string BaseModRelativePath = "data/base";
