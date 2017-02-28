@@ -17,7 +17,6 @@ namespace FactorioBrowser {
       }
    }
 
-
    public sealed class FcVersion : IComparable<FcVersion> {
       public int Major { get; }
       public int Minor { get; }
@@ -54,9 +53,9 @@ namespace FactorioBrowser {
             return 1;
 
          } else {
-            int[] leftRepr = new int[] { this.Major, this.Minor, this.Patch };
-            int[] rightRepr = new int[] { other.Major, other.Minor, other.Patch };
-            return Comparer<int[]>.Default.Compare(leftRepr, rightRepr);
+            Tuple<int, int, int> leftRepr = Tuple.Create(this.Major, this.Minor, this.Patch);
+            Tuple<int, int, int> rightRepr = Tuple.Create(other.Major, other.Minor, other.Patch);
+            return Comparer<Tuple<int, int, int>>.Default.Compare(leftRepr, rightRepr);
          }
       }
 

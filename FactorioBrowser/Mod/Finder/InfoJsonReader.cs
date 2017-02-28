@@ -11,7 +11,7 @@ namespace FactorioBrowser.Mod.Finder {
 
    public class InfoJson {
       public string Name { get; }
-      public string Version { get; }
+      public string Version { get; } // TODO : switch for FcVersion
       public FcModDependency[] Dependencies { get; }
 
       public InfoJson(string name, string version, FcModDependency[] dependencies) {
@@ -31,7 +31,7 @@ namespace FactorioBrowser.Mod.Finder {
       private const string KeyVersion = "version";
       private const string KeyDependencies = "dependencies";
       private static readonly Regex DependencySpecPattern = new Regex(
-         "^(\\?\\s+)?\\s*(.*)(>|>=|=>|=)\\s*([\\d\\.]+)", RegexOptions.Compiled);
+         "^(\\?\\s+)?\\s*([\\w\\s]*)(?:(>|>=|=>|=)\\s*([\\d\\.]+))?", RegexOptions.Compiled);
 
       private readonly StreamReader _reader;
       private readonly string _loadErrorMsg;
@@ -97,11 +97,18 @@ namespace FactorioBrowser.Mod.Finder {
 
          bool optional = match.Groups[1].Value.Trim().Equals("?");
          string modName = match.Groups[2].Value.Trim();
-         FcVersionRange range = ParseReqOperator(match.Groups[3].Value);
-         FcVersion version = FcVersion.FromDotNotation(match.Groups[4].Value);
+
+         FcVersionRequirement requiredVersion;
+         if (match.Groups[3].Value.Length > 0) {
+            FcVersionRange range = ParseReqOperator(match.Groups[3].Value);
+            FcVersion version = FcVersion.FromDotNotation(match.Groups[4].Value);
+            requiredVersion = new FcVersionRequirement(version, range);
+         } else {
+            requiredVersion = null;
+         }
          // TODO : support optional version requirement
 
-         return new FcModDependency(modName, new FcVersionRequirement(version, range), optional);
+         return new FcModDependency(modName, requiredVersion, optional);
       }
 
       private FcVersionRange ParseReqOperator(string op) {
@@ -112,7 +119,7 @@ namespace FactorioBrowser.Mod.Finder {
             case ">=":
                return FcVersionRange.AtLeast;
             default:
-               Debug.Assert(op.Equals("="), $"op is `${op}', should be `='");
+               Debug.Assert(op.Equals("="), $"op is `{op}', should be one of >, >=, <, <=, =.");
                return FcVersionRange.Exactly;
          }
       }
