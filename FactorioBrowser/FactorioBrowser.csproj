@@ -39,6 +39,8 @@
   <ItemGroup>
     <Compile Include="Mod\Finder\CycleFinderAlgorithm.cs" />
     <Compile Include="Mod\Finder\IFcModSorter.cs" />
+    <Compile Include="Mod\Finder\DefaultFcModSorter.cs" />
+    <Compile Include="Mod\Finder\ModDependencyValidator.cs" />
     <Compile Include="Mod\Loader\ModFileResolvers.cs" />
     <Compile Include="Mod\Loader\LegacyLuaModuleEmulator.cs" />
     <Compile Include="Mod\Loader\ReadStage.cs" />

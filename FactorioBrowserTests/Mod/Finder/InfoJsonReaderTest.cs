@@ -53,13 +53,13 @@ namespace FactorioBrowserTests.Mod.Finder {
 
       [Test]
       public void TestVersionlessOptionalDependency() {
-         var dep = LoadDep($"? {SimpleDepName}");
+         var dep = LoadDep($"?{SimpleDepName}");
          Assert.AreEqual(dep.ModName, SimpleDepName);
       }
 
       [Test]
       public void TestDepNameSpecialChars() {
-         var depName = "A B_C1";
+         var depName = "A B_C-D1";
          var dep = LoadDep($"{depName} >= 5.0.0");
          Assert.AreEqual(depName, dep.ModName);
       }

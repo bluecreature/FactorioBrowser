@@ -31,7 +31,7 @@ namespace FactorioBrowser.Mod.Finder {
       private const string KeyVersion = "version";
       private const string KeyDependencies = "dependencies";
       private static readonly Regex DependencySpecPattern = new Regex(
-         "^(\\?\\s+)?\\s*([\\w\\s]*)(?:(>|>=|=>|=)\\s*([\\d\\.]+))?", RegexOptions.Compiled);
+         "^(\\?)?\\s*([\\w\\s\\-]+)(?:(>|>=|=>|=)\\s*([\\d\\.]+))?", RegexOptions.Compiled);
 
       private readonly StreamReader _reader;
       private readonly string _loadErrorMsg;

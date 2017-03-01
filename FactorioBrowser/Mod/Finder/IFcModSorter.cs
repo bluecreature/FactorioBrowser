@@ -21,7 +21,9 @@ namespace FactorioBrowser.Mod.Finder {
 
       public FcVersion ActualVersion { get; }
 
-      public DependencyVersionMismatch(string dependency, FcVersionRequirement expected, FcVersion actual) {
+      public DependencyVersionMismatch(string dependency, FcVersionRequirement expected,
+         FcVersion actual) {
+
          Dependency = dependency;
          ExpectedVersion = expected;
          ActualVersion = actual;
@@ -57,6 +59,6 @@ namespace FactorioBrowser.Mod.Finder {
 
    public interface IFcModSorter {
 
-      IImmutableList<SortStatus> Sort(ICollection<FcModMetaInfo> modList);
+      IImmutableList<SortStatus> Sort(IEnumerable<FcModMetaInfo> modList);
    }
 }
