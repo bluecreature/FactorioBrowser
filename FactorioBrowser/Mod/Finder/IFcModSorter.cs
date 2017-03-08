@@ -7,7 +7,7 @@ namespace FactorioBrowser.Mod.Finder {
    public interface ISortProblem { }
 
    public sealed class MissingDependency : ISortProblem {
-      public String Dependency { get; }
+      public string Dependency { get; }
 
       public MissingDependency(string dependency) {
          Dependency = dependency;
@@ -15,7 +15,7 @@ namespace FactorioBrowser.Mod.Finder {
    }
 
    public sealed class DependencyVersionMismatch : ISortProblem {
-      public String Dependency { get; }
+      public string Dependency { get; }
 
       public FcVersionRequirement ExpectedVersion { get; }
 

@@ -3,15 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:FactorioBrowser.UI"
+        xmlns:views="clr-namespace:FactorioBrowser.UI.ViewModel"
         mc:Ignorable="d"
         Title="Factorio Inventory Browser : Select game paths"
-        Height="160"
-        MinHeight="160"
-        MaxHeight="160"
+        Height="180"
+        MinHeight="180"
+        MaxHeight="180"
         Width="600"
         MinWidth="600"
         Background="{DynamicResource {x:Static SystemColors.MenuBarBrushKey}}"
+        d:DataContext="{d:DesignInstance views:InitialConfigViewModel, d:IsDesignTimeCreatable = False}"
         >
 
    <Grid Margin="0,0,0,2">
@@ -25,6 +26,7 @@
          <RowDefinition Height="5"/>
          <RowDefinition Height="Auto"/>
          <RowDefinition Height="5"/>
+         <RowDefinition Height="Auto"/>
          <RowDefinition Height="*"/>
       </Grid.RowDefinitions>
 
@@ -37,15 +39,21 @@
             <ColumnDefinition Width="30" />
          </Grid.ColumnDefinitions>
 
-         <TextBox x:Name="GameHomeDirEdit"  Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" Text="" Margin="3,3,3,3" />
-         <Button x:Name="BrowseHomeDir"
-                 Grid.Row="0" Grid.Column="1"
-                 HorizontalAlignment="Stretch"
-                 VerticalAlignment="Stretch"
-                 Margin="3,3,3,3"
-                 Content="?"
-                 Click="BrowseDirClick"
-                 Tag="1" />
+         <TextBox
+            Grid.Row="0"
+            Grid.Column="0"
+            HorizontalAlignment="Stretch"
+            Text="{Binding GamePath}"
+            Margin="3,3,3,3"
+            />
+         <Button
+            Grid.Row="0" Grid.Column="1"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Margin="3,3,3,3"
+            Content="?"
+            Click="BrowseDirClick"
+            Tag="1" />
       </Grid>
 
       <Label Grid.Row="3" Grid.Column="0" Content="Data:" />
@@ -55,27 +63,49 @@
             <ColumnDefinition Width="30" />
          </Grid.ColumnDefinitions>
 
-         <TextBox x:Name="GameDataDirEdit" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" Text="" Margin="3,3,3,3" />
-         <Button x:Name="BrowseDataDir"
-                 Grid.Row="0" Grid.Column="1"
-                 HorizontalAlignment="Stretch"
-                 VerticalAlignment="Stretch"
-                 Margin="3,3,3,3"
-                 Content="?"
-                 Click="BrowseDirClick"
-                 Tag="2" />
+         <TextBox
+            Grid.Row="0"
+            Grid.Column="0"
+            HorizontalAlignment="Stretch"
+            Text="{Binding UserDataPath}"
+            Margin="3,3,3,3" />
+         <Button
+            Grid.Row="0" Grid.Column="1"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Margin="3,3,3,3"
+            Content="?"
+            Click="BrowseDirClick"
+            Tag="2" />
       </Grid>
 
-      <Button x:Name="SubmitButton"
-              Content="OK"
-              Grid.Row="5"
-              Grid.Column="1"
-              HorizontalAlignment="Right"
-              VerticalAlignment="Bottom"
-              Width="75"
-              Margin="3,3,8,8"
-              Click="SubmitClick"
-              />
+      <CheckBox
+         Grid.Row="5"
+         Grid.Column="1"
+         IsChecked="{Binding UseByDefault}"
+         Content="Use these paths by default and don't ask again."
+         Margin="5"
+         HorizontalAlignment="Left"
+         />
+
+      <UniformGrid
+         Grid.Column="0"
+         Grid.ColumnSpan="2"
+         Grid.Row="6"
+         Rows="1"
+         Columns="2"
+         HorizontalAlignment="Right"
+         VerticalAlignment="Center">
+
+         <Button
+            Content="OK"
+            Click="SubmitClick"
+            Margin="6"
+            Padding="20,3,20,3"
+            />
+
+         <Button Content="Cancel" Click="CancelClick" Margin="6" />
+      </UniformGrid>
 
    </Grid>
 </Window>

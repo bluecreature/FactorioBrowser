@@ -3,14 +3,17 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:FactorioBrowser.UI"
+        xmlns:views="clr-namespace:FactorioBrowser.UI.ViewModel"
+        xmlns:qc="clr-namespace:QuickConverter;assembly=QuickConverter"
         mc:Ignorable="d"
         Title="Mod Selection"
         Height="480"
         Width="720"
         Background="{DynamicResource {x:Static SystemColors.MenuBarBrushKey}}"
+        d:DataContext="{d:DesignInstance views:ModSelectionViewModel, IsDesignTimeCreatable=False}"
+        Loaded="RefreshModList"
         >
-    <Grid>
+   <Grid>
       <Grid.ColumnDefinitions>
          <ColumnDefinition Width="30*" MinWidth="100" />
          <ColumnDefinition Width="5" />
@@ -20,18 +23,52 @@
          <RowDefinition Height="*" />
          <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
-      <ListView x:Name="ModListView"
-                Grid.Column="0"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Margin="0"
-                >
-      </ListView>
 
-       <GridSplitter Grid.Column="1"
-                     Grid.Row="0"
-                     HorizontalAlignment="Stretch"
-                     VerticalAlignment="Stretch" />
+      <ListBox x:Name="ModListView"
+               Grid.Column="0"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               Margin="0"
+               ItemsSource="{Binding Path=ModList, Mode=OneWay}"
+               >
+         <ListBox.ItemTemplate>
+            <DataTemplate>
+               <Border Padding="5">
+                  <StackPanel Orientation="Vertical">
+                     <TextBlock Text="{Binding Path=Info.Name}" VerticalAlignment="Center" />
+                     <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch">
+                        <TextBlock Text="Enabled: " VerticalAlignment="Center" />
+                        <CheckBox Margin="2,5,2,5" Focusable="False" VerticalAlignment="Center"
+                                  IsChecked="{Binding Enabled, Mode=TwoWay}" />
+                     </StackPanel>
+                  </StackPanel>
+               </Border>
+            </DataTemplate>
+         </ListBox.ItemTemplate>
+      </ListBox>
+
+      <GridSplitter Grid.Column="1"
+                    Grid.Row="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" />
+
+      <TabControl
+         Grid.Row="0"
+         Grid.Column="2"
+         HorizontalAlignment="Stretch"
+         VerticalAlignment="Stretch"
+         Margin="0">
+         <TabItem Header="Info">
+            <StackPanel
+               Orientation="Vertical"
+               Visibility="{qc:Binding '$P != null ? Visibility.Visible : Visibility.Collapsed', P={Binding Path=SelectedItem, ElementName=ModListView}}">
+               <TextBlock Text="{Binding Path=SelectedItem.Info.Name, ElementName=ModListView}"/>
+            </StackPanel>
+         </TabItem>
+         <TabItem Header="Dependency graph">
+            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="TODO"/>
+         </TabItem>
+      </TabControl>
 
       <UniformGrid
          Grid.Column="0"
@@ -41,8 +78,13 @@
          Columns="2"
          HorizontalAlignment="Right">
 
-         <Button Content="Refresh" Margin="6" Padding="15,3,15,3"></Button>
-         <Button Content="Load" Margin="6" Padding="4"></Button>
+         <Button
+            Content="Refresh"
+            Margin="6"
+            Padding="15,3,15,3"
+            Click="RefreshModList"
+            IsEnabled="{qc:Binding '!$P', P={Binding IsBusy}}" />
+         <Button Content="Load" Margin="6" Padding="4" />
       </UniformGrid>
    </Grid>
 </Window>
