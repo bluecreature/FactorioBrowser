@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using FactorioBrowser.Mod.Finder;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Loaders;
@@ -30,7 +31,14 @@ namespace FactorioBrowser.Mod.Loader {
             ModulePaths = new[] { Path.Combine(_luaLibPath, "?.lua") },
          };
 
-         sharedState.Globals["module"] = (Action) NoOp;
+         using (var serpentSrc = Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream("FactorioBrowser.Mod.ExternalLib.serpent.lua")) {
+
+            var serpent = sharedState.LoadStream(serpentSrc, null, "serpent.lua");
+            sharedState.Globals["serpent"] = sharedState.Call(serpent);
+         }
+
+         sharedState.Globals["module"] = (Action)NoOp;
          sharedState.Globals["log"] = (Action<DynValue>) ModLogFunction;
 
          DynValue funcToNumber = sharedState.Globals.RawGet("tonumber");
@@ -79,8 +87,13 @@ namespace FactorioBrowser.Mod.Loader {
             argBase = DynValue.NewNumber(16);
          }
 
-         var origResult = script.Call(origToNumber, argNum, argBase);
-         return origResult;
+         try {
+            var origResult = script.Call(origToNumber, argNum, argBase);
+            return origResult;
+
+         } catch (FormatException e) {
+            return DynValue.Nil;
+         }
       }
 
       private static void NoOp() {

@@ -39,6 +39,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <EmbeddedResource Include="Mod\ExternalLib\serpent.lua" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
