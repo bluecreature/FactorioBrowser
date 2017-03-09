@@ -78,7 +78,7 @@ namespace FactorioBrowser.Mod.Finder {
       }
 
       public string VersionedName() {
-         return $"{Name}_${Version.ToDotNotation()}";
+         return $"{Name}_{Version.ToDotNotation()}";
       }
    }
 

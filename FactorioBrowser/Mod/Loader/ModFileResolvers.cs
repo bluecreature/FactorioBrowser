@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using NLog;
 
 namespace FactorioBrowser.Mod.Loader {
@@ -95,11 +96,26 @@ namespace FactorioBrowser.Mod.Loader {
          }
 
          Log.Trace("Loading ZIP entry {0}/{1}", _modFilePath, entryPath);
-         return entry.Open();
+         return ToSeekableStream(entry.Open());
       }
 
       private string GetEntryPath(string relPath) {
-         return Path.Combine(_entryBaseName, relPath);
+         return _entryBaseName + "/" + relPath.Replace("\\", "/");
+      }
+
+      private static Stream ToSeekableStream(Stream stream) {
+         if (stream.CanSeek) {
+            return stream;
+         } else {
+            var mem = new MemoryStream();
+            try {
+               stream.CopyTo(mem);
+               mem.Seek(0, SeekOrigin.Begin);
+               return mem;
+            } finally {
+               stream.Close(); ;
+            }
+         }
       }
    }
 }
