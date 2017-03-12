@@ -28,5 +28,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
       IEnumerable<KeyValuePair<ILuaVariant, ILuaVariant>> Entries();
 
       ILuaVariant Get(object key);
+
+      ILuaVariant Self(); // TODO : refactor the unpackers to eliminate the need and remove
    }
 }

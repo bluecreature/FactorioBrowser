@@ -57,7 +57,7 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
          get {
             Debug.Assert(ValueType == LuaValueType.Table);
             return _data is ILuaTable ? (ILuaTable) _data :
-               new DictionaryLuaTable((IDictionary<object, object>) _data);
+               new DictionaryLuaTable((IDictionary<object, object>) _data, this);
          }
       }
 
@@ -68,8 +68,14 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
 
    internal class DictionaryLuaTable : ILuaTable {
       private readonly IDictionary<object, object> _data;
-      public DictionaryLuaTable(IDictionary<object, object> data) {
+      private readonly ILuaVariant _self;
+
+      public DictionaryLuaTable(IDictionary<object, object> data, ILuaVariant self) {
          _data = data;
+         _self = self;
+      }
+
+      public DictionaryLuaTable(IDictionary<object, object> data) : this(data, null) {
       }
 
       public IEnumerable<ILuaVariant> Keys() {
@@ -93,6 +99,10 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
          } else {
             return null;
          }
+      }
+
+      public ILuaVariant Self() {
+         return _self ?? new ObjectLuaVariant(this);
       }
    }
 }

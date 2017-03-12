@@ -91,7 +91,7 @@ namespace FactorioBrowser.Mod.Loader {
             var origResult = script.Call(origToNumber, argNum, argBase);
             return origResult;
 
-         } catch (FormatException e) {
+         } catch (FormatException) {
             return DynValue.Nil;
          }
       }

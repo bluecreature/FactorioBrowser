@@ -8,7 +8,6 @@ namespace FactorioBrowser.Prototypes.Unpacker {
 
    internal interface IVariantUnpacker {
       object Unpack(Type targetType, ILuaVariant data, string path);
-
    }
 
    internal static class VariantUnpackerExtensions {
