@@ -5,21 +5,21 @@ using System.Diagnostics;
 namespace FactorioBrowser.Prototypes.Unpacker {
    internal sealed class UnpackerDispatcher : IVariantUnpacker {
 
-      public object Unpack(Type targetType, ILuaVariant data, string path) {
+      public object Unpack(Type targetType, ILuaVariant data, string currentPath) {
          switch (data.ValueType) {
             case LuaValueType.Nil:
             case LuaValueType.Boolean:
             case LuaValueType.Number:
             case LuaValueType.String:
-               return new AtomicValueUnpacker().Unpack(targetType, data, path); // TODO : reuse instances
+               return new AtomicValueUnpacker().Unpack(targetType, data, currentPath); // TODO : reuse instances
 
 
             case LuaValueType.Table:
-               return UnpackTable(targetType, data.AsTable, path);
+               return UnpackTable(targetType, data.AsTable, currentPath);
 
             default:
                throw new PrototypeUnpackException(
-                  path, $"Unable to unpack value at {path}: unsupported Lua value type.");
+                  currentPath, $"Unable to unpack value at {currentPath}: unsupported Lua value type.");
          }
       }
 

@@ -3,11 +3,11 @@ using System;
 namespace FactorioBrowser.Prototypes.Unpacker {
 
    internal interface ITableUnpacker<out T> {
-      T Unpack(ILuaTable data, string path);
+      T Unpack(ILuaTable data, string currentPath);
    }
 
    internal interface IVariantUnpacker {
-      object Unpack(Type targetType, ILuaVariant data, string path);
+      object Unpack(Type targetType, ILuaVariant data, string currentPath);
    }
 
    internal static class VariantUnpackerExtensions {

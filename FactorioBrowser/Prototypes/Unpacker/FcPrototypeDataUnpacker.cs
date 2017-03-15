@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
+
    public class PrototypeUnpackException : Exception {
       public string Path { get; }
 

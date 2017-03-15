@@ -64,8 +64,12 @@ namespace FactorioBrowser.Prototypes.Unpacker {
       }
 
       public MoonSharpVariantValue(DynValue value) {
-         Debug.Assert(_value != null);
+         Debug.Assert(value != null);
          _value = value;
+      }
+
+      public override string ToString() {
+         return _value.ToString();
       }
 
       private void EnsureType(LuaValueType expected) {

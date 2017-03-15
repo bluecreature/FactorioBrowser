@@ -18,17 +18,17 @@ namespace FactorioBrowser.Prototypes.Unpacker {
          _configuration = configuration;
       }
 
-      public object Unpack(Type type, ILuaVariant data, string path) {
+      public object Unpack(Type type, ILuaVariant data, string currentPath) {
          var unpacker = FindCustomUnpackerMethod(type, _configuration.Unpacker);
          if (unpacker != null) {
-            object[] convertParams = { _dispatcher, data, path };
+            object[] convertParams = { _dispatcher, data, currentPath };
             object result = unpacker.Invoke(null,
                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static,
                null, convertParams, null);
 
             return result;
          } else {
-            throw new PrototypeUnpackException(path,
+            throw new PrototypeUnpackException(currentPath,
                $"Internal error: unable to find compatible unpacker method {_configuration.Unpacker}");
          }
       }
@@ -58,7 +58,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
          _dispatcher = dispatcher;
       }
 
-      public T Unpack(ILuaTable data, string path) {
+      public T Unpack(ILuaTable data, string currentPath) {
          Debug.Assert(TypeTools.IsStructureType<T>());
 
          Type targetType = ResolveTargetType(typeof(T), data);
@@ -69,10 +69,10 @@ namespace FactorioBrowser.Prototypes.Unpacker {
                DataFieldMirror dataFieldDef = propInfo.GetCustomAttribute<DataFieldMirror>();
                SelfMirror selfMirror = propInfo.GetCustomAttribute<SelfMirror>();
                if (dataFieldDef != null) {
-                  HandleDataFieldMirror(data, path, target, propInfo, dataFieldDef);
+                  HandleDataFieldMirror(data, currentPath, target, propInfo, dataFieldDef);
 
                } else if (selfMirror != null) {
-                  HandleSelfMirror(data, path, target, propInfo);
+                  HandleSelfMirror(data, currentPath, target, propInfo);
                }
             }
 

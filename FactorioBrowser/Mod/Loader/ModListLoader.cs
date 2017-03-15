@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using FactorioBrowser.Mod.Finder;
+using FactorioBrowser.Prototypes.Unpacker;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Loaders;
 using NLog;
@@ -24,7 +25,7 @@ namespace FactorioBrowser.Mod.Loader {
          _luaLibPath = Path.Combine(gamePath, LuaLibRelPath);
       }
 
-      public Script LoadAll(IEnumerable<FcModFileInfo> allMods) {
+      public ILuaTable LoadRawData(IEnumerable<FcModFileInfo> allMods) {
          Script sharedState = new Script(CoreModules.Preset_SoftSandbox | CoreModules.LoadMethods);
          sharedState.Options.ScriptLoader = new FileSystemScriptLoader {
             IgnoreLuaPathGlobal = true,
@@ -38,7 +39,7 @@ namespace FactorioBrowser.Mod.Loader {
             sharedState.Globals["serpent"] = sharedState.Call(serpent);
          }
 
-         sharedState.Globals["module"] = (Action)NoOp;
+         sharedState.Globals["module"] = (Action) NoOp;
          sharedState.Globals["log"] = (Action<DynValue>) ModLogFunction;
 
          DynValue funcToNumber = sharedState.Globals.RawGet("tonumber");
@@ -52,12 +53,17 @@ namespace FactorioBrowser.Mod.Loader {
          var coreLibLoader = new DirModFileResolver(_luaLibPath);
          LoadModData(allMods, coreLibLoader, sharedState);
 
-         return sharedState;
+         return CreateRawDataBridge(sharedState);
+      }
+
+      private ILuaTable CreateRawDataBridge(Script sharedState) {
+         var rawData = sharedState.Globals.RawGet("data").Table.RawGet("raw");
+         return new MoonSharpTable(rawData.Table, rawData);
       }
 
       private void ModLogFunction(DynValue param) {
          var msg = param.Type == DataType.String ? param.String : param.ToString();
-         Log.Info("Lua Log: {0}", param); // TODO : identify the calling mod/file
+         Log.Info("Lua Log: {0}", msg); // TODO : identify the calling mod/file
       }
 
       private void LoadModData(IEnumerable<FcModFileInfo> allMods, IModFileResolver coreLibLoader,
