@@ -14,11 +14,35 @@
         d:DataContext="{d:DesignInstance views:ModSelectionViewModel, IsDesignTimeCreatable=False}"
         Loaded="RefreshModList"
         >
+
+   <Window.Resources>
+      <Style TargetType="{x:Type gx:VertexControl}">
+         <Setter Property="Template">
+            <Setter.Value>
+               <ControlTemplate TargetType="{x:Type gx:VertexControl}">
+                  <Grid>
+                     <Border x:Name="BackgroundNorm" CornerRadius="5" Background="Lime" BorderThickness="1" BorderBrush="Navy" />
+                     <Grid Margin="10,5,10,5">
+                        <Grid.ColumnDefinitions>
+                           <ColumnDefinition Width="Auto" />
+                           <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="{Binding ModName}" Foreground="Black" Margin="5,0,5,0"  />
+                        <TextBlock Grid.Column="1" Text="1.0.0" Foreground="DarkGray" />
+                     </Grid>
+                  </Grid>
+               </ControlTemplate>
+            </Setter.Value>
+         </Setter>
+      </Style>
+   </Window.Resources>
+
    <Grid>
       <Grid.ColumnDefinitions>
-         <ColumnDefinition Width="30*" MinWidth="100" />
+         <ColumnDefinition Width="20*" MinWidth="100" />
          <ColumnDefinition Width="5" />
-         <ColumnDefinition Width="70*" MinWidth="100" />
+         <ColumnDefinition Width="80*" MinWidth="100" />
       </Grid.ColumnDefinitions>
       <Grid.RowDefinitions>
          <RowDefinition Height="*" />
@@ -30,17 +54,27 @@
                HorizontalAlignment="Stretch"
                VerticalAlignment="Stretch"
                Margin="0"
-               ItemsSource="{Binding Path=ModList, Mode=OneWay}"
+               ItemsSource="{Binding Path=ModList}"
+               HorizontalContentAlignment="Stretch"
                >
          <ListBox.ItemTemplate>
             <DataTemplate>
-               <Border Padding="5">
-                  <StackPanel Orientation="Vertical">
-                     <TextBlock Text="{Binding Path=Info.Name}" VerticalAlignment="Center" />
+               <Border Padding="5,5,20,5" HorizontalAlignment="Stretch">
+                  <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                     <Grid HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                           <ColumnDefinition Width="Auto" />
+                           <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Path=Info.Name}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{qc:Binding '$P.ToDotNotation()', P={Binding Info.Version}}"
+                                   HorizontalAlignment="Right" />
+                     </Grid>
                      <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch">
                         <TextBlock Text="Enabled: " VerticalAlignment="Center" />
                         <CheckBox Margin="2,5,2,5" Focusable="False" VerticalAlignment="Center"
-                                  IsChecked="{Binding Enabled, Mode=TwoWay}" />
+                                  IsChecked="{Binding Enabled, Mode=TwoWay}"
+                                  IsEnabled="{Binding SortStatus.Successful, Mode=OneWay}" />
                      </StackPanel>
                   </StackPanel>
                </Border>
@@ -62,8 +96,27 @@
          <TabItem Header="Info">
             <StackPanel
                Orientation="Vertical"
-               Visibility="{qc:Binding '$P != null ? Visibility.Visible : Visibility.Collapsed', P={Binding Path=SelectedItem, ElementName=ModListView}}">
-               <TextBlock Text="{Binding Path=SelectedItem.Info.Name, ElementName=ModListView}"/>
+               Visibility="{qc:Binding '$P != null ? Visibility.Visible : Visibility.Collapsed', P={Binding Path=SelectedItem, ElementName=ModListView}}"
+               DataContext="{Binding Path=SelectedItem, ElementName=ModListView}"
+               Margin="20,10,20,10">
+               <Grid Margin="0,0,20,8">
+                  <Grid.ColumnDefinitions>
+                     <ColumnDefinition Width="Auto" />
+                     <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="{Binding Path=Info.Name}">
+                     <TextBlock.RenderTransform>
+                        <ScaleTransform ScaleX="1.4" ScaleY="1.4" />
+                     </TextBlock.RenderTransform>
+                  </TextBlock>
+                  <TextBlock Grid.Column="1" Text="{qc:Binding '$P.ToDotNotation()', P={Binding Path=Info.Version}}"
+                             HorizontalAlignment="Right">
+                        <TextBlock.RenderTransform>
+                           <ScaleTransform ScaleX="1.4" ScaleY="1.4" />
+                        </TextBlock.RenderTransform>
+                  </TextBlock>
+               </Grid>
+               <Separator />
             </StackPanel>
          </TabItem>
          <TabItem Header="Dependency graph">

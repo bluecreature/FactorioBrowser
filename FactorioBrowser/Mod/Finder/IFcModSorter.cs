@@ -3,9 +3,9 @@ using System.Collections.Immutable;
 
 namespace FactorioBrowser.Mod.Finder {
 
-   public interface ISortProblem { }
+   public interface IDependencyProblem { }
 
-   public sealed class MissingDependency : ISortProblem {
+   public sealed class MissingDependency : IDependencyProblem {
       public string Dependency { get; }
 
       public MissingDependency(string dependency) {
@@ -13,7 +13,7 @@ namespace FactorioBrowser.Mod.Finder {
       }
    }
 
-   public sealed class DependencyVersionMismatch : ISortProblem {
+   public sealed class DependencyVersionMismatch : IDependencyProblem {
       public string Dependency { get; }
 
       public FcVersionRequirement ExpectedVersion { get; }
@@ -29,7 +29,7 @@ namespace FactorioBrowser.Mod.Finder {
       }
    }
 
-   public sealed class CyclicDependency : ISortProblem {
+   public sealed class CyclicDependency : IDependencyProblem {
       public IImmutableList<string> Cycle { get; }
 
       public CyclicDependency(IImmutableList<string> cycle) {
@@ -37,20 +37,20 @@ namespace FactorioBrowser.Mod.Finder {
       }
    }
 
-
    public sealed class SortStatus {
       public FcModMetaInfo ModInfo { get; }
 
       public bool Successful { get; }
-      public IImmutableList<ISortProblem> Problems { get; }
 
-      public SortStatus(FcModMetaInfo modInfo, IList<ISortProblem> problems) {
+      public IImmutableList<IDependencyProblem> Problems { get; }
+
+      public SortStatus(FcModMetaInfo modInfo, IList<IDependencyProblem> problems) {
          ModInfo = modInfo;
          Successful = problems.Count == 0;
          Problems = ImmutableList.CreateRange(problems);
       }
 
-      public static SortStatus Create(FcModMetaInfo modInfo, params ISortProblem[] problems) {
+      public static SortStatus Create(FcModMetaInfo modInfo, params IDependencyProblem[] problems) {
          return new SortStatus(modInfo, ImmutableList.CreateRange(problems));
       }
    }

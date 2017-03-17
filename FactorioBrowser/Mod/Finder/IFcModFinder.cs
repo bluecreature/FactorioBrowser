@@ -54,9 +54,13 @@ namespace FactorioBrowser.Mod.Finder {
 
    public sealed class FcModMetaInfo {
       public string Path { get; }
+
       public FcModDeploymentType DeploymentType { get; }
+
       public string Name { get; }
+
       public FcVersion Version { get; }
+
       public IImmutableList<FcModDependency> Dependencies { get; }
 
       public FcModMetaInfo(string path, FcModDeploymentType deploymentType, string name,

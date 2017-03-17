@@ -2,6 +2,7 @@
 using System.Windows;
 using FactorioBrowser.UI.ViewModel;
 using GraphX.PCL.Common.Enums;
+using GraphX.PCL.Logic.Algorithms.EdgeRouting;
 using GraphX.PCL.Logic.Algorithms.LayoutAlgorithms;
 
 namespace FactorioBrowser.UI {
@@ -17,6 +18,7 @@ namespace FactorioBrowser.UI {
          InitializeComponent();
          DataContext = _viewModel;
          ModGraph.LogicCore = InitModGraphLogic();
+         ModGraph.SetVerticesDrag(true);
       }
 
       private async void RefreshModList(object sender, RoutedEventArgs e) {
@@ -36,7 +38,9 @@ namespace FactorioBrowser.UI {
          logic.DefaultOverlapRemovalAlgorithm = OverlapRemovalAlgorithmTypeEnum.FSA;
          logic.DefaultOverlapRemovalAlgorithmParams.HorizontalGap = 60;
          logic.DefaultOverlapRemovalAlgorithmParams.VerticalGap = 20;
-         logic.DefaultEdgeRoutingAlgorithm = EdgeRoutingAlgorithmTypeEnum.SimpleER;
+
+         logic.DefaultEdgeRoutingAlgorithm = EdgeRoutingAlgorithmTypeEnum.None;
+
          logic.AsyncAlgorithmCompute = true;
 
          return logic;

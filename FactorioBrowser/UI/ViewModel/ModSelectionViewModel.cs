@@ -14,17 +14,17 @@ namespace FactorioBrowser.UI.ViewModel {
 
       public FcModMetaInfo Info { get; }
 
-      public SortStatus AutoSortStatus { get; }
+      public SortStatus SortStatus { get; }
 
       public bool Enabled { get; set; }
 
-      public ModListItem(FcModMetaInfo modInfo, SortStatus autoSortStatus) {
+      public ModListItem(FcModMetaInfo modInfo, SortStatus sortStatus) {
          Contract.Requires(modInfo != null);
-         Contract.Requires(autoSortStatus != null);
+         Contract.Requires(sortStatus != null);
 
          Info = modInfo;
-         AutoSortStatus = autoSortStatus;
-         Enabled = autoSortStatus.Successful;
+         SortStatus = sortStatus;
+         Enabled = sortStatus.Successful;
       }
    }
 
@@ -80,9 +80,11 @@ namespace FactorioBrowser.UI.ViewModel {
 
          IDictionary<string, ModGraphVertex> vertexByName = new Dictionary<string, ModGraphVertex>(modList.Count);
          foreach (var mod in modList) {
-            var vertex = new ModGraphVertex(mod.ModInfo.Name);
-            vertexByName[mod.ModInfo.Name] = vertex;
-            graph.AddVertex(vertex);
+            if (mod.Successful) {
+               var vertex = new ModGraphVertex(mod.ModInfo.Name);
+               vertexByName[mod.ModInfo.Name] = vertex;
+               graph.AddVertex(vertex);
+            }
          }
 
          foreach (var mod in modList) {
@@ -94,7 +96,6 @@ namespace FactorioBrowser.UI.ViewModel {
             }
          }
 
-         graph.AddEdge(new ModGraphEdge(graph.Vertices.First(), graph.Vertices.First()));
          return graph;
       }
    }

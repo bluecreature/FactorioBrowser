@@ -45,7 +45,7 @@ namespace FactorioBrowser.Mod.Finder {
             return null;
          }
 
-         IList<ISortProblem> problems = new List<ISortProblem>();
+         IList<IDependencyProblem> problems = new List<IDependencyProblem>();
          foreach (var dep in modInfo.Dependencies) {
             var depStatus = Validate(dep.ModName, state);
             if (depStatus == null) {
