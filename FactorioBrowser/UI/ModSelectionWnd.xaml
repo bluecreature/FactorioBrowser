@@ -20,18 +20,20 @@
          <Setter Property="Template">
             <Setter.Value>
                <ControlTemplate TargetType="{x:Type gx:VertexControl}">
-                  <Grid>
-                     <Border x:Name="BackgroundNorm" CornerRadius="5" Background="Lime" BorderThickness="1" BorderBrush="Navy" />
+                  <Border x:Name="BackgroundNorm" CornerRadius="5" Background="LightGreen" BorderThickness="1" BorderBrush="Navy">
                      <Grid Margin="10,5,10,5">
                         <Grid.ColumnDefinitions>
                            <ColumnDefinition Width="Auto" />
                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="{Binding ModName}" Foreground="Black" Margin="5,0,5,0"  />
-                        <TextBlock Grid.Column="1" Text="1.0.0" Foreground="DarkGray" />
+                        <TextBlock
+                        Grid.Column="0" Text="{Binding ModInfo.Name}" Foreground="Black"
+                        Margin="5,0,5,0"  />
+                        <TextBlock Grid.Column="1" Foreground="DarkGray"
+                        Text="{qc:Binding '$P.ToDotNotation()', P={Binding ModInfo.Version}}" />
                      </Grid>
-                  </Grid>
+                  </Border>
                </ControlTemplate>
             </Setter.Value>
          </Setter>

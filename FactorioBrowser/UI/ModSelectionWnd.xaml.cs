@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using FactorioBrowser.UI.ViewModel;
+using GraphX.Controls.Models;
 using GraphX.PCL.Common.Enums;
 using GraphX.PCL.Logic.Algorithms.EdgeRouting;
 using GraphX.PCL.Logic.Algorithms.LayoutAlgorithms;
@@ -13,7 +14,7 @@ namespace FactorioBrowser.UI {
    public partial class ModSelectionWnd : Window, IDisposable {
       private readonly ModSelectionViewModel _viewModel;
 
-      public ModSelectionWnd(ModSelectionViewModel viewModel) {
+      internal ModSelectionWnd(ModSelectionViewModel viewModel) {
          _viewModel = viewModel;
          InitializeComponent();
          DataContext = _viewModel;
@@ -40,7 +41,6 @@ namespace FactorioBrowser.UI {
          logic.DefaultOverlapRemovalAlgorithmParams.VerticalGap = 20;
 
          logic.DefaultEdgeRoutingAlgorithm = EdgeRoutingAlgorithmTypeEnum.None;
-
          logic.AsyncAlgorithmCompute = true;
 
          return logic;

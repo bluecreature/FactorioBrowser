@@ -1,4 +1,5 @@
 ﻿using System;
+using FactorioBrowser.Mod.Finder;
 using GraphX.Controls;
 using GraphX.PCL.Common.Models;
 using GraphX.PCL.Logic.Models;
@@ -6,15 +7,15 @@ using QuickGraph;
 
 namespace FactorioBrowser.UI.ViewModel {
 
-   public sealed class ModGraphVertex : VertexBase, IComparable<ModGraphVertex> {
-      public string ModName { get; }
+   internal sealed class ModGraphVertex : VertexBase, IComparable<ModGraphVertex> {
+      public FcModMetaInfo ModInfo { get; }
 
-      public ModGraphVertex(string modName) {
-         ModName = modName;
+      public ModGraphVertex(FcModMetaInfo modInfo) {
+         ModInfo = modInfo;
       }
 
       public override string ToString() {
-         return ModName;
+         return ModInfo.Name;
       }
 
       public int CompareTo(ModGraphVertex other) {
@@ -25,24 +26,24 @@ namespace FactorioBrowser.UI.ViewModel {
             return 1;
 
          } else {
-            return string.Compare(ModName, other.ModName, StringComparison.Ordinal);
+            return string.Compare(ModInfo.Name, other.ModInfo.Name, StringComparison.Ordinal);
          }
       }
    }
 
-   public sealed class ModGraphEdge : EdgeBase<ModGraphVertex> {
+   internal sealed class ModGraphEdge : EdgeBase<ModGraphVertex> {
 
       public ModGraphEdge(ModGraphVertex source, ModGraphVertex target, double weight = 1)
          : base(source, target, weight) {
       }
    }
 
-   public sealed class ModGraphLogic :
+   internal sealed class ModGraphLogic :
       GXLogicCore<ModGraphVertex, ModGraphEdge, BidirectionalGraph<ModGraphVertex, ModGraphEdge>> {
 
    }
 
-   public sealed class ModGraphControl :
+   internal sealed class ModGraphControl :
       GraphArea<ModGraphVertex, ModGraphEdge, BidirectionalGraph<ModGraphVertex, ModGraphEdge>> {
    }
 }

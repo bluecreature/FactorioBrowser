@@ -28,7 +28,7 @@ namespace FactorioBrowser.UI.ViewModel {
       }
    }
 
-   public sealed class ModSelectionViewModel : BindableBase {
+   internal sealed class ModSelectionViewModel : BindableBase {
 
       private readonly IFcModFinder _modFinder;
       private readonly IFcModSorter _modSorter;
@@ -81,7 +81,7 @@ namespace FactorioBrowser.UI.ViewModel {
          IDictionary<string, ModGraphVertex> vertexByName = new Dictionary<string, ModGraphVertex>(modList.Count);
          foreach (var mod in modList) {
             if (mod.Successful) {
-               var vertex = new ModGraphVertex(mod.ModInfo.Name);
+               var vertex = new ModGraphVertex(mod.ModInfo);
                vertexByName[mod.ModInfo.Name] = vertex;
                graph.AddVertex(vertex);
             }
