@@ -10,7 +10,7 @@
       public InitialConfigViewModel(AppSettings settings) {
          _settings = settings;
          _gamePath = _settings.GamePath;
-         _userDataPath = _settings.UserDataPath;
+         _userDataPath = _settings.ModsPath;
          _useByDefault = _settings.UseSavedSettings;
       }
 
@@ -31,7 +31,7 @@
          }
 
          set {
-            _settings.UserDataPath.Write(value);
+            _settings.ModsPath.Write(value);
             UpdateProperty(ref _userDataPath, value);
          }
       }

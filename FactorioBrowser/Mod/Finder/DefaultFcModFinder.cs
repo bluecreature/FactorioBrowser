@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -8,15 +9,16 @@ namespace FactorioBrowser.Mod.Finder {
 
    public class DefaultFcModFinder : IFcModFinder {
       private const string BaseModRelativePath = "data/base";
-      private const string UserModsRelativePath = "mods";
       private const string InfoJsonName = "info.json";
 
       private readonly string _gamePath;
-      private readonly string _userDataPath;
+      private readonly string _modsPath;
 
-      public DefaultFcModFinder(string gamePath, string userDataPath) {
+      public DefaultFcModFinder(string gamePath, string modsPath) {
+         Contract.Requires(gamePath != null);
+         Contract.Requires(modsPath != null);
          _gamePath = gamePath;
-         _userDataPath = userDataPath;
+         _modsPath = modsPath;
       }
 
       public IImmutableList<FcModMetaInfo> FindAll() {
@@ -25,8 +27,7 @@ namespace FactorioBrowser.Mod.Finder {
          var baseModInfo = ReadBaseMod();
          builder.Add(baseModInfo);
 
-         string modsPath = Path.Combine(_userDataPath, UserModsRelativePath);
-         foreach (string modDirEntry in Directory.GetFileSystemEntries(modsPath)) {
+         foreach (string modDirEntry in Directory.GetFileSystemEntries(_modsPath)) {
             var modInfo = ReadModInfo(modDirEntry);
             if (modInfo != null) {
                builder.Add(modInfo);

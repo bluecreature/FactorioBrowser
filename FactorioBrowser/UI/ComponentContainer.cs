@@ -14,7 +14,7 @@ namespace FactorioBrowser.UI {
 
       public readonly Option<string> GamePath = new Option<string>("game_path", null);
 
-      public readonly Option<string> UserDataPath = new Option<string>("user_data_path", null);
+      public readonly Option<string> ModsPath = new Option<string>("mods_path", null);
 
       public readonly Option<bool> UseSavedSettings = new Option<bool>("use_saved_settings", false);
 
@@ -37,7 +37,8 @@ namespace FactorioBrowser.UI {
          _settings = settings;
 
          var krnlConfig = new NinjectSettings {
-            LoadExtensions = false
+            LoadExtensions = false,
+            InjectNonPublic = true,
          };
 
          _kernel = new StandardKernel(krnlConfig,
@@ -65,7 +66,7 @@ namespace FactorioBrowser.UI {
 
       private IFcModFinder CreateModFinder(IContext ctx) {
          return new DefaultFcModFinder(
-            _settings.GamePath, _settings.UserDataPath);
+            _settings.GamePath, _settings.ModsPath);
       }
    }
 }
