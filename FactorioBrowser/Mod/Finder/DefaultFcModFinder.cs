@@ -4,12 +4,15 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using NLog;
 
 namespace FactorioBrowser.Mod.Finder {
 
    public class DefaultFcModFinder : IFcModFinder {
       private const string BaseModRelativePath = "data/base";
       private const string InfoJsonName = "info.json";
+
+      private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
       private readonly string _gamePath;
       private readonly string _modsPath;
@@ -63,6 +66,12 @@ namespace FactorioBrowser.Mod.Finder {
 
          } else {
             // TODO : log
+            Log.Info("Skipping entry {0}: it's neither a directory nor a .zip file.", sourcePath);
+            return null;
+         }
+
+         if (info == null) {
+            Log.Info("No {0} loaded from {1}. Skipped.", InfoJsonName, sourcePath);
             return null;
          }
 
