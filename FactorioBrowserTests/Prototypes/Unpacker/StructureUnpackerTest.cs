@@ -62,6 +62,26 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
       }
    }
 
+   [ModelMirror]
+   internal abstract class PolymorphicEntityBase {
+
+      [DataFieldMirror("f1", Required = false)]
+      public int FieldOne { get; private set; }
+   }
+
+   [ModelMirror]
+   [TypeDiscriminatorField("type", "a")]
+   internal sealed class ConcreteEntityA : PolymorphicEntityBase {
+
+      [DataFieldMirror("f2", Required = false)]
+      public int FieldTwo { get; private set; }
+   }
+
+   [ModelMirror]
+   [TypeDiscriminatorField("type", "b")]
+   internal sealed class ConcreteEntityB : PolymorphicEntityBase {
+   }
+
    [TestFixture]
    public class StructureUnpackerTest {
       public const int TestFieldValue = 100;
@@ -107,6 +127,37 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
 
          Assert.AreEqual(CustomFieldValue, unpacked.A.FieldOne);
          Assert.AreEqual(TestFieldValue, unpacked.FieldTwo);
+      }
+
+      [Test]
+      public void TestPolymorphicUnpack() {
+         var unpacked = Unpack<PolymorphicEntityBase>(new Dictionary<object, object> {
+            ["type"] = "b",
+         });
+
+         Assert.IsInstanceOf<ConcreteEntityB>(unpacked);
+      }
+
+      [Test]
+      public void TestUnpackBaseClassProperty() {
+         var unpacked = Unpack<PolymorphicEntityBase>(new Dictionary<object, object> {
+            ["type"] = "a",
+            ["f1"] = TestFieldValue,
+         });
+
+         Assert.IsInstanceOf<ConcreteEntityA>(unpacked);
+         Assert.AreEqual(TestFieldValue, unpacked.FieldOne);
+      }
+
+      [Test]
+      public void TestUnpackDerivedClassProperty() {
+         var unpacked = Unpack<PolymorphicEntityBase>(new Dictionary<object, object> {
+            ["type"] = "a",
+            ["f2"] = TestFieldValue,
+         });
+
+         Assert.IsInstanceOf<ConcreteEntityA>(unpacked);
+         Assert.AreEqual(TestFieldValue, ((ConcreteEntityA) unpacked).FieldTwo);
       }
 
       private T Unpack<T>(IDictionary<object, object> table) where T : class {

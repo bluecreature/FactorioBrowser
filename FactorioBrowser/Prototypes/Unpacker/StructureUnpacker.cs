@@ -2,57 +2,14 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Linq;
+using NLog;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
 
-   internal sealed class CustomUnpackerSupport: IVariantUnpacker {
-      private readonly IVariantUnpacker _dispatcher;
-      private readonly Type _containingType;
-      private readonly CustomUnpacker _configuration;
-
-      public CustomUnpackerSupport(IVariantUnpacker dispatcher, Type containingType,
-         CustomUnpacker configuration) {
-
-         _dispatcher = dispatcher;
-         _containingType = containingType;
-         _configuration = configuration;
-      }
-
-      public object Unpack(Type type, ILuaVariant data, string currentPath) {
-         var unpacker = FindCustomUnpackerMethod(type, _configuration.Unpacker);
-         if (unpacker != null) {
-            object[] convertParams = { _dispatcher, data, currentPath };
-            object result = unpacker.Invoke(null,
-               BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static,
-               null, convertParams, null);
-
-            return result;
-         } else {
-            throw new PrototypeUnpackException(currentPath,
-               $"Internal error: unable to find compatible unpacker method {_configuration.Unpacker}");
-         }
-      }
-
-      private MethodInfo FindCustomUnpackerMethod(Type returnType, string name) {
-         return _containingType
-            .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
-            .FirstOrDefault(m => m.Name.Equals(name) && IsCompatibleUnpackerMethod(returnType, m));
-      }
-
-      private bool IsCompatibleUnpackerMethod(Type returnType, MethodInfo method) {
-         var methodParams = method.GetParameters();
-         return method.IsStatic &&
-             returnType.IsAssignableFrom(method.ReturnType) &&
-            methodParams.Length == 3 &&
-            methodParams[0].ParameterType.IsAssignableFrom(typeof(IVariantUnpacker)) &&
-            methodParams[1].ParameterType.IsAssignableFrom(typeof(ILuaVariant)) &&
-            methodParams[2].ParameterType.IsAssignableFrom(typeof(string));
-      }
-   }
-
-
    internal sealed class StructureUnpacker<T> : ITableUnpacker<T> where T : class {
       private readonly IVariantUnpacker _dispatcher;
+
+      private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
       public StructureUnpacker(IVariantUnpacker dispatcher) {
          _dispatcher = dispatcher;
@@ -60,6 +17,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
 
       public T Unpack(ILuaTable data, string currentPath) {
          Debug.Assert(TypeTools.IsStructureType<T>());
+         Log.Debug("Start unpack structure {0} at path {1}", typeof(T).Name, currentPath);
 
          Type targetType = ResolveTargetType(typeof(T), data);
 
@@ -105,9 +63,10 @@ namespace FactorioBrowser.Prototypes.Unpacker {
 
       private bool DiscriminatorMatches(TypeDiscriminatorField attr, ILuaTable data) {
          var discFieldValue = data.Get(attr.FieldName);
+
          return discFieldValue != null &&
             discFieldValue.ValueType == LuaValueType.String &&
-            attr.FieldValues.Contains(discFieldValue.ToString());
+            attr.FieldValues.Contains(discFieldValue.AsString);
       }
 
       private void HandleDataFieldMirror(ILuaTable data, string path, T target,
@@ -147,7 +106,8 @@ namespace FactorioBrowser.Prototypes.Unpacker {
       private void HandleCustomUnpacker(T target, ILuaVariant data, string path,
          PropertyInfo propInfo, CustomUnpacker customUnpacker) {
 
-         var unpacker = FindCustomUnpackerMethod(propInfo.PropertyType, customUnpacker.Unpacker);
+         var unpacker = FindCustomUnpackerMethod(propInfo.DeclaringType,
+            propInfo.PropertyType, customUnpacker.Unpacker);
          if (unpacker != null) {
             object[] convertParams = { _dispatcher, data, path };
             object result = unpacker.Invoke(null,
@@ -162,8 +122,8 @@ namespace FactorioBrowser.Prototypes.Unpacker {
          }
       }
 
-      private MethodInfo FindCustomUnpackerMethod(Type returnType, string name) {
-         return typeof(T)
+      private MethodInfo FindCustomUnpackerMethod(Type declaringType, Type returnType, string name) {
+         return declaringType
             .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
             .FirstOrDefault(m => m.Name.Equals(name) && IsCompatibleUnpackerMethod(returnType, m));
       }
@@ -179,8 +139,11 @@ namespace FactorioBrowser.Prototypes.Unpacker {
       }
 
       private void PopulateDataField(T target, PropertyInfo propInfo, object value) {
-         propInfo.SetValue(target, value,
-            BindingFlags.Public | BindingFlags.NonPublic, null, null, null);
+         var declaringType = propInfo.DeclaringType;
+         Debug.Assert(declaringType != null);
+         declaringType.InvokeMember(propInfo.Name,
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.SetProperty,
+            null, target, new object[] { value });
       }
    }
 }

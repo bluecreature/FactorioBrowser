@@ -49,12 +49,22 @@ namespace FactorioBrowser.Prototypes.Unpacker {
 
       private object UnpackString(Type targetType, ILuaVariant data, string path) {
          Debug.Assert(data.ValueType == LuaValueType.String);
+         var value = data.AsString;
 
-         if (targetType != typeof(string)) {
-            throw new PrototypeUnpackException(path); // TODO : message
+         if (targetType == typeof(string)) {
+            return value;
+
+         } else if (targetType == typeof(bool)) {
+            bool result;
+            if (!bool.TryParse(value, out result)) {
+               throw new PrototypeUnpackException(path, $"Cannot coerce string `{value}' to boolean.");
+            }
+
+            return result;
+
+         } else {
+            throw new PrototypeUnpackException(path, $"Cannot coerce string to {targetType}");
          }
-
-         return data.AsString;
       }
    }
 }
