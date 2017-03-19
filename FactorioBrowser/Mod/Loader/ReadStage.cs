@@ -41,7 +41,7 @@ namespace FactorioBrowser.Mod.Loader {
                return "data.lua";
 
             case ReadStage.Update:
-               return "data-update.lua";
+               return "data-updates.lua";
 
             case ReadStage.FinalFixes:
                return "data-final-fixes.lua";
