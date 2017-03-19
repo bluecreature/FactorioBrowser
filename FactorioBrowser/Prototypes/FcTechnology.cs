@@ -14,7 +14,7 @@ namespace FactorioBrowser.Prototypes {
       [DataFieldMirror("prerequisites")]
       public IList<string> Prerequisites { get; private set; }
 
-      [DataFieldMirror("units")]
+      [DataFieldMirror("unit")]
       public FcTechResearchCost Cost { get; private set; }
    }
 
@@ -36,10 +36,13 @@ namespace FactorioBrowser.Prototypes {
 
    [ModelMirror]
    public sealed class FcTechResearchCost {
-      [DataFieldMirror]
+      [DataFieldMirror("count")]
       public int Count { get; private set; }
 
-      [DataFieldMirror]
+      [DataFieldMirror("time")]
       public int Time { get; private set; }
+
+      [DataFieldMirror("ingredients")]
+      public IList<FcTechResearchIngredient> Ingredients { get; private set; }
    }
 }
