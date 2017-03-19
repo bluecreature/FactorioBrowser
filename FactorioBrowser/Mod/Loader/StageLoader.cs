@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using FactorioBrowser.Mod.Finder;
 using MoonSharp.Interpreter;
 using NLog;
@@ -9,6 +10,10 @@ using NLog;
 namespace FactorioBrowser.Mod.Loader {
 
    internal sealed class StageLoader {
+      private static readonly char[] PathSeparators = new char[] {
+         Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar
+      };
+
       private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
       private readonly IModFileResolver _commonLibLoader;
@@ -90,19 +95,26 @@ namespace FactorioBrowser.Mod.Loader {
 
          private DynValue LoadNewModule(string moduleName) {
             var attemptedLocations = new List<string>();
-            var found = TryLoadFromModRoot(moduleName, attemptedLocations) ??
-               TryLoadCallingModuleSibling(moduleName, attemptedLocations) ??
-               TryLoadFromGlobalLib(moduleName, attemptedLocations);
+            FoundModule? findResult;
+            if (moduleName.IndexOfAny(PathSeparators) >= 0) {
+               findResult = TryLoadByRelativePath(moduleName, attemptedLocations);
 
-            if (found == null) {
+            } else {
+               findResult = TryLoadFromModRoot(moduleName, attemptedLocations) ??
+                  TryLoadModuleSibling(moduleName, attemptedLocations) ??
+                  TryLoadFromGlobalLib(moduleName, attemptedLocations);
+            }
+
+            if (!findResult.HasValue) {
                throw new ScriptRuntimeException(
                   $"Required module `{moduleName}' not found on search " +
                   $"path:\n {string.Join("\n ", attemptedLocations)}");
             }
 
-            var location = found.Item1;
-            var stream = found.Item2;
-            _loadPath.AddLast(moduleName);
+            var found = findResult.Value;
+            var location = found.FriendlyName;
+            var stream = found.Stream;
+            _loadPath.AddLast(found.RelativePath);
             try {
                var moduleLoader = _script.LoadStream(stream, null, location);
                var module = _script.Call(moduleLoader);
@@ -114,47 +126,87 @@ namespace FactorioBrowser.Mod.Loader {
             }
          }
 
-         private Tuple<string, Stream> TryLoadCallingModuleSibling(string moduleName,
-            List<string> attemptedLocations) {
+         private FoundModule? TryLoadByRelativePath(string moduleName, List<string> attemptedLocations) {
 
-            var callingModule = _loadPath.Count > 0 ? _loadPath.Last.Value : null;
-            int lastPathSep;
-            if (callingModule != null &&
-               (lastPathSep = callingModule.LastIndexOf(".", StringComparison.Ordinal)) > 0) {
-
-               string siblingModuleFqName = callingModule.Substring(0, lastPathSep + 1) + moduleName;
-               return TryLoadFromModRoot(siblingModuleFqName, attemptedLocations);
-
+            var childPathComponents = moduleName.Split(PathSeparators);
+            var callingModule = _loadPath.Count > 0 ? _loadPath.Last.Value : null; // TODO : code duplication
+            List<string> pathComponents;
+            if (callingModule != null) {
+               var callingModulePath = callingModule.Split(PathSeparators);
+               pathComponents = new List<string>(callingModulePath.Take(callingModulePath.Length - 1));
             } else {
-               return null;
+               pathComponents = new List<string>();
             }
+
+            foreach (var component in childPathComponents) {
+               if (component.Equals(".")) {
+                  continue;
+
+               } else if (component.Equals("..")) {
+                  if (pathComponents.Count > 0) {
+                     pathComponents.RemoveAt(pathComponents.Count - 1);
+                  }
+
+               } else {
+                  pathComponents.Add(component);
+               }
+            }
+
+            string finalRelPath = string.Join("/", pathComponents) + ".lua";
+            return TryOpen(_modFileResolver, finalRelPath, attemptedLocations);
          }
 
-         private Tuple<string, Stream> TryLoadFromModRoot(string moduleName,
+         private FoundModule? TryLoadModuleSibling(string moduleName,
+            List<string> attemptedLocations) {
+
+            return TryLoadByRelativePath(moduleName.Replace(".", "/"), attemptedLocations);
+         }
+
+         private FoundModule? TryLoadFromModRoot(string moduleName,
             List<string> attemptedLocations) {
 
             return TryOpenWithResolver(_modFileResolver, moduleName, attemptedLocations);
          }
 
-         private Tuple<string, Stream> TryLoadFromGlobalLib(string moduleName,
+         private FoundModule? TryLoadFromGlobalLib(string moduleName,
             List<string> attemptedLocations) {
 
             return TryOpenWithResolver(_commonLibResolver, moduleName, attemptedLocations);
          }
 
-         private Tuple<string, Stream> TryOpenWithResolver(IModFileResolver resolver,
+         private FoundModule? TryOpenWithResolver(IModFileResolver resolver,
             string moduleName, List<string> attemptedLocations) {
 
-            string modRelPath = moduleName.Replace(".", "/") + ".lua";
-            try {
-               string friendlyName = resolver.FriendlyName(modRelPath);
-               Stream stream = resolver.Open(modRelPath);
-               return Tuple.Create(friendlyName, stream);
+            string moduleRelPath = moduleName.Replace(".", "/") + ".lua";
+            return TryOpen(resolver, moduleRelPath, attemptedLocations);
+         }
 
-            } catch (FileNotFoundException e) {
-               attemptedLocations.Add(e.FileName);
-               return null;
+         private FoundModule? TryOpen(IModFileResolver resolver,
+            string moduleRelPath, List<string> attemptedLocations) {
+
+            string friendlyName = resolver.FriendlyName(moduleRelPath);
+            if (resolver.Exists(moduleRelPath)) {
+               try {
+                  Stream stream = resolver.Open(moduleRelPath);
+                  return new FoundModule {
+                     RelativePath = moduleRelPath,
+                     FriendlyName = friendlyName,
+                     Stream = stream
+                  };
+
+               } catch (FileNotFoundException) {
+               }
             }
+
+            // Either Exists returned false or Open threw
+            attemptedLocations.Add(friendlyName);
+            return null;
+         }
+
+         private struct FoundModule {
+            public string RelativePath;
+            public string FriendlyName;
+            public Stream Stream;
          }
 
          private DynValue TryGetLoadedModule(string moduleName) {

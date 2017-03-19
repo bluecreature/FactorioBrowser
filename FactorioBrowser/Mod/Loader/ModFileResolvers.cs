@@ -51,7 +51,12 @@ namespace FactorioBrowser.Mod.Loader {
       public Stream Open(string relPath) {
          string fullPath = GetFilePath(relPath);
          Log.Trace("Loading file {0}", fullPath);
-         return new FileStream(fullPath, FileMode.Open, FileAccess.Read);
+         try {
+            return new FileStream(fullPath, FileMode.Open, FileAccess.Read);
+
+         } catch (DirectoryNotFoundException e) {
+            throw new FileNotFoundException($"File not found: {fullPath}", fullPath, e);
+         }
       }
 
       private string GetFilePath(string relPath) {
