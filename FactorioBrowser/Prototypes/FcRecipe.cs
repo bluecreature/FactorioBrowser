@@ -13,16 +13,16 @@ namespace FactorioBrowser.Prototypes {
 
       [DataFieldMirror("ingredients")]
       [CustomUnpacker(nameof(UnpackIngredients))]
-      public IList<FcRecipeInputOutput> Ingredients { get; private set; }
+      public IList<FcRecipeIngredient> Ingredients { get; private set; }
 
       [DataFieldMirror]
       [CustomUnpacker(nameof(UnpackResults))]
-      public IList<FcRecipeInputOutput> Results { get; private set; }
+      public IList<FcRecipeProduct> Results { get; private set; }
 
       [DataFieldMirror("icon")]
       public string Icon { get; private set; }
 
-      private static IList<FcRecipeInputOutput> UnpackResults(IVariantUnpacker unpacker,
+      private static IList<FcRecipeProduct> UnpackResults(IVariantUnpacker unpacker,
          ILuaVariant recipe, string path) {
 
          RequireTable(recipe, path);
@@ -35,34 +35,36 @@ namespace FactorioBrowser.Prototypes {
             int? count = unpacker.Unpack<int?>(
                recipeTable.Get("result_count"), path + ".result_count");
 
-            return new List<FcRecipeInputOutput> {
-               new FcRecipeInputOutput(directResult.AsString, count ?? 1)
+            return new List<FcRecipeProduct> {
+               new FcRecipeProduct(directResult.AsString, count ?? 1)
             };
 
          } else if (recipeTable.Get("results") != null) {
-            return unpacker.Unpack<IList<FcRecipeIoDictionary>>(recipe, path + ".results")
-               .Select(u => new FcRecipeInputOutput(u.Item, u.ItemType, u.Count))
-               .ToList();
+            return unpacker.Unpack<IList<FcRecipeProduct>>(recipe, path + ".results");
 
          } else {
-            return new FcRecipeInputOutput[0];
+            return new FcRecipeProduct[0];
          }
       }
 
-      private static IList<FcRecipeInputOutput> UnpackIngredients(IVariantUnpacker unpacker,
+      private static IList<FcRecipeIngredient> UnpackIngredients(IVariantUnpacker unpacker,
          ILuaVariant ingredients, string path) {
 
          RequireTable(ingredients, path);
-         RequireTable(ingredients.AsTable.Get(1), $"{path}[1]");
+         var ingredientsTable = ingredients.AsTable;
+         if (ingredientsTable.Get(1) == null) {
+            return new List<FcRecipeIngredient>();
+         }
 
-         if (ingredients.AsTable.Get(1).AsTable.Get("type") != null) {
-            return unpacker.Unpack<IList<FcRecipeIoDictionary>>(ingredients, path)
-               .Select(u => new FcRecipeInputOutput(u.Item, u.ItemType, u.Count))
+         RequireTable(ingredientsTable.Get(1), $"{path}[1]");
+         if (ingredientsTable.Get(1).AsTable.Get("type") != null) {
+            return unpacker.Unpack<IList<FcRecipeIngredientDictionary>>(ingredients, path)
+               .Select(u => new FcRecipeIngredient(u.Item, u.ItemType, u.Count))
                .ToList();
 
          } else {
             return unpacker.Unpack<IList<FcRecipeIngredientList>>(ingredients, path)
-               .Select(u => new FcRecipeInputOutput(u.Item, u.Count))
+               .Select(u => new FcRecipeIngredient(u.Item, u.Count))
                .ToList();
          }
       }
@@ -76,7 +78,7 @@ namespace FactorioBrowser.Prototypes {
 
       // ReSharper disable once ClassNeverInstantiated.Local
       [ModelMirror]
-      private sealed class FcRecipeIoDictionary {
+      private sealed class FcRecipeIngredientDictionary {
          [DataFieldMirror("name")]
          public string Item { get; private set; }
 
@@ -98,24 +100,55 @@ namespace FactorioBrowser.Prototypes {
       }
    }
 
-   public sealed class FcRecipeInputOutput {
+   public sealed class FcRecipeIngredient {
 
-      public string Item { get; private set; }
+      public string Item { get; }
 
-      public string ItemType { get; private set; } = "item";
+      public string ItemType { get; }
 
-      public int Count { get; private set; }
+      public int Count { get; }
 
-      public FcRecipeInputOutput() {
-      }
-
-      public FcRecipeInputOutput(string item, string itemType, int count) {
+      public FcRecipeIngredient(string item, string itemType, int count) {
          Item = item;
          ItemType = itemType;
          Count = count;
       }
 
-      public FcRecipeInputOutput(string item, int count) : this(item, "item", count) {
+      public FcRecipeIngredient(string item, int count) : this(item, "item", count) {
+      }
+   }
+
+   [ModelMirror]
+   public sealed class FcRecipeProduct {
+
+      [DataFieldMirror("name")]
+      public string Item { get; private set; }
+
+      [DataFieldMirror("type")]
+      public string ItemType { get; private set; }
+
+      [DataFieldMirror("amount")]
+      public double Amount { get; private set; }
+
+      [DataFieldMirror("amount_min")]
+      public int AmountMin { get; private set; }
+
+      [DataFieldMirror("amount_max")]
+      public int AmountMax { get; private set; }
+
+      [DataFieldMirror("probability")]
+      public double Probability { get; private set; }
+
+      public FcRecipeProduct() {
+      }
+
+      public FcRecipeProduct(string item, double amount) {
+         Item = item;
+         ItemType = "item";
+         Amount = amount;
+         AmountMin = 0;
+         AmountMax = 0;
+         Probability = 0;
       }
    }
 }
