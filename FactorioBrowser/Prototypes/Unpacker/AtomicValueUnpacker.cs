@@ -4,21 +4,24 @@ using System.Diagnostics;
 namespace FactorioBrowser.Prototypes.Unpacker {
    internal sealed class AtomicValueUnpacker : IVariantUnpacker {
       public object Unpack(Type targetType, ILuaVariant data, string currentPath) {
-         switch (data.ValueType) {
-            case LuaValueType.Nil:
-               return null; // TODO : check if targetType allows null-s
+         if (data == null || data.ValueType == LuaValueType.Nil) {
+            return null;  // TODO : check if targetType allows null-s
 
-            case LuaValueType.Boolean:
-               return UnpackBoolean(targetType, data, currentPath);
+         } else {
+            targetType = StripNullable(targetType);
+            switch (data.ValueType) {
+               case LuaValueType.Boolean:
+                  return UnpackBoolean(targetType, data, currentPath);
 
-            case LuaValueType.Number:
-               return UnpackNumber(targetType, data, currentPath);
+               case LuaValueType.Number:
+                  return UnpackNumber(targetType, data, currentPath);
 
-            case LuaValueType.String:
-               return UnpackString(targetType, data, currentPath);
+               case LuaValueType.String:
+                  return UnpackString(targetType, data, currentPath);
 
-            default:
-               throw new InvalidOperationException("This class only supports atomic values.");
+               default:
+                  throw new InvalidOperationException("This class only supports atomic values.");
+            }
          }
       }
 
@@ -66,5 +69,13 @@ namespace FactorioBrowser.Prototypes.Unpacker {
             throw new PrototypeUnpackException(path, $"Cannot coerce string to {targetType}");
          }
       }
+      private Type StripNullable(Type targetType) {
+         if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Nullable<>)) {
+            return targetType.GetGenericArguments()[0];
+         } else {
+            return targetType;
+         }
+      }
+
    }
 }

@@ -39,6 +39,20 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
          Assert.AreEqual(value, unpacked);
       }
 
+      [Test]
+      public void TestUnpackEmptyNullable() {
+         int? unpacked = new AtomicValueUnpacker().Unpack<int?>(null, "root");
+         Assert.AreEqual(false, unpacked.HasValue);
+      }
+
+      [Test]
+      public void TestUnpackNullabkeWithValue() {
+         int value = 100;
+         int? unpacked = Unpack<int?>(value);
+         Assert.IsTrue(unpacked.HasValue);
+         Assert.AreEqual(value, unpacked.Value);
+      }
+
       private T Unpack<T>(object data) {
          return new AtomicValueUnpacker().Unpack<T>(new ObjectLuaVariant(data), "root");
       }
