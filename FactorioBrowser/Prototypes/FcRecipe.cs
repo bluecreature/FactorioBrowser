@@ -52,21 +52,25 @@ namespace FactorioBrowser.Prototypes {
 
          RequireTable(ingredients, path);
          var ingredientsTable = ingredients.AsTable;
-         if (ingredientsTable.Get(1) == null) {
-            return new List<FcRecipeIngredient>();
+
+         int index = 1;
+         ILuaVariant item;
+         IList<FcRecipeIngredient> result = new List<FcRecipeIngredient>();
+         while ((item = ingredientsTable.Get(index)) != null) {
+            var itemPath = $"{path}[{index}]";
+            index++;
+
+            RequireTable(item, itemPath);
+            if (item.AsTable.Get("type") != null) {
+               var u = unpacker.Unpack<FcRecipeIngredientDictionary>(item, itemPath);
+               result.Add(new FcRecipeIngredient(u.Item, u.ItemType, u.Count));
+            } else {
+               var u = unpacker.Unpack<FcRecipeIngredientList>(item, itemPath);
+               result.Add(new FcRecipeIngredient(u.Item, u.Count));
+            }
          }
 
-         RequireTable(ingredientsTable.Get(1), $"{path}[1]");
-         if (ingredientsTable.Get(1).AsTable.Get("type") != null) {
-            return unpacker.Unpack<IList<FcRecipeIngredientDictionary>>(ingredients, path)
-               .Select(u => new FcRecipeIngredient(u.Item, u.ItemType, u.Count))
-               .ToList();
-
-         } else {
-            return unpacker.Unpack<IList<FcRecipeIngredientList>>(ingredients, path)
-               .Select(u => new FcRecipeIngredient(u.Item, u.Count))
-               .ToList();
-         }
+         return result;
       }
 
       private static void RequireTable(ILuaVariant value, string path) {

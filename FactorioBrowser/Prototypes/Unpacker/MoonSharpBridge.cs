@@ -110,7 +110,8 @@ namespace FactorioBrowser.Prototypes.Unpacker {
          }
 
          var rawValue = _table.RawGet(key);
-         return rawValue == null ? null : new MoonSharpVariantValue(_table.RawGet(key));
+         return rawValue == null || rawValue.Type == DataType.Nil ? null :
+            new MoonSharpVariantValue(rawValue);
       }
 
       public ILuaVariant Self() {
