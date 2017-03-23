@@ -10,10 +10,6 @@ using NLog;
 namespace FactorioBrowser.Mod.Loader {
 
    internal sealed class StageLoader {
-      private static readonly char[] PathSeparators = new char[] {
-         Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar
-      };
-
       private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
       private readonly IModFileResolver _commonLibLoader;
@@ -95,19 +91,19 @@ namespace FactorioBrowser.Mod.Loader {
 
          private DynValue LoadNewModule(string moduleName) {
             var attemptedLocations = new List<string>();
-            FoundModule? findResult;
-            if (moduleName.IndexOfAny(PathSeparators) >= 0) {
-               findResult = TryLoadByRelativePath(moduleName, attemptedLocations);
+            string nameAsRequired = moduleName;
+            if (moduleName.IndexOfAny(PathTools.PathSeparators) < 0) {
+               moduleName = moduleName.Replace('.', '/');
+            }
+            moduleName += ".lua";
 
-            } else {
-               findResult = TryLoadFromModRoot(moduleName, attemptedLocations) ??
+            FoundModule? findResult = TryLoadFromModRoot(moduleName, attemptedLocations) ??
                   TryLoadModuleSibling(moduleName, attemptedLocations) ??
                   TryLoadFromGlobalLib(moduleName, attemptedLocations);
-            }
 
             if (!findResult.HasValue) {
                throw new ScriptRuntimeException(
-                  $"Required module `{moduleName}' not found on search " +
+                  $"Required module `{nameAsRequired}' not found. Searched on " +
                   $"path:\n {string.Join("\n ", attemptedLocations)}");
             }
 
@@ -128,11 +124,11 @@ namespace FactorioBrowser.Mod.Loader {
 
          private FoundModule? TryLoadByRelativePath(string moduleName, List<string> attemptedLocations) {
 
-            var childPathComponents = moduleName.Split(PathSeparators);
-            var callingModule = _loadPath.Count > 0 ? _loadPath.Last.Value : null; // TODO : code duplication
+            var childPathComponents = moduleName.Split(PathTools.PathSeparators);
+            var callingModule = _loadPath.Count > 0 ? _loadPath.Last.Value : null;
             List<string> pathComponents;
             if (callingModule != null) {
-               var callingModulePath = callingModule.Split(PathSeparators);
+               var callingModulePath = callingModule.Split(PathTools.PathSeparators);
                pathComponents = new List<string>(callingModulePath.Take(callingModulePath.Length - 1));
             } else {
                pathComponents = new List<string>();
@@ -153,35 +149,37 @@ namespace FactorioBrowser.Mod.Loader {
             }
 
             string finalRelPath = string.Join("/", pathComponents) + ".lua";
-            return TryOpen(_modFileResolver, finalRelPath, attemptedLocations);
+            return null;
          }
 
-         private FoundModule? TryLoadModuleSibling(string moduleName,
+         private FoundModule? TryLoadModuleSibling(string moduleRelPath,
             List<string> attemptedLocations) {
 
-            return TryLoadByRelativePath(moduleName.Replace(".", "/"), attemptedLocations);
+            var callingModule = _loadPath.Count > 0 ? _loadPath.Last.Value : null;
+            int lastPathSeparator;
+            if (callingModule != null
+               && (lastPathSeparator = callingModule.LastIndexOfAny(PathTools.PathSeparators)) >= 0) {
+               var path = callingModule.Substring(0, lastPathSeparator + 1);
+               return TryOpenWithResolver(_modFileResolver, path + moduleRelPath, attemptedLocations);
+
+            } else {
+               return null;
+            }
          }
 
-         private FoundModule? TryLoadFromModRoot(string moduleName,
+         private FoundModule? TryLoadFromModRoot(string moduleRelPath,
             List<string> attemptedLocations) {
 
-            return TryOpenWithResolver(_modFileResolver, moduleName, attemptedLocations);
+            return TryOpenWithResolver(_modFileResolver, moduleRelPath, attemptedLocations);
          }
 
-         private FoundModule? TryLoadFromGlobalLib(string moduleName,
+         private FoundModule? TryLoadFromGlobalLib(string moduleRelPath,
             List<string> attemptedLocations) {
 
-            return TryOpenWithResolver(_commonLibResolver, moduleName, attemptedLocations);
+            return TryOpenWithResolver(_commonLibResolver, moduleRelPath, attemptedLocations);
          }
 
          private FoundModule? TryOpenWithResolver(IModFileResolver resolver,
-            string moduleName, List<string> attemptedLocations) {
-
-            string moduleRelPath = moduleName.Replace(".", "/") + ".lua";
-            return TryOpen(resolver, moduleRelPath, attemptedLocations);
-         }
-
-         private FoundModule? TryOpen(IModFileResolver resolver,
             string moduleRelPath, List<string> attemptedLocations) {
 
             string friendlyName = resolver.FriendlyName(moduleRelPath);

@@ -1,7 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
+using System.Text.RegularExpressions;
 using NLog;
 
 namespace FactorioBrowser.Mod.Loader {
@@ -60,7 +61,7 @@ namespace FactorioBrowser.Mod.Loader {
       }
 
       private string GetFilePath(string relPath) {
-         return Path.GetFullPath(Path.Combine(_path, relPath)); // XXX : safeguard against absolute relPath-s
+         return Path.GetFullPath(Path.Combine(_path, PathTools.NormalizePath(relPath)));
       }
    }
 
@@ -105,7 +106,7 @@ namespace FactorioBrowser.Mod.Loader {
       }
 
       private string GetEntryPath(string relPath) {
-         return _entryBaseName + "/" + relPath.Replace("\\", "/");
+         return _entryBaseName + "/" + PathTools.NormalizePath(relPath, "/");
       }
 
       private static Stream ToSeekableStream(Stream stream) {
@@ -120,6 +121,84 @@ namespace FactorioBrowser.Mod.Loader {
             } finally {
                stream.Close(); ;
             }
+         }
+      }
+   }
+
+   internal static class PathTools {
+      public static readonly char[] PathSeparators = new char[] {
+         Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar
+      };
+
+      public static string NormalizePath(string relPath, string targetSeparator = "\\") {
+         List<string> normalizedPath = new List<string>();
+
+         string[] pathComponents = relPath.Split(PathSeparators);
+         foreach (var component in pathComponents) {
+            if (component.Length == 0 || component.Equals(".")) {
+               continue;
+
+            } else if (component.Equals("..")) {
+               if (normalizedPath.Count > 0) {
+                  normalizedPath.RemoveAt(normalizedPath.Count - 1);
+               }
+
+            } else {
+               normalizedPath.Add(component);
+            }
+         }
+
+         return string.Join(targetSeparator, normalizedPath);
+      }
+   }
+
+   internal sealed class AssetPathFileResolver : IModFileResolver {
+      private static readonly char[] PathSeparators = {
+         Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar
+
+      };
+
+      private static readonly Regex QualifiedPathPattern = new Regex("^__([^/]+)__/(.+)$");
+      private readonly IDictionary<string, IModFileResolver> _modSpecificResolvers;
+
+      public AssetPathFileResolver(IDictionary<string, IModFileResolver> modSpecificResolvers) {
+         _modSpecificResolvers = modSpecificResolvers;
+      }
+
+      public bool Exists(string relPath) {
+         IModFileResolver resolver;
+         string modRelPath;
+         return RouteToSpecificResolver(relPath, out resolver, out modRelPath) && resolver.Exists(modRelPath);
+      }
+
+      public string FriendlyName(string relPath) {
+         return relPath;
+      }
+
+      public Stream Open(string relPath) {
+         IModFileResolver resolver;
+         string modRelPath;
+         if (!RouteToSpecificResolver(relPath, out resolver, out modRelPath)) {
+            throw new FileNotFoundException(
+               $"Asset path invalid or references non-existent mod: {relPath}", relPath);
+         }
+
+         return resolver.Open(modRelPath);
+      }
+
+      public void Dispose() {
+      }
+
+      private bool RouteToSpecificResolver(string relPath, out IModFileResolver resolver, out string modRelPath) {
+         resolver = null;
+         modRelPath = null;
+         var match = QualifiedPathPattern.Match(relPath);
+         if (!(match.Success && _modSpecificResolvers.TryGetValue(match.Groups[1].Value, out resolver))) {
+            return false;
+
+         } else {
+            modRelPath = match.Groups[2].Value;
+            return true;
          }
       }
    }
