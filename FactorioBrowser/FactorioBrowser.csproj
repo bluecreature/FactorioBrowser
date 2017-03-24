@@ -56,7 +56,7 @@
     <Compile Include="FcVersion.cs" />
     <Compile Include="Prototypes\Attributes.cs" />
     <Compile Include="Prototypes\FcRecipe.cs" />
-    <Compile Include="Prototypes\FcEntity.cs" />
+    <Compile Include="Prototypes\FcDataStructure.cs" />
     <Compile Include="Prototypes\FcItem.cs" />
     <Compile Include="Prototypes\FcTechnology.cs" />
     <Compile Include="Prototypes\Unpacker\AtomicValueUnpacker.cs" />

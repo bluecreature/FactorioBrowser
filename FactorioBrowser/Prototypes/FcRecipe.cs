@@ -6,7 +6,7 @@ namespace FactorioBrowser.Prototypes {
 
    [ModelMirror]
    [TypeDiscriminatorField("type", "recipe")]
-   public sealed class FcRecipe : FcEntity {
+   public sealed class FcRecipe : FcDataStructure {
 
       [DataFieldMirror("enabled")]
       public bool Enabled { get; private set; }

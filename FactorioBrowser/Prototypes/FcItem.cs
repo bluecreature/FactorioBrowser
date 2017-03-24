@@ -1,8 +1,9 @@
 namespace FactorioBrowser.Prototypes {
 
    [ModelMirror]
-   [TypeDiscriminatorField("type", "item")] // TODO
-   public sealed class FcItem : FcEntity {
+   [TypeDiscriminatorField("type", "item")]
+   public sealed class FcItem : FcDataStructure {
+
       [DataFieldMirror("icon")]
       public string Icon { get; private set; }
    }
