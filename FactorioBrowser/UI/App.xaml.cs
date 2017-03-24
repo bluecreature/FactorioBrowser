@@ -12,12 +12,13 @@ namespace FactorioBrowser.UI {
 
       protected override void OnStartup(StartupEventArgs e) {
          base.OnStartup(e);
-         AppSettings settings = new AppSettings();
-         if (settings.UseSavedSettings) { // TODO : validate existing values
-            ShowMainWindow(settings);
-         } else {
-            AskForInitialConfiguration(settings);
-         }
+         new BrowseWindow().Show();
+         //AppSettings settings = new AppSettings();
+         //if (settings.UseSavedSettings) { // TODO : validate existing values
+         //   ShowMainWindow(settings);
+         //} else {
+         //   AskForInitialConfiguration(settings);
+         //}
       }
 
       private void AskForInitialConfiguration(AppSettings settings) {
