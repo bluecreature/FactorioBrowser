@@ -42,8 +42,8 @@ namespace FactorioBrowser.UI {
       }
 
       public async Task Refresh() {
-         await _viewModel.RefreshModList();
          ModGraph.ClearLayout();
+         await _viewModel.RefreshModList();
          ModGraph.GenerateGraph(_viewModel.DependencyGraph);
          ModGraphZoom.ZoomToFill();
       }

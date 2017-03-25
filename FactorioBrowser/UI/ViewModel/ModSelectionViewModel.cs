@@ -60,8 +60,8 @@ namespace FactorioBrowser.UI.ViewModel {
       public async Task RefreshModList() {
          IsBusy = true;
          try {
-            var allMods = await Task.Factory.StartNew(FindAndSortMods);
             ModList.Clear();
+            var allMods = await Task.Factory.StartNew(FindAndSortMods);
             ModList.AddRange(allMods.Select(m => new ModListItem(m.ModInfo, m)));
             DependencyGraph = BuildDependencyGraph(allMods);
          } finally {
