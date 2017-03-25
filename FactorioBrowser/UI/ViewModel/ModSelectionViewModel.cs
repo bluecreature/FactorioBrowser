@@ -4,20 +4,41 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using FactorioBrowser.Mod.Finder;
 using QuickGraph;
 
 namespace FactorioBrowser.UI.ViewModel {
 
-   public sealed class ModListItem {
+   public sealed class ModListItem : BindableBase {
+      private bool _enabled;
+      private bool _selected;
 
       public FcModMetaInfo Info { get; }
 
       public SortStatus SortStatus { get; }
 
-      public bool Enabled { get; set; }
+      public bool Selectable { get; }
+
+      public bool Selected {
+         get {
+            return _selected;
+         }
+
+         set {
+            UpdateProperty(ref _selected, value);
+         }
+      }
+
+      public bool Enabled {
+         get {
+            return _enabled;
+         }
+
+         set {
+            UpdateProperty(ref _enabled, value);
+         }
+      }
 
       public ModListItem(FcModMetaInfo modInfo, SortStatus sortStatus) {
          Contract.Requires(modInfo != null);
@@ -26,6 +47,7 @@ namespace FactorioBrowser.UI.ViewModel {
          Info = modInfo;
          SortStatus = sortStatus;
          Enabled = sortStatus.Successful;
+         Selectable = sortStatus.Successful;
       }
    }
 
@@ -63,7 +85,7 @@ namespace FactorioBrowser.UI.ViewModel {
             ModList.Clear();
             var allMods = await Task.Factory.StartNew(FindAndSortMods);
             ModList.AddRange(allMods.Select(m => new ModListItem(m.ModInfo, m)));
-            DependencyGraph = BuildDependencyGraph(allMods);
+            DependencyGraph = BuildDependencyGraph(ModList);
          } finally {
             IsBusy = false;
          }
@@ -74,25 +96,25 @@ namespace FactorioBrowser.UI.ViewModel {
       }
 
       private BidirectionalGraph<ModGraphVertex, ModGraphEdge> BuildDependencyGraph(
-         IImmutableList<SortStatus> modList) {
+         IList<ModListItem> modList) {
 
          BidirectionalGraph<ModGraphVertex, ModGraphEdge> graph =
             new BidirectionalGraph<ModGraphVertex, ModGraphEdge>(allowParallelEdges: false);
 
          IDictionary<string, ModGraphVertex> vertexByName = new Dictionary<string, ModGraphVertex>(modList.Count);
          foreach (var mod in modList) {
-            if (mod.Successful) {
-               var vertex = new ModGraphVertex(mod.ModInfo);
-               vertexByName[mod.ModInfo.Name] = vertex;
+            if (mod.SortStatus.Successful) {
+               var vertex = new ModGraphVertex(mod);
+               vertexByName[mod.Info.Name] = vertex;
                graph.AddVertex(vertex);
             }
          }
 
          foreach (var mod in modList) {
-            foreach (var dependency in mod.ModInfo.Dependencies) {
+            foreach (var dependency in mod.Info.Dependencies) {
                ModGraphVertex depVertex;
                if (vertexByName.TryGetValue(dependency.ModName, out depVertex)) {
-                  graph.AddEdge(new ModGraphEdge(vertexByName[mod.ModInfo.Name], depVertex));
+                  graph.AddEdge(new ModGraphEdge(vertexByName[mod.Info.Name], depVertex));
                }
             }
          }

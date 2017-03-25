@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Windows;
 using FactorioBrowser.UI.ViewModel;
+using GraphX.Controls.Models;
 using GraphX.PCL.Common.Enums;
 using GraphX.PCL.Logic.Algorithms.LayoutAlgorithms;
 
@@ -50,6 +51,18 @@ namespace FactorioBrowser.UI {
 
       public void Dispose() {
          ModGraph?.Dispose();
+      }
+
+      private void ModGraph_OnVertexSelected(object sender, VertexSelectedEventArgs args) {
+         ModGraphVertex vertex = (ModGraphVertex) args.VertexControl.Vertex;
+
+         foreach (var modListItem in _viewModel.ModList) {
+            if (modListItem != vertex.Item) {
+               modListItem.Selected = false;
+            }
+         }
+
+         vertex.Item.Selected = true;
       }
    }
 }
