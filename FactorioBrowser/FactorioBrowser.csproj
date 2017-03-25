@@ -36,7 +36,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>FactorioBrowser.TestClass</StartupObject>
+    <StartupObject>FactorioBrowser.UI.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -75,15 +75,18 @@
     <Compile Include="UI\App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\BrowseWindow.xaml.cs">
-      <DependentUpon>BrowseWindow.xaml</DependentUpon>
+    <Compile Include="UI\BrowseView.xaml.cs">
+      <DependentUpon>BrowseView.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\InitialConfigWnd.xaml.cs">
       <DependentUpon>InitialConfigWnd.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\ComponentContainer.cs" />
-    <Compile Include="UI\ModSelectionWnd.xaml.cs">
-      <DependentUpon>ModSelectionWnd.xaml</DependentUpon>
+    <Compile Include="UI\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\ModSelectionView.xaml.cs">
+      <DependentUpon>ModSelectionView.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\ViewModel\BindableBase.cs" />
     <Compile Include="UI\ViewModel\ModGraphControl.cs" />
@@ -178,7 +181,7 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="UI\BrowseWindow.xaml">
+    <Page Include="UI\BrowseView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -186,7 +189,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UI\ModSelectionWnd.xaml">
+    <Page Include="UI\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\ModSelectionView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

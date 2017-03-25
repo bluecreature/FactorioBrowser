@@ -1,5 +1,6 @@
 ﻿<Application
    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-   x:Class="FactorioBrowser.UI.App">
+   x:Class="FactorioBrowser.UI.App"
+   StartupUri="UI/MainWindow.xaml">
 </Application>

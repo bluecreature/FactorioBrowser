@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Windows;
 using FactorioBrowser.UI.ViewModel;
-using GraphX.Controls.Models;
 using GraphX.PCL.Common.Enums;
-using GraphX.PCL.Logic.Algorithms.EdgeRouting;
 using GraphX.PCL.Logic.Algorithms.LayoutAlgorithms;
 
 namespace FactorioBrowser.UI {
@@ -11,7 +9,7 @@ namespace FactorioBrowser.UI {
    /// <summary>
    /// Interaction logic for ModSelectionWnd.xaml
    /// </summary>
-   public partial class ModSelectionWnd : Window, IDisposable {
+   public partial class ModSelectionWnd : IDisposable {
       private readonly ModSelectionViewModel _viewModel;
 
       internal ModSelectionWnd(ModSelectionViewModel viewModel) {

@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using FactorioBrowser.UI.ViewModel;
 
 namespace FactorioBrowser.UI {
 
@@ -8,35 +7,6 @@ namespace FactorioBrowser.UI {
       public App() {
          QuickConverter.EquationTokenizer.AddNamespace(typeof(object));
          QuickConverter.EquationTokenizer.AddNamespace(typeof(System.Windows.Visibility));
-      }
-
-      protected override void OnStartup(StartupEventArgs e) {
-         base.OnStartup(e);
-         new BrowseWindow().Show();
-         //AppSettings settings = new AppSettings();
-         //if (settings.UseSavedSettings) { // TODO : validate existing values
-         //   ShowMainWindow(settings);
-         //} else {
-         //   AskForInitialConfiguration(settings);
-         //}
-      }
-
-      private void AskForInitialConfiguration(AppSettings settings) {
-         ShutdownMode = ShutdownMode.OnExplicitShutdown;
-
-         Window configWnd = new InitialConfigWnd(new InitialConfigViewModel(settings));
-         if (configWnd.ShowDialog() == true) {
-            ShowMainWindow(settings);
-            ShutdownMode = ShutdownMode.OnLastWindowClose;
-         } else {
-            Shutdown(0);
-         }
-      }
-
-      private void ShowMainWindow(AppSettings settings) {
-         var container = new ComponentContainer(settings);
-         var window = container.Get<ModSelectionWnd>();
-         window.Show();
       }
    }
 }
