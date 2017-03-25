@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using FactorioBrowser.UI.ViewModel;
@@ -8,6 +8,9 @@ namespace FactorioBrowser.UI {
    /// Interaction logic for MainWindow.xaml
    /// </summary>
    public partial class MainWindow : Window {
+
+      private ModSelectionView _modSelectionView = null;
+
       public MainWindow() {
          InitializeComponent();
       }
@@ -31,13 +34,20 @@ namespace FactorioBrowser.UI {
       }
 
       private void ShowModSelectionView(AppSettings settings) {
+         Debug.Assert(_modSelectionView == null);
+
          var container = new ComponentContainer(settings);
-         var view = container.Get<ModSelectionWnd>();
-         Grid.SetColumn(view, 0);
-         Grid.SetRow(view, 0);
-         view.VerticalAlignment = VerticalAlignment.Stretch;
-         view.HorizontalAlignment = HorizontalAlignment.Stretch;
-         Layout.Children.Add(view);
+         _modSelectionView = container.Get<ModSelectionView>();
+         _modSelectionView.VerticalAlignment = VerticalAlignment.Stretch;
+         _modSelectionView.HorizontalAlignment = HorizontalAlignment.Stretch;
+         Grid.SetColumn(_modSelectionView, 0);
+         Grid.SetRow(_modSelectionView, 0);
+
+         Layout.Children.Add(_modSelectionView);
+
+#pragma warning disable 4014
+         _modSelectionView.Refresh();
+#pragma warning restore 4014
       }
    }
 }

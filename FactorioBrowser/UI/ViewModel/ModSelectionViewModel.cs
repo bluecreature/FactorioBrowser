@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FactorioBrowser.Mod.Finder;
 using QuickGraph;
@@ -59,7 +60,7 @@ namespace FactorioBrowser.UI.ViewModel {
       public async Task RefreshModList() {
          IsBusy = true;
          try {
-            var allMods = await Task.Run(() => FindAndSortMods());
+            var allMods = await Task.Factory.StartNew(FindAndSortMods);
             ModList.Clear();
             ModList.AddRange(allMods.Select(m => new ModListItem(m.ModInfo, m)));
             DependencyGraph = BuildDependencyGraph(allMods);

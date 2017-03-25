@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using FactorioBrowser.UI.ViewModel;
 using GraphX.PCL.Common.Enums;
@@ -9,10 +10,10 @@ namespace FactorioBrowser.UI {
    /// <summary>
    /// Interaction logic for ModSelectionWnd.xaml
    /// </summary>
-   public partial class ModSelectionWnd : IDisposable {
+   public partial class ModSelectionView : IDisposable {
       private readonly ModSelectionViewModel _viewModel;
 
-      internal ModSelectionWnd(ModSelectionViewModel viewModel) {
+      internal ModSelectionView(ModSelectionViewModel viewModel) {
          _viewModel = viewModel;
          InitializeComponent();
          DataContext = _viewModel;
@@ -21,11 +22,7 @@ namespace FactorioBrowser.UI {
       }
 
       private async void RefreshModList(object sender, RoutedEventArgs e) {
-         await _viewModel.RefreshModList();
-
-         ModGraph.ClearLayout();
-         ModGraph.GenerateGraph(_viewModel.DependencyGraph);
-         ModGraphZoom.ZoomToFill();
+         await Refresh();
       }
 
       private ModGraphLogic InitModGraphLogic() {
@@ -42,6 +39,13 @@ namespace FactorioBrowser.UI {
          logic.AsyncAlgorithmCompute = true;
 
          return logic;
+      }
+
+      public async Task Refresh() {
+         await _viewModel.RefreshModList();
+         ModGraph.ClearLayout();
+         ModGraph.GenerateGraph(_viewModel.DependencyGraph);
+         ModGraphZoom.ZoomToFill();
       }
 
       public void Dispose() {
