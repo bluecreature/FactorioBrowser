@@ -1,13 +1,11 @@
-﻿using System.Windows;
-
-namespace FactorioBrowser.UI {
+﻿namespace FactorioBrowser.UI {
 
    /// <summary>
    /// Interaction logic for BrowseWindow.xaml
    /// </summary>
-   public partial class BrowseWindow {
+   public partial class BrowseView {
 
-      public BrowseWindow() {
+      public BrowseView() {
          InitializeComponent();
       }
    }

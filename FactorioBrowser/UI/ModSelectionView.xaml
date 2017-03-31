@@ -66,18 +66,19 @@
    </UserControl.Resources>
 
    <wpfx:BusyIndicator IsBusy="{Binding IsBusy}" BusyContent="Searching for mods...">
-      <Grid>
-         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="20*" MinWidth="100" />
-            <ColumnDefinition Width="5" />
-            <ColumnDefinition Width="80*" MinWidth="100" />
-         </Grid.ColumnDefinitions>
-         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-         </Grid.RowDefinitions>
+      <ContentControl.Content>
+         <Grid>
+            <Grid.ColumnDefinitions>
+               <ColumnDefinition Width="20*" MinWidth="100" />
+               <ColumnDefinition Width="5" />
+               <ColumnDefinition Width="80*" MinWidth="100" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+               <RowDefinition Height="*" />
+               <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-         <ListBox
+            <ListBox
             x:Name="ModListView"
             Grid.Column="0"
             HorizontalAlignment="Stretch"
@@ -85,85 +86,85 @@
             Margin="0"
             ItemsSource="{Binding Path=ModList}"
             HorizontalContentAlignment="Stretch">
-            <ListBox.ItemContainerStyle>
-               <Style TargetType="ListBoxItem">
-                  <Setter Property="IsSelected" Value="{Binding Selected}"></Setter>
-               </Style>
-            </ListBox.ItemContainerStyle>
-            <ListBox.ItemTemplate>
-               <DataTemplate>
-                  <Border Padding="5,5,20,5" HorizontalAlignment="Stretch">
-                     <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
-                        <Grid HorizontalAlignment="Stretch">
-                           <Grid.ColumnDefinitions>
-                              <ColumnDefinition Width="Auto" />
-                              <ColumnDefinition Width="*" />
-                           </Grid.ColumnDefinitions>
-                           <TextBlock Grid.Column="0" Text="{Binding Path=Info.Name}" VerticalAlignment="Center" />
-                           <TextBlock Grid.Column="1" Text="{qc:Binding '$P.ToDotNotation()', P={Binding Info.Version}}"
+               <ListBox.ItemContainerStyle>
+                  <Style TargetType="ListBoxItem">
+                     <Setter Property="IsSelected" Value="{Binding Selected}"></Setter>
+                  </Style>
+               </ListBox.ItemContainerStyle>
+               <ListBox.ItemTemplate>
+                  <DataTemplate>
+                     <Border Padding="5,5,20,5" HorizontalAlignment="Stretch">
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                           <Grid HorizontalAlignment="Stretch">
+                              <Grid.ColumnDefinitions>
+                                 <ColumnDefinition Width="Auto" />
+                                 <ColumnDefinition Width="*" />
+                              </Grid.ColumnDefinitions>
+                              <TextBlock Grid.Column="0" Text="{Binding Path=Info.Name}" VerticalAlignment="Center" />
+                              <TextBlock Grid.Column="1" Text="{qc:Binding '$P.ToDotNotation()', P={Binding Info.Version}}"
                                    HorizontalAlignment="Right" />
-                        </Grid>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch">
-                           <TextBlock Text="Enabled: " VerticalAlignment="Center" />
-                           <CheckBox Margin="2,5,2,5" Focusable="False" VerticalAlignment="Center"
+                           </Grid>
+                           <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch">
+                              <TextBlock Text="Enabled: " VerticalAlignment="Center" />
+                              <CheckBox Margin="2,5,2,5" Focusable="False" VerticalAlignment="Center"
                                   IsChecked="{Binding Enabled, Mode=TwoWay}"
                                   IsEnabled="{Binding Selectable, Mode=OneWay}" />
+                           </StackPanel>
                         </StackPanel>
-                     </StackPanel>
-                  </Border>
-               </DataTemplate>
-            </ListBox.ItemTemplate>
-         </ListBox>
+                     </Border>
+                  </DataTemplate>
+               </ListBox.ItemTemplate>
+            </ListBox>
 
-         <GridSplitter
+            <GridSplitter
             Grid.Column="1"
             Grid.Row="0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch" />
 
-         <TabControl
+            <TabControl
             Grid.Row="0"
             Grid.Column="2"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             Margin="0">
-            <TabItem Header="Info">
-               <StackPanel
+               <TabItem Header="Info">
+                  <StackPanel
                   Orientation="Vertical"
                   Visibility="{qc:Binding '$P != null ? Visibility.Visible : Visibility.Collapsed', P={Binding Path=SelectedItem, ElementName=ModListView}}"
                   DataContext="{Binding Path=SelectedItem, ElementName=ModListView}"
                   Margin="20,10,20,10">
-                  <Grid Margin="0,0,20,8">
-                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                     </Grid.ColumnDefinitions>
-                     <TextBlock Grid.Column="0" Text="{Binding Path=Info.Name}">
-                        <TextBlock.RenderTransform>
-                           <ScaleTransform ScaleX="1.4" ScaleY="1.4" />
-                        </TextBlock.RenderTransform>
-                     </TextBlock>
-                     <TextBlock Grid.Column="1" Text="{qc:Binding '$P.ToDotNotation()', P={Binding Path=Info.Version}}"
+                     <Grid Margin="0,0,20,8">
+                        <Grid.ColumnDefinitions>
+                           <ColumnDefinition Width="Auto" />
+                           <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Path=Info.Name}">
+                           <TextBlock.RenderTransform>
+                              <ScaleTransform ScaleX="1.4" ScaleY="1.4" />
+                           </TextBlock.RenderTransform>
+                        </TextBlock>
+                        <TextBlock Grid.Column="1" Text="{qc:Binding '$P.ToDotNotation()', P={Binding Path=Info.Version}}"
                              HorizontalAlignment="Right">
-                        <TextBlock.RenderTransform>
-                           <ScaleTransform ScaleX="1.4" ScaleY="1.4" />
-                        </TextBlock.RenderTransform>
-                     </TextBlock>
-                  </Grid>
-                  <Separator />
-               </StackPanel>
-            </TabItem>
-            <TabItem Header="Dependency graph">
-               <gx:ZoomControl x:Name="ModGraphZoom" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                  <views:ModGraphControl
+                           <TextBlock.RenderTransform>
+                              <ScaleTransform ScaleX="1.4" ScaleY="1.4" />
+                           </TextBlock.RenderTransform>
+                        </TextBlock>
+                     </Grid>
+                     <Separator />
+                  </StackPanel>
+               </TabItem>
+               <TabItem Header="Dependency graph">
+                  <gx:ZoomControl x:Name="ModGraphZoom" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                     <views:ModGraphControl
                      x:Name="ModGraph" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                      AutoAssignMissingDataId="True"
                      VertexSelected="ModGraph_OnVertexSelected" />
-               </gx:ZoomControl>
-            </TabItem>
-         </TabControl>
+                  </gx:ZoomControl>
+               </TabItem>
+            </TabControl>
 
-         <UniformGrid
+            <UniformGrid
             Grid.Column="0"
             Grid.ColumnSpan="3"
             Grid.Row="1"
@@ -171,14 +172,14 @@
             Columns="2"
             HorizontalAlignment="Right">
 
-            <Button
+               <Button
                Content="Refresh"
                Margin="6"
                Padding="15,3,15,3"
-               Click="RefreshModList"
-               IsEnabled="{qc:Binding '!$P', P={Binding IsBusy}}" />
-            <Button Content="Load" Margin="6" Padding="4" />
-         </UniformGrid>
-      </Grid>
+               Click="RefreshModList_Click" />
+               <Button Content="Load" Margin="6" Padding="4" Click="LoadModList_Click" />
+            </UniformGrid>
+         </Grid>
+      </ContentControl.Content>
    </wpfx:BusyIndicator>
 </UserControl>

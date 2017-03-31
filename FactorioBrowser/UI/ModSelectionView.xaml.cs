@@ -22,8 +22,20 @@ namespace FactorioBrowser.UI {
          ModGraph.SetVerticesDrag(true);
       }
 
-      private async void RefreshModList(object sender, RoutedEventArgs e) {
+      public void Dispose() {
+         ModGraph?.Dispose();
+      }
+
+      public delegate void SelectionConfirmedEventHandler();
+
+      public event SelectionConfirmedEventHandler SelectionConfirmed;
+
+      private async void RefreshModList_Click(object sender, RoutedEventArgs e) {
          await Refresh();
+      }
+
+      private void LoadModList_Click(object sender, RoutedEventArgs e) {
+         SelectionConfirmed?.Invoke();
       }
 
       private ModGraphLogic InitModGraphLogic() {
@@ -47,10 +59,6 @@ namespace FactorioBrowser.UI {
          await _viewModel.RefreshModList();
          ModGraph.GenerateGraph(_viewModel.DependencyGraph);
          ModGraphZoom.ZoomToFill();
-      }
-
-      public void Dispose() {
-         ModGraph?.Dispose();
       }
 
       private void ModGraph_OnVertexSelected(object sender, VertexSelectedEventArgs args) {
