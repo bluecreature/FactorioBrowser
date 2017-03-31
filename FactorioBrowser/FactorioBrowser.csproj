@@ -44,7 +44,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mod\Loader\ModListLoader.cs" />
+    <Compile Include="IProgressReporter.cs" />
+    <Compile Include="Mod\Loader\IFcModDataLoader.cs" />
+    <Compile Include="Mod\Loader\DefaultModDataLoader.cs" />
     <Compile Include="TestClass.cs" />
     <Compile Include="Mod\Finder\IFcModSorter.cs" />
     <Compile Include="Mod\Finder\DefaultFcModSorter.cs" />
@@ -89,6 +91,7 @@
       <DependentUpon>ModSelectionView.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\ViewModel\BindableBase.cs" />
+    <Compile Include="UI\ViewModel\BrowseViewModel.cs" />
     <Compile Include="UI\ViewModel\ModGraphControl.cs" />
     <Compile Include="UI\ViewModel\InitialConfigViewModel.cs" />
     <Compile Include="UI\ViewModel\ModSelectionViewModel.cs" />

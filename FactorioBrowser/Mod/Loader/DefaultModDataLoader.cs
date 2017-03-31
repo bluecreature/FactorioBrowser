@@ -11,7 +11,7 @@ using NLog;
 
 namespace FactorioBrowser.Mod.Loader {
 
-   internal sealed class ModListLoader {
+   internal sealed class DefaultModDataLoader : IFcModDataLoader {
       private const string CoreModRelPath = "data/core";
       private const string LuaLibRelPath = CoreModRelPath + "/lualib";
 
@@ -20,7 +20,7 @@ namespace FactorioBrowser.Mod.Loader {
       private readonly string _gamePath;
       private readonly string _luaLibPath;
 
-      public ModListLoader(string gamePath) {
+      public DefaultModDataLoader(string gamePath) {
          _gamePath = gamePath;
          _luaLibPath = Path.Combine(gamePath, LuaLibRelPath);
       }
