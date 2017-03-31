@@ -63,6 +63,7 @@ namespace FactorioBrowser.UI {
          }
 
          vertex.Item.Selected = true;
+         ModListView.ScrollIntoView(vertex.Item);
       }
    }
 }

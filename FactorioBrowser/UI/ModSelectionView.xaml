@@ -54,6 +54,15 @@
             </Setter.Value>
          </Setter>
       </Style>
+
+      <Style TargetType="{x:Type gx:EdgeControl}">
+         <Setter Property="Foreground" Value="Black" />
+         <Style.Triggers>
+            <DataTrigger Binding="{Binding IsOptionalDependency}" Value="True">
+               <Setter Property="Foreground" Value="DarkSlateBlue" />
+            </DataTrigger>
+         </Style.Triggers>
+      </Style>
    </UserControl.Resources>
 
    <wpfx:BusyIndicator IsBusy="{Binding IsBusy}" BusyContent="Searching for mods...">

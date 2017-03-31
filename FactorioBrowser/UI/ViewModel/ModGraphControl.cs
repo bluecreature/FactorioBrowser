@@ -1,6 +1,5 @@
 ﻿using System;
 using GraphX.Controls;
-using GraphX.Controls.Models;
 using GraphX.PCL.Common.Models;
 using GraphX.PCL.Logic.Models;
 using QuickGraph;
@@ -33,9 +32,12 @@ namespace FactorioBrowser.UI.ViewModel {
 
    internal sealed class ModGraphEdge : EdgeBase<ModGraphVertex> {
 
-      public ModGraphEdge(ModGraphVertex source, ModGraphVertex target)
+      public ModGraphEdge(ModGraphVertex source, ModGraphVertex target, bool isOptionalDependency)
          : base(source, target, 1) {
+         IsOptionalDependency = isOptionalDependency;
       }
+
+      public bool IsOptionalDependency { get; }
    }
 
    internal sealed class ModGraphLogic :

@@ -114,7 +114,8 @@ namespace FactorioBrowser.UI.ViewModel {
             foreach (var dependency in mod.Info.Dependencies) {
                ModGraphVertex depVertex;
                if (vertexByName.TryGetValue(dependency.ModName, out depVertex)) {
-                  graph.AddEdge(new ModGraphEdge(vertexByName[mod.Info.Name], depVertex));
+                  graph.AddEdge(
+                     new ModGraphEdge(vertexByName[mod.Info.Name], depVertex, dependency.Optional));
                }
             }
          }
