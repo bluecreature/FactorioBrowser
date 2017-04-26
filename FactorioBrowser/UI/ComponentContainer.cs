@@ -4,8 +4,11 @@ using System.IO;
 using System.Reflection;
 using Config.Net;
 using FactorioBrowser.Mod.Finder;
+using FactorioBrowser.Mod.Loader;
+using FactorioBrowser.UI.ViewModel;
 using Ninject;
 using Ninject.Activation;
+using Ninject.Extensions.Factory;
 using Ninject.Modules;
 
 namespace FactorioBrowser.UI {
@@ -44,6 +47,7 @@ namespace FactorioBrowser.UI {
          _kernel = new StandardKernel(krnlConfig,
             new ModComponents(settings)
          );
+         _kernel.Load<FuncModule>();
       }
 
       public T Get<T>() {
@@ -62,11 +66,18 @@ namespace FactorioBrowser.UI {
       public override void Load() {
          Bind<IFcModFinder>().ToMethod(CreateModFinder);
          Bind<IFcModSorter>().To<DefaultFcModSorter>();
+         Bind<IFcModDataLoader>().ToMethod(CreateModDataLoader);
+         Bind<IBrowseViewFactory>().ToFactory();
+         Bind<IBrowseViewModelFactory>().ToFactory();
       }
 
       private IFcModFinder CreateModFinder(IContext ctx) {
          return new DefaultFcModFinder(
             _settings.GamePath, _settings.ModsPath);
+      }
+
+      private IFcModDataLoader CreateModDataLoader(IContext ctx) {
+         return new DefaultModDataLoader(_settings.GamePath);
       }
    }
 }

@@ -1,7 +1,10 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using FactorioBrowser.Mod.Loader;
 using FactorioBrowser.UI.ViewModel;
 
 namespace FactorioBrowser.UI {
@@ -30,18 +33,18 @@ namespace FactorioBrowser.UI {
          }
       }
 
-      private void LoadModListConfirmed() {
+      private void LoadModListConfirmed(IEnumerable<FcModFileInfo> selectedMods) {
          ModSelectionView view;
          if ((view = Interlocked.Exchange(ref _modSelectionView, null)) != null) {
             view.SelectionConfirmed -= LoadModListConfirmed;
             Layout.Children.Remove(view);
-            ShowBrowseView();
+            ShowBrowseView(selectedMods);
          }
       }
 
-      private void ShowBrowseView() {
+      private void ShowBrowseView(IEnumerable<FcModFileInfo> selectedMods) {
          Debug.Assert(_browseView == null);
-         _browseView = _components.Get<BrowseView>();
+         _browseView = _components.Get<IBrowseViewFactory>().CreateBrowseView(selectedMods);
          SwitchTo(_browseView);
       }
 

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using FactorioBrowser.Mod.Loader;
 using FactorioBrowser.UI.ViewModel;
 using GraphX.Controls.Models;
 using GraphX.PCL.Common.Enums;
@@ -26,16 +29,27 @@ namespace FactorioBrowser.UI {
          ModGraph?.Dispose();
       }
 
-      public delegate void SelectionConfirmedEventHandler();
+      internal delegate void SelectionConfirmedEventHandler(IEnumerable<FcModFileInfo> selectedMods);
 
-      public event SelectionConfirmedEventHandler SelectionConfirmed;
+      internal event SelectionConfirmedEventHandler SelectionConfirmed;
+
+      public async Task Refresh() {
+         ModGraph.ClearLayout();
+         await _viewModel.RefreshModList();
+         ModGraph.GenerateGraph(_viewModel.DependencyGraph);
+         ModGraphZoom.ZoomToFill();
+      }
 
       private async void RefreshModList_Click(object sender, RoutedEventArgs e) {
          await Refresh();
       }
 
       private void LoadModList_Click(object sender, RoutedEventArgs e) {
-         SelectionConfirmed?.Invoke();
+         var selectedMods = _viewModel.ModList
+            .Where(i => i.Enabled)
+            .Select(i => FcModFileInfo.FromMetaInfo(i.Info))
+            .ToList();
+         SelectionConfirmed?.Invoke(selectedMods);
       }
 
       private ModGraphLogic InitModGraphLogic() {
@@ -52,13 +66,6 @@ namespace FactorioBrowser.UI {
          logic.AsyncAlgorithmCompute = true;
 
          return logic;
-      }
-
-      public async Task Refresh() {
-         ModGraph.ClearLayout();
-         await _viewModel.RefreshModList();
-         ModGraph.GenerateGraph(_viewModel.DependencyGraph);
-         ModGraphZoom.ZoomToFill();
       }
 
       private void ModGraph_OnVertexSelected(object sender, VertexSelectedEventArgs args) {

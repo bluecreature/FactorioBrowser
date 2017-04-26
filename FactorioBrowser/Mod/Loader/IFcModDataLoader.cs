@@ -4,7 +4,7 @@ using FactorioBrowser.Prototypes.Unpacker;
 
 namespace FactorioBrowser.Mod.Loader {
 
-   internal struct FcModFileInfo {
+   public struct FcModFileInfo {
 
       public string Name { get; }
 
@@ -29,7 +29,7 @@ namespace FactorioBrowser.Mod.Loader {
       }
    }
 
-   internal interface IFcModDataLoader {
+   public interface IFcModDataLoader {
 
       ILuaTable LoadRawData(IEnumerable<FcModFileInfo> list);
    }
