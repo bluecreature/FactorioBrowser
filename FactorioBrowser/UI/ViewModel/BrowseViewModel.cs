@@ -10,10 +10,6 @@ using FactorioBrowser.Prototypes.Unpacker;
 
 namespace FactorioBrowser.UI.ViewModel {
 
-   public interface IBrowseViewModelFactory {
-      BrowseViewModel Create(IEnumerable<FcModFileInfo> modsToLoad);
-   }
-
    public sealed class BrowseViewModel : BindableBase {
 
       private readonly IFcModDataLoader _modLoader;

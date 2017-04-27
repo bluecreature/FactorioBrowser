@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Reflection;
@@ -45,9 +46,9 @@ namespace FactorioBrowser.UI {
          };
 
          _kernel = new StandardKernel(krnlConfig,
-            new ModComponents(settings)
+            new ModComponents(settings),
+            new FuncModule()
          );
-         _kernel.Load<FuncModule>();
       }
 
       public T Get<T>() {
@@ -67,7 +68,7 @@ namespace FactorioBrowser.UI {
          Bind<IFcModFinder>().ToMethod(CreateModFinder);
          Bind<IFcModSorter>().To<DefaultFcModSorter>();
          Bind<IFcModDataLoader>().ToMethod(CreateModDataLoader);
-         Bind<IBrowseViewFactory>().ToFactory();
+         Bind<IBrowseViewFactory>().To<BrowseViewFactoryImpl>();
          Bind<IBrowseViewModelFactory>().ToFactory();
       }
 
@@ -78,6 +79,23 @@ namespace FactorioBrowser.UI {
 
       private IFcModDataLoader CreateModDataLoader(IContext ctx) {
          return new DefaultModDataLoader(_settings.GamePath);
+      }
+   }
+
+   public interface IBrowseViewModelFactory {
+      BrowseViewModel Create(IEnumerable<FcModFileInfo> modsToLoad);
+   }
+
+   internal sealed class BrowseViewFactoryImpl : IBrowseViewFactory {
+      private readonly IBrowseViewModelFactory _viewModelFactory;
+
+      public BrowseViewFactoryImpl(IBrowseViewModelFactory viewModelFactory) {
+         _viewModelFactory = viewModelFactory;
+      }
+
+      public BrowseView Create(IEnumerable<FcModFileInfo> modsToLoad) {
+         var viewModel = _viewModelFactory.Create(modsToLoad);
+         return new BrowseView(viewModel);
       }
    }
 }

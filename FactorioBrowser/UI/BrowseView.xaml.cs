@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
+using System.Windows;
 using FactorioBrowser.Mod.Loader;
 using FactorioBrowser.UI.ViewModel;
 
 namespace FactorioBrowser.UI {
 
    public interface IBrowseViewFactory {
-      BrowseView CreateBrowseView(IEnumerable<FcModFileInfo> selectedMods);
+
+      BrowseView Create(IEnumerable<FcModFileInfo> selectedMods);
    }
 
    /// <summary>
@@ -16,16 +17,14 @@ namespace FactorioBrowser.UI {
 
       private readonly BrowseViewModel _viewModel;
 
-      internal BrowseView(IBrowseViewModelFactory viewModelFactory,
-         IEnumerable<FcModFileInfo> selectedMods) {
-
-         _viewModel = viewModelFactory.Create(selectedMods);
+      internal BrowseView(BrowseViewModel viewModel) {
+         _viewModel = viewModel;
          InitializeComponent();
          DataContext = _viewModel;
       }
 
-      public void Refresh() {
-
+      private void BrowseView_OnLoaded(object sender, RoutedEventArgs e) {
+         _viewModel.LoadData();
       }
    }
 }

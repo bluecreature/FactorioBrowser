@@ -44,7 +44,7 @@ namespace FactorioBrowser.UI {
 
       private void ShowBrowseView(IEnumerable<FcModFileInfo> selectedMods) {
          Debug.Assert(_browseView == null);
-         _browseView = _components.Get<IBrowseViewFactory>().CreateBrowseView(selectedMods);
+         _browseView = _components.Get<IBrowseViewFactory>().Create(selectedMods);
          SwitchTo(_browseView);
       }
 
