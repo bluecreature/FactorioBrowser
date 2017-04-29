@@ -94,6 +94,7 @@
     </Compile>
     <Compile Include="UI\ViewModel\BindableBase.cs" />
     <Compile Include="UI\ViewModel\BrowseViewModel.cs" />
+    <Compile Include="UI\ViewModel\StructureGraphTypes.cs" />
     <Compile Include="UI\ViewModel\ModGraphControl.cs" />
     <Compile Include="UI\ViewModel\InitialConfigViewModel.cs" />
     <Compile Include="UI\ViewModel\ModSelectionViewModel.cs" />

@@ -1,11 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Generics;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using FactorioBrowser.Mod.Loader;
 using FactorioBrowser.Prototypes;
 using FactorioBrowser.Prototypes.Unpacker;
+
+using TechnologyGraphVertex = FactorioBrowser.UI.ViewModel.StructureGraphVertex<FactorioBrowser.Prototypes.FcTechnology>;
+using TechnologyGraphEdge = FactorioBrowser.UI.ViewModel.StructureGraphEdge<FactorioBrowser.Prototypes.FcTechnology>;
+using TechnologyGraph = QuickGraph.BidirectionalGraph<
+   FactorioBrowser.UI.ViewModel.StructureGraphVertex<FactorioBrowser.Prototypes.FcTechnology>,
+   FactorioBrowser.UI.ViewModel.StructureGraphEdge<FactorioBrowser.Prototypes.FcTechnology>>;
 
 namespace FactorioBrowser.UI.ViewModel {
 
@@ -46,7 +53,9 @@ namespace FactorioBrowser.UI.ViewModel {
 
       public ObservableCollection<FcTechnology> Technologies { get; }
 
-      public async void LoadData() {
+      public TechnologyGraph TechnologyGraph;
+
+      public async Task LoadData() {
          IsBusy = true;
          try {
             var unpackedProtos = await Task.Factory.StartNew(LoadAndUnpackData);
@@ -58,10 +67,41 @@ namespace FactorioBrowser.UI.ViewModel {
 
             Technologies.Clear();
             Technologies.AddRange(unpackedProtos.Technologies);
+            TechnologyGraph = RebuildTechnologyGraph(unpackedProtos.Technologies);
 
          } finally {
             IsBusy = false;
          }
+      }
+
+      private TechnologyGraph RebuildTechnologyGraph(IImmutableList<FcTechnology> technologies) {
+         TechnologyGraph graph = new TechnologyGraph(allowParallelEdges: false,
+            vertexCapacity: technologies.Count);
+
+         IDictionary<string, TechnologyGraphVertex> vertexByName =
+            new Dictionary<string, TechnologyGraphVertex>(technologies.Count);
+         foreach (var tech in technologies) {
+            var vertex = new TechnologyGraphVertex(tech);
+            graph.AddVertex(vertex);
+            vertexByName.Add(tech.Name, vertex);
+         }
+
+         foreach (var tech in technologies) {
+            if (tech.Prerequisites == null) {
+               continue;
+            }
+
+            foreach (var prerequisite in tech.Prerequisites) {
+               var techVertex = vertexByName[tech.Name];
+               TechnologyGraphVertex prereqVertex;
+               if (vertexByName.TryGetValue(prerequisite, out prereqVertex)) {
+                  var edge = new TechnologyGraphEdge(prereqVertex, techVertex);
+                  graph.AddEdge(edge);
+               }
+            }
+         }
+
+         return graph;
       }
 
       private FcPrototypes LoadAndUnpackData() {
