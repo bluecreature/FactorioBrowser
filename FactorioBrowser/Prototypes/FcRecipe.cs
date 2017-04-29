@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using FactorioBrowser.Prototypes.Unpacker;
 
 namespace FactorioBrowser.Prototypes {
@@ -152,7 +151,7 @@ namespace FactorioBrowser.Prototypes {
          Amount = amount;
          AmountMin = 0;
          AmountMax = 0;
-         Probability = 0;
+         Probability = 1;
       }
    }
 }
