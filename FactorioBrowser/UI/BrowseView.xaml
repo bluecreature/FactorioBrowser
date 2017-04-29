@@ -4,44 +4,126 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:FactorioBrowser.UI.ViewModel"
+        xmlns:wpfx="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         d:DesignHeight="768"
         d:DesignWidth="1200"
         Background="{DynamicResource {x:Static SystemColors.MenuBarBrushKey}}"
-        d:DataContext="{d:DesignInstance views:BrowseViewModel, IsDesignTimeCreatable=False}">
+        d:DataContext="{d:DesignInstance views:BrowseViewModel, IsDesignTimeCreatable=False}"
+        Loaded="BrowseView_OnLoaded">
 
-   <TabControl>
-      <TabItem Header="Items">
-         <Grid>
-            <Grid.ColumnDefinitions>
-               <ColumnDefinition Width="20*" />
-               <ColumnDefinition Width="5" />
-               <ColumnDefinition Width="60*" />
-               <ColumnDefinition Width="5" />
-               <ColumnDefinition Width="20*" />
-            </Grid.ColumnDefinitions>
+   <wpfx:BusyIndicator IsBusy="{Binding IsBusy}" BusyContent="Loading...">
+      <ContentControl.Content>
+         <TabControl>
+            <TabItem Header="Items">
+               <Grid>
+                  <Grid.ColumnDefinitions>
+                     <ColumnDefinition Width="20*" />
+                     <ColumnDefinition Width="5" />
+                     <ColumnDefinition Width="60*" />
+                     <ColumnDefinition Width="5" />
+                     <ColumnDefinition Width="20*" />
+                  </Grid.ColumnDefinitions>
 
-            <DockPanel Grid.Column="0">
-               <TextBox DockPanel.Dock="Top"></TextBox>
-               <ListBox></ListBox>
-            </DockPanel>
+                  <DockPanel Grid.Column="0">
+                     <TextBox DockPanel.Dock="Top" />
+                     <ListBox ItemsSource="{Binding Items}">
+                        <ListBox.ItemTemplate>
+                           <DataTemplate>
+                              <TextBlock Text="{Binding Name}" />
+                           </DataTemplate>
+                        </ListBox.ItemTemplate>
+                     </ListBox>
+                  </DockPanel>
 
-            <GridSplitter
-               Grid.Column="1"
-               HorizontalAlignment="Stretch"
-               VerticalAlignment="Stretch" />
+                  <GridSplitter
+                     Grid.Column="1"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Stretch" />
 
-            <Canvas Grid.Column="2" Background="Green" />
+                  <Canvas Grid.Column="2" Background="Green" />
 
-            <GridSplitter
-               Grid.Column="3"
-               HorizontalAlignment="Stretch"
-               VerticalAlignment="Stretch" />
+                  <GridSplitter
+                     Grid.Column="3"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Stretch" />
 
-            <Canvas Grid.Column="4" Background="Blue" />
-         </Grid>
-      </TabItem>
-      <TabItem Header="Recipes"></TabItem>
-      <TabItem Header="Technologies"></TabItem>
-   </TabControl>
+                  <Canvas Grid.Column="4" Background="Blue" />
+               </Grid>
+            </TabItem>
+            <TabItem Header="Recipes">
+               <Grid>
+                  <Grid.ColumnDefinitions>
+                     <ColumnDefinition Width="20*" />
+                     <ColumnDefinition Width="5" />
+                     <ColumnDefinition Width="60*" />
+                     <ColumnDefinition Width="5" />
+                     <ColumnDefinition Width="20*" />
+                  </Grid.ColumnDefinitions>
+
+                  <DockPanel Grid.Column="0">
+                     <TextBox DockPanel.Dock="Top" />
+                     <ListBox ItemsSource="{Binding Recipes}">
+                        <ListBox.ItemTemplate>
+                           <DataTemplate>
+                              <TextBlock Text="{Binding Name}" />
+                           </DataTemplate>
+                        </ListBox.ItemTemplate>
+                     </ListBox>
+                  </DockPanel>
+
+                  <GridSplitter
+                     Grid.Column="1"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Stretch" />
+
+                  <Canvas Grid.Column="2" Background="Green" />
+
+                  <GridSplitter
+                     Grid.Column="3"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Stretch" />
+
+                  <Canvas Grid.Column="4" Background="Blue" />
+               </Grid>
+            </TabItem>
+            <TabItem Header="Technologies">
+               <Grid>
+                  <Grid.ColumnDefinitions>
+                     <ColumnDefinition Width="20*" />
+                     <ColumnDefinition Width="5" />
+                     <ColumnDefinition Width="60*" />
+                     <ColumnDefinition Width="5" />
+                     <ColumnDefinition Width="20*" />
+                  </Grid.ColumnDefinitions>
+
+                  <DockPanel Grid.Column="0">
+                     <TextBox DockPanel.Dock="Top" />
+                     <ListBox ItemsSource="{Binding Technologies}">
+                        <ListBox.ItemTemplate>
+                           <DataTemplate>
+                              <TextBlock Text="{Binding Name}" />
+                           </DataTemplate>
+                        </ListBox.ItemTemplate>
+                     </ListBox>
+                  </DockPanel>
+
+                  <GridSplitter
+                     Grid.Column="1"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Stretch" />
+
+                  <Canvas Grid.Column="2" Background="Green" />
+
+                  <GridSplitter
+                     Grid.Column="3"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Stretch" />
+
+                  <Canvas Grid.Column="4" Background="Blue" />
+               </Grid>
+            </TabItem>
+         </TabControl>
+      </ContentControl.Content>
+   </wpfx:BusyIndicator>
 </UserControl>

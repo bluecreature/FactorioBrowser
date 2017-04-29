@@ -6,6 +6,7 @@ using System.Reflection;
 using Config.Net;
 using FactorioBrowser.Mod.Finder;
 using FactorioBrowser.Mod.Loader;
+using FactorioBrowser.Prototypes.Unpacker;
 using FactorioBrowser.UI.ViewModel;
 using Ninject;
 using Ninject.Activation;
@@ -68,6 +69,7 @@ namespace FactorioBrowser.UI {
          Bind<IFcModFinder>().ToMethod(CreateModFinder);
          Bind<IFcModSorter>().To<DefaultFcModSorter>();
          Bind<IFcModDataLoader>().ToMethod(CreateModDataLoader);
+         Bind<IFcPrototypeUnpacker>().To<DefaultPrototypeUnpacker>();
          Bind<IBrowseViewFactory>().To<BrowseViewFactoryImpl>();
          Bind<IBrowseViewModelFactory>().ToFactory();
       }

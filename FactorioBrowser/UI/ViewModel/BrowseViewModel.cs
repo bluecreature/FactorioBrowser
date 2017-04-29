@@ -2,7 +2,6 @@
 using System.Collections.Generics;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using FactorioBrowser.Mod.Loader;
 using FactorioBrowser.Prototypes;
@@ -13,16 +12,22 @@ namespace FactorioBrowser.UI.ViewModel {
    public sealed class BrowseViewModel : BindableBase {
 
       private readonly IFcModDataLoader _modLoader;
+      private readonly IFcPrototypeUnpacker _prototypeUnpacker;
       private readonly IEnumerable<FcModFileInfo> _modsToLoad;
 
       private bool _isBusy;
 
-      public BrowseViewModel(IFcModDataLoader modLoader, IEnumerable<FcModFileInfo> modsToLoad) {
+      public BrowseViewModel(IFcModDataLoader modLoader, IFcPrototypeUnpacker prototypeUnpacker,
+         IEnumerable<FcModFileInfo> modsToLoad) {
+
          Debug.Assert(modsToLoad != null);
          _modLoader = modLoader;
+         _prototypeUnpacker = prototypeUnpacker;
          _modsToLoad = modsToLoad;
          _isBusy = false;
          Items = new ObservableCollection<FcItem>();
+         Recipes = new ObservableCollection<FcRecipe>();
+         Technologies = new ObservableCollection<FcTechnology>();
       }
 
       public bool IsBusy {
@@ -37,32 +42,31 @@ namespace FactorioBrowser.UI.ViewModel {
 
       public ObservableCollection<FcItem> Items { get; }
 
+      public ObservableCollection<FcRecipe> Recipes { get; }
+
+      public ObservableCollection<FcTechnology> Technologies { get; }
+
       public async void LoadData() {
          IsBusy = true;
          try {
-            var items = await Task.Factory.StartNew(LoadAndUnpackData);
+            var unpackedProtos = await Task.Factory.StartNew(LoadAndUnpackData);
             Items.Clear();
-            Items.AddRange(items);
+            Items.AddRange(unpackedProtos.Items);
+
+            Recipes.Clear();
+            Recipes.AddRange(unpackedProtos.Recipes);
+
+            Technologies.Clear();
+            Technologies.AddRange(unpackedProtos.Technologies);
+
          } finally {
             IsBusy = false;
          }
       }
 
-      private IList<FcItem> LoadAndUnpackData() {
+      private FcPrototypes LoadAndUnpackData() {
          var rawData = _modLoader.LoadRawData(_modsToLoad);
-         var unpacked = new UnpackerDispatcher().
-            Unpack<IDictionary<string, IDictionary<string, FcDataStructure>>>(rawData.Self(), "data.raw"); // TODO : inject
-         IList<FcItem> items = new List<FcItem>();
-         foreach (var category in unpacked.Values) {
-            foreach (var structure in category.Values) {
-               var item = structure as FcItem;
-               if (item != null) {
-                  items.Add(item);
-               }
-            }
-         }
-
-         return items;
+         return _prototypeUnpacker.Unpack(rawData);
       }
    }
 }
