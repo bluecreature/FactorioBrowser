@@ -79,13 +79,13 @@
             </Grid.RowDefinitions>
 
             <ListBox
-            x:Name="ModListView"
-            Grid.Column="0"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            Margin="0"
-            ItemsSource="{Binding Path=ModList}"
-            HorizontalContentAlignment="Stretch">
+               x:Name="ModListView"
+               Grid.Column="0"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               Margin="0"
+               ItemsSource="{Binding Path=ModList}"
+               HorizontalContentAlignment="Stretch">
                <ListBox.ItemContainerStyle>
                   <Style TargetType="ListBoxItem">
                      <Setter Property="IsSelected" Value="{Binding Selected}"></Setter>
@@ -117,17 +117,17 @@
             </ListBox>
 
             <GridSplitter
-            Grid.Column="1"
-            Grid.Row="0"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch" />
+               Grid.Column="1"
+               Grid.Row="0"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch" />
 
             <TabControl
-            Grid.Row="0"
-            Grid.Column="2"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            Margin="0">
+               Grid.Row="0"
+               Grid.Column="2"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               Margin="0">
                <TabItem Header="Info">
                   <StackPanel
                   Orientation="Vertical"
@@ -157,26 +157,26 @@
                <TabItem Header="Dependency graph">
                   <gx:ZoomControl x:Name="ModGraphZoom" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                      <views:ModGraphControl
-                     x:Name="ModGraph" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                     AutoAssignMissingDataId="True"
-                     VertexSelected="ModGraph_OnVertexSelected" />
+                        x:Name="ModGraph" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                        AutoAssignMissingDataId="True"
+                        VertexSelected="ModGraph_OnVertexSelected" />
                   </gx:ZoomControl>
                </TabItem>
             </TabControl>
 
             <UniformGrid
-            Grid.Column="0"
-            Grid.ColumnSpan="3"
-            Grid.Row="1"
-            Rows="1"
-            Columns="2"
-            HorizontalAlignment="Right">
+               Grid.Column="0"
+               Grid.ColumnSpan="3"
+               Grid.Row="1"
+               Rows="1"
+               Columns="2"
+               HorizontalAlignment="Right">
 
                <Button
-               Content="Refresh"
-               Margin="6"
-               Padding="15,3,15,3"
-               Click="RefreshModList_Click" />
+                  Content="Refresh"
+                  Margin="6"
+                  Padding="15,3,15,3"
+                  Click="RefreshModList_Click" />
                <Button Content="Load" Margin="6" Padding="4" Click="LoadModList_Click" />
             </UniformGrid>
          </Grid>
