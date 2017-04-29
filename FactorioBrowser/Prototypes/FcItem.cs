@@ -1,7 +1,7 @@
 namespace FactorioBrowser.Prototypes {
 
    [ModelMirror]
-   [TypeDiscriminatorField("type", "item")]
+   [TypeDiscriminatorField("type", "item", "fluid")]
    public sealed class FcItem : FcDataStructure {
 
       [DataFieldMirror("icon")]
