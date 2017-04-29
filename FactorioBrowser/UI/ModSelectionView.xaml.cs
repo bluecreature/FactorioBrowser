@@ -80,5 +80,11 @@ namespace FactorioBrowser.UI {
          vertex.Item.Selected = true;
          ModListView.ScrollIntoView(vertex.Item);
       }
+
+      private void ModSelectionView_OnLoaded(object sender, RoutedEventArgs e) {
+#pragma warning disable 4014
+         Refresh();
+#pragma warning restore 4014
+      }
    }
 }

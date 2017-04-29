@@ -12,6 +12,7 @@
         d:DesignHeight="720"
         Background="{DynamicResource {x:Static SystemColors.MenuBarBrushKey}}"
         d:DataContext="{d:DesignInstance views:ModSelectionViewModel, IsDesignTimeCreatable=False}"
+        Loaded="ModSelectionView_OnLoaded"
         >
 
    <UserControl.Resources>

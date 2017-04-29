@@ -62,9 +62,6 @@ namespace FactorioBrowser.UI {
          _modSelectionView = _components.Get<ModSelectionView>();
          _modSelectionView.SelectionConfirmed += LoadModListConfirmed;
          SwitchTo(_modSelectionView);
-#pragma warning disable 4014
-         _modSelectionView.Refresh();
-#pragma warning restore 4014
       }
 
       private void SwitchTo(FrameworkElement ui) {
