@@ -72,7 +72,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
       private void HandleDataFieldMirror(ILuaTable data, string path, T target,
          PropertyInfo propInfo, DataFieldMirror dataFieldDef) {
 
-         string propName = dataFieldDef.Name?.ToString() ?? propInfo.Name;
+         object propName = dataFieldDef.Name ?? propInfo.Name;
          string propPath = path + "." + propName;
          ILuaVariant rawValue = data.Get(propName);
          var customUnpacker = propInfo.GetCustomAttribute<CustomUnpacker>();

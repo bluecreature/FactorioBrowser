@@ -63,6 +63,15 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
    }
 
    [ModelMirror]
+   internal sealed class StructE {
+      [DataFieldMirror(5)]
+      public string FieldOne { get; private set; }
+
+      [DataFieldMirror(false)]
+      public string FieldTwo { get; private set; }
+   }
+
+   [ModelMirror]
    internal abstract class PolymorphicEntityBase {
 
       [DataFieldMirror("f1", Required = false)]
@@ -127,6 +136,17 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
 
          Assert.AreEqual(CustomFieldValue, unpacked.A.FieldOne);
          Assert.AreEqual(TestFieldValue, unpacked.FieldTwo);
+      }
+
+      [Test]
+      public void TestUnpackNonStringFields() {
+         var unpacked = Unpack<StructE>(new Dictionary<object, object>() {
+            [5] = "five",
+            [false] = "False"
+         });
+
+         Assert.AreEqual(unpacked.FieldOne, "five");
+         Assert.AreEqual(unpacked.FieldTwo, "False");
       }
 
       [Test]
