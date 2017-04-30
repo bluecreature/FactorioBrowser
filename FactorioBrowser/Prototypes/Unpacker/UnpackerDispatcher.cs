@@ -6,7 +6,8 @@ namespace FactorioBrowser.Prototypes.Unpacker {
    internal sealed class UnpackerDispatcher : IVariantUnpacker {
 
       public object Unpack(Type targetType, ILuaVariant data, string currentPath) {
-         switch (data.ValueType) {
+         var valueType = data?.ValueType ?? LuaValueType.Nil;
+         switch (valueType) {
             case LuaValueType.Nil:
             case LuaValueType.Boolean:
             case LuaValueType.Number:
@@ -15,6 +16,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
 
 
             case LuaValueType.Table:
+               Debug.Assert(data != null);
                return UnpackTable(targetType, data.AsTable, currentPath);
 
             default:
