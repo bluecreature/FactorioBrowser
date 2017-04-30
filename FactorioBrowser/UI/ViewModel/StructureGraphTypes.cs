@@ -49,6 +49,18 @@ namespace FactorioBrowser.UI.ViewModel {
       BidirectionalGraph<StructureGraphVertex<FcItem>, StructureGraphEdge<FcItem>>> {
    }
 
+   public sealed class RecipeGraphLogic : GXLogicCore<
+      StructureGraphVertex<FcRecipe>,
+      StructureGraphEdge<FcRecipe>,
+      BidirectionalGraph<StructureGraphVertex<FcRecipe>, StructureGraphEdge<FcRecipe>>> {
+   }
+
+   public sealed class RecipeGraphControl : GraphArea<
+      StructureGraphVertex<FcRecipe>,
+      StructureGraphEdge<FcRecipe>,
+      BidirectionalGraph<StructureGraphVertex<FcRecipe>, StructureGraphEdge<FcRecipe>>> {
+   }
+
    public sealed class TechnologyGraphLogic : GXLogicCore<
       StructureGraphVertex<FcTechnology>,
       StructureGraphEdge<FcTechnology>,

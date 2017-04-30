@@ -14,7 +14,7 @@ namespace FactorioBrowser.Prototypes {
       [CustomUnpacker(nameof(UnpackIngredients))]
       public IList<FcRecipeIngredient> Ingredients { get; private set; }
 
-      [DataFieldMirror]
+      [SelfMirror]
       [CustomUnpacker(nameof(UnpackResults))]
       public IList<FcRecipeProduct> Results { get; private set; }
 

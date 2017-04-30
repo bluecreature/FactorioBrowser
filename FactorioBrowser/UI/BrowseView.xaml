@@ -42,7 +42,40 @@
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Stretch" />
 
-                  <Canvas Grid.Column="2" Background="Green" />
+                  <gx:ZoomControl
+                     x:Name="ItemGraphZoom"
+                     Grid.Column="2"
+                     VerticalAlignment="Stretch"
+                     HorizontalAlignment="Stretch">
+                     <gx:ZoomControl.Resources>
+                        <Style TargetType="{x:Type gx:VertexControl}">
+                           <Setter Property="Template">
+                              <Setter.Value>
+                                 <ControlTemplate TargetType="{x:Type gx:VertexControl}">
+                                    <Border>
+                                       <Border.Style>
+                                          <Style TargetType="Border">
+                                             <Setter Property="Background" Value="LightGreen" />
+                                             <Setter Property="CornerRadius" Value="5" />
+                                             <Setter Property="BorderThickness" Value="1" />
+                                             <Setter Property="BorderBrush" Value="Navy" />
+                                          </Style>
+                                       </Border.Style>
+                                       <TextBlock
+                                          Grid.Column="0" Text="{Binding Data.Name}" Foreground="Black"
+                                          Margin="5,0,5,0"  />
+                                    </Border>
+                                 </ControlTemplate>
+                              </Setter.Value>
+                           </Setter>
+                        </Style>
+                     </gx:ZoomControl.Resources>
+                     <views:ItemGraphControl
+                        x:Name="ItemGraph"
+                        AutoAssignMissingDataId="True"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch" />
+                  </gx:ZoomControl>
 
                   <GridSplitter
                      Grid.Column="3"
@@ -78,7 +111,17 @@
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Stretch" />
 
-                  <Canvas Grid.Column="2" Background="Green" />
+                  <gx:ZoomControl
+                     x:Name="RecipeGraphZoom"
+                     Grid.Column="2"
+                     VerticalAlignment="Stretch"
+                     HorizontalAlignment="Stretch">
+                     <views:RecipeGraphControl
+                        x:Name="RecipeGraph"
+                        AutoAssignMissingDataId="True"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch" />
+                  </gx:ZoomControl>
 
                   <GridSplitter
                      Grid.Column="3"
@@ -143,9 +186,9 @@
                      </gx:ZoomControl.Resources>
                      <views:TechnologyGraphControl
                         x:Name="TechGraph"
+                        AutoAssignMissingDataId="True"
                         VerticalAlignment="Stretch"
-                        HorizontalAlignment="Stretch"
-                        AutoAssignMissingDataId="True" />
+                        HorizontalAlignment="Stretch" />
                   </gx:ZoomControl>
 
                   <GridSplitter
