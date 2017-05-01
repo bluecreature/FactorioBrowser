@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using QuickGraph;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
 
@@ -25,7 +27,10 @@ namespace FactorioBrowser.Prototypes.Unpacker {
             }
          }
 
-         return new FcPrototypes(items, recipes, technologies);
+         return new FcPrototypes(
+            items.OrderBy(i => i.Name),
+            recipes.OrderBy(r => r.Name),
+            technologies.OrderBy(t => t.Name));
       }
    }
 }
