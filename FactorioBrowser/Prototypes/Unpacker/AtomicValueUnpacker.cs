@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
+
    internal sealed class AtomicValueUnpacker : IVariantUnpacker {
       public object Unpack(Type targetType, ILuaVariant data, string currentPath) {
          if (data == null || data.ValueType == LuaValueType.Nil) {
@@ -20,7 +21,8 @@ namespace FactorioBrowser.Prototypes.Unpacker {
                   return UnpackString(targetType, data, currentPath);
 
                default:
-                  throw new InvalidOperationException("This class only supports atomic values.");
+                  throw new PrototypeUnpackException(currentPath,
+                     "Atomic value (a boolean, a number, or a string) expected, but it was " + data.ValueType);
             }
          }
       }
@@ -28,7 +30,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
       private object UnpackBoolean(Type targetType, ILuaVariant data, string path) {
          Debug.Assert(data.ValueType == LuaValueType.Boolean);
 
-         if (targetType == typeof(bool) || targetType == typeof(Boolean)) {
+         if (targetType == typeof(bool)) {
             return data.AsBoolean;
 
          } else {
@@ -39,7 +41,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
       private object UnpackNumber(Type targetType, ILuaVariant data, string path) {
          Debug.Assert(data.ValueType == LuaValueType.Number);
 
-         if (targetType == typeof(Int32) || targetType == typeof(int)) {
+         if (targetType == typeof(int)) {
             return Convert.ToInt32(data.AsNumber);
 
          } else if (targetType == typeof(double)) {

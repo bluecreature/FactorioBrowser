@@ -10,6 +10,10 @@ namespace FactorioBrowser.Prototypes.Unpacker {
       }
 
       public IDictionary<TKey, TValue> Unpack(ILuaTable data, string currentPath) {
+         if (data == null) {
+            return new Dictionary<TKey, TValue>();
+         }
+
          IDictionary<TKey, TValue> unpackedData = new Dictionary<TKey, TValue>();
          foreach (var entry in data.Entries()) {
             var key = _dispatcher.Unpack<TKey>(entry.Key, currentPath);
@@ -29,6 +33,10 @@ namespace FactorioBrowser.Prototypes.Unpacker {
       }
 
       public IList<T> Unpack(ILuaTable data, string currentPath) {
+         if (data == null) {
+            return new List<T>();
+         }
+
          IList<T> mirror = new List<T>();
          int i = 1;
          ILuaVariant item;

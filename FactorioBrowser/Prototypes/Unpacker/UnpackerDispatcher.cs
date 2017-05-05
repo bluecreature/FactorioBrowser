@@ -1,63 +1,62 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
+
    internal sealed class UnpackerDispatcher : IVariantUnpacker {
 
+      private static readonly Type[] AtomicTypes = {
+         typeof(bool), typeof(int), typeof(double), typeof(string)
+      };
+
+      private readonly IVariantUnpacker _atomicValueUnpacker = new AtomicValueUnpacker();
+      private readonly IDictionary<Type, ITableUnpacker<object>> _typedUnpackers =
+         new Dictionary<Type, ITableUnpacker<object>>();
+
       public object Unpack(Type targetType, ILuaVariant data, string currentPath) {
-         var valueType = data?.ValueType ?? LuaValueType.Nil;
-         switch (valueType) {
-            case LuaValueType.Nil:
-            case LuaValueType.Boolean:
-            case LuaValueType.Number:
-            case LuaValueType.String:
-               return new AtomicValueUnpacker().Unpack(targetType, data, currentPath); // TODO : reuse instances
 
-
-            case LuaValueType.Table:
-               Debug.Assert(data != null);
-               return UnpackTable(targetType, data.AsTable, currentPath);
-
-            default:
-               throw new PrototypeUnpackException(
-                  currentPath, $"Unable to unpack value at {currentPath}: unsupported Lua value type.");
+         if (AtomicTypes.Contains(targetType)) {
+            return _atomicValueUnpacker.Unpack(targetType, data, currentPath);
          }
-      }
 
-      private object UnpackTable(Type targetType, ILuaTable data, string path) {
-         Type mirrorImpl = GetUnpackerFor(targetType);
-         ITableUnpacker<object> unpacker = (ITableUnpacker<object>)Activator.CreateInstance(mirrorImpl, this);
-         return unpacker.Unpack(data, path);
-      }
+         if (data != null && data.ValueType != LuaValueType.Table) {
+            throw new PrototypeUnpackException(currentPath,
+               $"Expected a table, but the value was {data.ValueType}");
+         }
 
-      private Type GetUnpackerFor(Type targetType) {
-         Type unpackerImpl;
-         if (targetType.IsGenericType) {
-            Type genTarget = targetType.GetGenericTypeDefinition();
-            if (genTarget == typeof(IDictionary<,>)) {
-               unpackerImpl = typeof(DictionaryUnpacker<,>);
+         ITableUnpacker<object> unpacker;
+         if (TypeTools.IsStructureType(targetType)) {
+            unpacker = _typedUnpackers.GetOrAdd(targetType,
+               () => CreateStructUnpacker(targetType));
 
-            } else if (genTarget == typeof(IList<>)) {
-               unpackerImpl = typeof(ListUnpacker<>);
+         } else if (targetType.IsGenericType) {
+            Type unapckerClassTemplate;
+            var targetTemplate = targetType.GetGenericTypeDefinition();
+            if (targetTemplate == typeof(IDictionary<,>)) {
+               unapckerClassTemplate = typeof(DictionaryUnpacker<,>);
+
+            } else if (targetTemplate == typeof(IList<>)) {
+               unapckerClassTemplate = typeof(ListUnpacker<>);
 
             } else {
-               throw new NotImplementedException();
+               throw new NotImplementedException("Unable to unpack to " + targetType);
             }
 
-         } else if (TypeTools.IsStructureType(targetType)) {
-            unpackerImpl = typeof(StructureUnpacker<>).MakeGenericType(targetType);
+            Type unpackerClass = unapckerClassTemplate.MakeGenericType(targetType.GenericTypeArguments);
+            unpacker = _typedUnpackers.GetOrAdd(targetType,
+               () => (ITableUnpacker<object>)Activator.CreateInstance(unpackerClass, this));
 
          } else {
-            throw new NotImplementedException();
+            throw new PrototypeUnpackException(currentPath, "Unable to unpack to " + targetType);
          }
 
-         if (targetType.IsGenericType) {
-            Debug.Assert(unpackerImpl.IsGenericType);
-            unpackerImpl = unpackerImpl.MakeGenericType(targetType.GenericTypeArguments);
-         }
+         return unpacker.Unpack(data?.AsTable, currentPath);
+      }
 
-         return unpackerImpl;
+      private ITableUnpacker<object> CreateStructUnpacker(Type structType) {
+         var unpackerClass = typeof(StructureUnpacker<>).MakeGenericType(structType);
+         return (ITableUnpacker<object>) Activator.CreateInstance(unpackerClass, this);
       }
    }
 }
