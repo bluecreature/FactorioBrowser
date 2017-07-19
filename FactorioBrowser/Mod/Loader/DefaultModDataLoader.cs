@@ -32,12 +32,8 @@ namespace FactorioBrowser.Mod.Loader {
             ModulePaths = new[] { Path.Combine(_luaLibPath, "?.lua") },
          };
 
-         using (var serpentSrc = Assembly.GetExecutingAssembly()
-            .GetManifestResourceStream("FactorioBrowser.Mod.ExternalLib.serpent.lua")) {
-
-            var serpent = sharedState.LoadStream(serpentSrc, null, "serpent.lua");
-            sharedState.Globals["serpent"] = sharedState.Call(serpent);
-         }
+         LoadBuiltinLibrary(sharedState, "serpent");
+         LoadBuiltinLibrary(sharedState, "defines");
 
          sharedState.Globals["module"] = (Action) NoOp;
          sharedState.Globals["log"] = (Action<DynValue>) ModLogFunction;
@@ -64,6 +60,15 @@ namespace FactorioBrowser.Mod.Loader {
       private void ModLogFunction(DynValue param) {
          var msg = param.Type == DataType.String ? param.String : param.ToString();
          Log.Info("Lua Log: {0}", msg); // TODO : identify the calling mod/file
+      }
+
+      private void LoadBuiltinLibrary(Script sharedState, string libName) {
+         using (var libSrc = Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream($"FactorioBrowser.Mod.BuiltinLibs.{libName}.lua")) {
+
+            var library = sharedState.LoadStream(libSrc, null, $"{libName}.lua");
+            sharedState.Globals[libName] = sharedState.Call(library);
+         }
       }
 
       private void LoadModData(IEnumerable<FcModFileInfo> allMods, IModFileResolver coreLibLoader,

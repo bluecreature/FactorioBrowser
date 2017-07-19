@@ -41,7 +41,7 @@ namespace FactorioBrowser.Mod.Loader {
                (new ModLocalRequireImpl(_sharedState, fileResolver, _commonLibLoader).RequireModule);
 
             Stream entryPoint = fileResolver.Open(entryPointPath);
-            _sharedState.DoStream(entryPoint, null, entryPointPath);
+            _sharedState.DoStream(entryPoint, null, fileResolver.FriendlyName(entryPointPath));
 
          } finally {
             _sharedState.Globals["require"] = originalRequire;
