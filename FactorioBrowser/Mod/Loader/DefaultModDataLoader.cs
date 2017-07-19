@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using FactorioBrowser.Mod.Finder;
 using FactorioBrowser.Prototypes.Unpacker;
@@ -14,15 +15,18 @@ namespace FactorioBrowser.Mod.Loader {
    internal sealed class DefaultModDataLoader : IFcModDataLoader {
       private const string CoreModRelPath = "data/core";
       private const string LuaLibRelPath = CoreModRelPath + "/lualib";
+      private static readonly ReadStage[] SettingsStages = new[] { ReadStage.Data, ReadStage.DataUpdate, ReadStage.DataFinalFixes };
+      private static readonly ReadStage[] PrototypesStages = new[] { ReadStage.Data, ReadStage.DataUpdate, ReadStage.DataFinalFixes };
 
       private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-      private readonly string _gamePath;
       private readonly string _luaLibPath;
+      private readonly FcModFileInfo _coreModInfo;
 
       public DefaultModDataLoader(string gamePath) {
-         _gamePath = gamePath;
          _luaLibPath = Path.Combine(gamePath, LuaLibRelPath);
+         _coreModInfo = new FcModFileInfo("core", Path.Combine(gamePath, CoreModRelPath),
+            FcModDeploymentType.Directory, null);
       }
 
       public ILuaTable LoadRawData(IEnumerable<FcModFileInfo> allMods) {
@@ -47,7 +51,10 @@ namespace FactorioBrowser.Mod.Loader {
          sharedState.DoFile(Path.Combine(_luaLibPath, "dataloader.lua"));
 
          var coreLibLoader = new DirModFileResolver(_luaLibPath);
-         LoadModData(allMods, coreLibLoader, sharedState);
+
+         IList<FcModFileInfo> combinedModList = new[] { _coreModInfo }.Concat(allMods).ToList();
+         LoadStages(sharedState, coreLibLoader, combinedModList, SettingsStages);
+         LoadStages(sharedState, coreLibLoader, combinedModList, PrototypesStages);
 
          return CreateRawDataBridge(sharedState);
       }
@@ -71,20 +78,12 @@ namespace FactorioBrowser.Mod.Loader {
          }
       }
 
-      private void LoadModData(IEnumerable<FcModFileInfo> allMods, IModFileResolver coreLibLoader,
-         Script sharedState) {
+      private void LoadStages(Script sharedState, IModFileResolver coreLibLoader,
+         IList<FcModFileInfo> mods, ReadStage[] stages) {
 
          var stageLoader = new StageLoader(coreLibLoader, sharedState);
-
-         FcModFileInfo hardcodedCore = new FcModFileInfo("core", Path.Combine(_gamePath, CoreModRelPath),
-            FcModDeploymentType.Directory, null);
-
-         stageLoader.LoadStage(hardcodedCore, ReadStage.Data);
-
-         ReadStage[] stages = {ReadStage.Data, ReadStage.Update, ReadStage.FinalFixes,};
-         IList<FcModFileInfo> modList = new List<FcModFileInfo>(allMods);
          foreach (var stage in stages) {
-            foreach (var modFile in modList) {
+            foreach (var modFile in mods) {
                stageLoader.LoadStage(modFile, stage);
             }
          }
