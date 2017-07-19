@@ -68,7 +68,7 @@ namespace FactorioBrowser.UI {
             StructureGraphVertex<TCategory>,
             StructureGraphEdge<TCategory>,
             BidirectionalGraph<StructureGraphVertex<TCategory>, StructureGraphEdge<TCategory>>>, new()
-         where TCategory : FcDataStructure {
+         where TCategory : FcPrototype {
 
          var logic = new TLogic();
 

@@ -5,7 +5,7 @@ namespace FactorioBrowser.Prototypes {
 
    [ModelMirror]
    [TypeDiscriminatorField("type", "recipe")]
-   public sealed class FcRecipe : FcDataStructure {
+   public sealed class FcRecipe : FcPrototype {
 
       [DataFieldMirror("enabled")]
       public bool Enabled { get; private set; }
@@ -20,6 +20,9 @@ namespace FactorioBrowser.Prototypes {
 
       [DataFieldMirror("icon")]
       public string Icon { get; private set; }
+
+      [DataFieldMirror("category")]
+      public string Category { get; private set; }
 
       private static IList<FcRecipeProduct> UnpackResults(IVariantUnpacker unpacker,
          ILuaVariant recipe, string path) {

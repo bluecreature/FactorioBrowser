@@ -1,7 +1,7 @@
 namespace FactorioBrowser.Prototypes {
 
    [ModelMirror]
-   public abstract class FcDataStructure {
+   public abstract class FcPrototype {
 
       [DataFieldMirror("type")]
       public string Type { get; private set; }

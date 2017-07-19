@@ -8,7 +8,7 @@ using QuickGraph;
 namespace FactorioBrowser.UI.ViewModel {
 
    public sealed class StructureGraphVertex<TCategory> : VertexBase,
-      IComparable<StructureGraphVertex<TCategory>> where TCategory : FcDataStructure {
+      IComparable<StructureGraphVertex<TCategory>> where TCategory : FcPrototype {
 
       public StructureGraphVertex(TCategory data) {
          Data = data;
@@ -30,7 +30,7 @@ namespace FactorioBrowser.UI.ViewModel {
    }
 
    public sealed class StructureGraphEdge<TCategory> : EdgeBase<StructureGraphVertex<TCategory>>
-      where TCategory : FcDataStructure {
+      where TCategory : FcPrototype {
 
       public StructureGraphEdge(StructureGraphVertex<TCategory> source, StructureGraphVertex<TCategory> target) :
          base(source, target, 1) {

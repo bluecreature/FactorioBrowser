@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace FactorioBrowser.Prototypes {
    [ModelMirror]
    [TypeDiscriminatorField("type", "technology")]
-   public sealed class FcTechnology : FcDataStructure {
+   public sealed class FcTechnology : FcPrototype {
 
       [DataFieldMirror("icon")]
       public string Icon { get; private set; }

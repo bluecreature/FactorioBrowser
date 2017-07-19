@@ -24,12 +24,15 @@ namespace FactorioBrowser.Prototypes {
 
       public bool Required { get; set; }
 
-      public DataFieldMirror(object name) {
+      public DataFieldMirror(object name, bool required) {
          Name = name;
+         Required = required;
       }
 
-      public DataFieldMirror() {
-         Name = null;
+      public DataFieldMirror(object name) : this(name, false) {
+      }
+
+      public DataFieldMirror() : this(null, false) {
       }
    }
 

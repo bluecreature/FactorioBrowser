@@ -36,17 +36,19 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>FactorioBrowser.UI.App</StartupObject>
+    <StartupObject>FactorioBrowser.TestClass</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <EmbeddedResource Include="Mod\ExternalLib\serpent.lua" />
+    <EmbeddedResource Include="Mod\BuiltinLibs\serpent.lua" />
+    <EmbeddedResource Include="Mod\BuiltinLibs\defines.lua" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IProgressReporter.cs" />
     <Compile Include="Mod\Loader\IFcModDataLoader.cs" />
     <Compile Include="Mod\Loader\DefaultModDataLoader.cs" />
+    <Compile Include="Prototypes\FcModSetting.cs" />
     <Compile Include="Prototypes\Unpacker\DefaultPrototypeUnpacker.cs" />
     <Compile Include="Prototypes\Unpacker\IFcPrototypeUnpacker.cs" />
     <Compile Include="TestClass.cs" />
@@ -61,7 +63,7 @@
     <Compile Include="FcVersion.cs" />
     <Compile Include="Prototypes\Attributes.cs" />
     <Compile Include="Prototypes\FcRecipe.cs" />
-    <Compile Include="Prototypes\FcDataStructure.cs" />
+    <Compile Include="Prototypes\FcPrototype.cs" />
     <Compile Include="Prototypes\FcItem.cs" />
     <Compile Include="Prototypes\FcTechnology.cs" />
     <Compile Include="Prototypes\Unpacker\AtomicValueUnpacker.cs" />
