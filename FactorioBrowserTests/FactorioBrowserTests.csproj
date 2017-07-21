@@ -42,6 +42,7 @@
     <Compile Include="FcVersionTest.cs" />
     <Compile Include="Mod\Finder\InfoJsonReaderTest.cs" />
     <Compile Include="Prototypes\Unpacker\AtomicUnpackerTest.cs" />
+    <Compile Include="Prototypes\Unpacker\UnpackerDispatcherTest.cs" />
     <Compile Include="Prototypes\Unpacker\StructureUnpackerTest.cs" />
     <Compile Include="Prototypes\Unpacker\ListUnpackerTest.cs" />
     <Compile Include="Prototypes\Unpacker\NativeLuaBridge.cs" />

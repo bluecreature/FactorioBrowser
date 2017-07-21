@@ -26,6 +26,13 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
       }
 
       [Test]
+      public void TestUnpackInt64() {
+         long value = 100;
+         long unpacked = Unpack<long>(value);
+         Assert.AreEqual(value, unpacked);
+      }
+
+      [Test]
       public void TestUnpackFloatingPoint() {
          double value = 100.5;
          double unpacked = Unpack<double>(value);

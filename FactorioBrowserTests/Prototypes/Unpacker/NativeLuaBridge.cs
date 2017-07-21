@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using FactorioBrowser.Prototypes.Unpacker;
@@ -17,7 +16,7 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
             } else if (_data is Boolean) {
                return LuaValueType.Boolean;
 
-            } else if (_data is Int32 || _data is Double) {
+            } else if (_data is Int32 || _data is Int64 || _data is Double) {
                return LuaValueType.Number;
 
             } else if (_data is string) {
