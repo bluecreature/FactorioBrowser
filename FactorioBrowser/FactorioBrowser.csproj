@@ -36,7 +36,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>FactorioBrowser.TestClass</StartupObject>
+    <StartupObject>FactorioBrowser.DataDump</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -53,7 +53,7 @@
     <Compile Include="Prototypes\Unpacker\DefaultSettingsDefsUnpacker.cs" />
     <Compile Include="Prototypes\Unpacker\IFcPrototypeUnpacker.cs" />
     <Compile Include="Prototypes\Unpacker\IFcSettingsDefsUnpacker.cs" />
-    <Compile Include="TestClass.cs" />
+    <Compile Include="DataDump.cs" />
     <Compile Include="Mod\Finder\IFcModSorter.cs" />
     <Compile Include="Mod\Finder\DefaultFcModSorter.cs" />
     <Compile Include="Mod\Finder\ModDependencyValidator.cs" />

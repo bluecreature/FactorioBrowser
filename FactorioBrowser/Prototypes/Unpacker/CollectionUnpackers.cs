@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
 
-   internal sealed class DictionaryUnpacker<TKey, TValue> : ITableUnpacker<IDictionary<TKey, TValue>> {
+   internal sealed class DictionaryUnpacker<TKey, TValue> : ITypedUnpacker<IDictionary<TKey, TValue>> {
       private readonly IVariantUnpacker _dispatcher;
 
       public DictionaryUnpacker(IVariantUnpacker dispatcher) {
@@ -25,7 +25,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
       }
    }
 
-   internal sealed class ListUnpacker<T> : ITableUnpacker<IList<T>> {
+   internal sealed class ListUnpacker<T> : ITypedUnpacker<IList<T>> {
       private readonly IVariantUnpacker _dispatcher;
 
       public ListUnpacker(IVariantUnpacker dispatcher) {

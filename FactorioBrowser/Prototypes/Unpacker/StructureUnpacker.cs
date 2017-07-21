@@ -6,10 +6,10 @@ using NLog;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
 
-   internal sealed class StructureUnpacker<T> : ITableUnpacker<T> where T : class {
+   internal sealed class StructureUnpacker<T> : ITypedUnpacker<T> where T : class {
       private readonly IVariantUnpacker _dispatcher;
 
-      private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+      private readonly Logger _log = LogManager.GetCurrentClassLogger();
 
       public StructureUnpacker(IVariantUnpacker dispatcher) {
          _dispatcher = dispatcher;
@@ -17,7 +17,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
 
       public T Unpack(ILuaTable data, string currentPath) {
          Debug.Assert(TypeTools.IsStructureType<T>());
-         Log.Debug("Start unpack structure {0} at path {1}", typeof(T).Name, currentPath);
+         _log.Debug("Start unpack structure {0} at path {1}", typeof(T).Name, currentPath);
 
          Type targetType = ResolveTargetType(typeof(T), data);
 
@@ -143,7 +143,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
          Debug.Assert(declaringType != null);
          declaringType.InvokeMember(propInfo.Name,
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.SetProperty,
-            null, target, new object[] { value });
+            null, target, new[] { value });
       }
    }
 }
