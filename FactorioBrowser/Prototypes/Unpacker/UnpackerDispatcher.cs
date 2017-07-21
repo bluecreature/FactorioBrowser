@@ -7,7 +7,8 @@ namespace FactorioBrowser.Prototypes.Unpacker {
    internal sealed class UnpackerDispatcher : IVariantUnpacker {
 
       private static readonly Type[] AtomicTypes = {
-         typeof(bool), typeof(int), typeof(double), typeof(string)
+         typeof(bool), typeof(int), typeof(long), typeof(double), typeof(string),
+         typeof(bool?), typeof(int?), typeof(long?), typeof(double?)
       };
 
       private readonly IVariantUnpacker _atomicValueUnpacker = new AtomicValueUnpacker();
@@ -18,6 +19,10 @@ namespace FactorioBrowser.Prototypes.Unpacker {
 
          if (AtomicTypes.Contains(targetType)) {
             return _atomicValueUnpacker.Unpack(targetType, data, currentPath);
+         }
+
+         if (data == null || data.ValueType == LuaValueType.Nil) {
+            return null;  // TODO : code duplication with the atomic unpacker
          }
 
          if (data != null && data.ValueType != LuaValueType.Table) {

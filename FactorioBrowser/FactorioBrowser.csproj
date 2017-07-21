@@ -45,12 +45,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Prototypes\FcModSettings.cs" />
     <Compile Include="IProgressReporter.cs" />
     <Compile Include="Mod\Loader\IFcModDataLoader.cs" />
     <Compile Include="Mod\Loader\DefaultModDataLoader.cs" />
-    <Compile Include="Prototypes\FcModSetting.cs" />
     <Compile Include="Prototypes\Unpacker\DefaultPrototypeUnpacker.cs" />
+    <Compile Include="Prototypes\Unpacker\DefaultSettingsDefsUnpacker.cs" />
     <Compile Include="Prototypes\Unpacker\IFcPrototypeUnpacker.cs" />
+    <Compile Include="Prototypes\Unpacker\IFcSettingsDefsUnpacker.cs" />
     <Compile Include="TestClass.cs" />
     <Compile Include="Mod\Finder\IFcModSorter.cs" />
     <Compile Include="Mod\Finder\DefaultFcModSorter.cs" />

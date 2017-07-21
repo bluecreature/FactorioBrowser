@@ -33,13 +33,10 @@ namespace FactorioBrowser.UI {
    }
 
    public sealed class ComponentContainer {
-
-      private readonly AppSettings _settings;
       private readonly StandardKernel _kernel;
 
       public ComponentContainer(AppSettings settings) {
          Contract.Assert(settings != null);
-         _settings = settings;
 
          var krnlConfig = new NinjectSettings {
             LoadExtensions = false,
@@ -69,6 +66,7 @@ namespace FactorioBrowser.UI {
          Bind<IFcModFinder>().ToMethod(CreateModFinder);
          Bind<IFcModSorter>().To<DefaultFcModSorter>();
          Bind<IFcModDataLoader>().ToMethod(CreateModDataLoader);
+         Bind<IFcSettingsDefsUnpacker>().To<DefaultSettingsDefsUnpacker>();
          Bind<IFcPrototypeUnpacker>().To<DefaultPrototypeUnpacker>();
          Bind<IBrowseViewFactory>().To<BrowseViewFactoryImpl>();
          Bind<IBrowseViewModelFactory>().ToFactory();
@@ -80,7 +78,8 @@ namespace FactorioBrowser.UI {
       }
 
       private IFcModDataLoader CreateModDataLoader(IContext ctx) {
-         return new DefaultModDataLoader(_settings.GamePath);
+         return new DefaultModDataLoader(_settings.GamePath,
+            ctx.Kernel.Get<IFcSettingsDefsUnpacker>());
       }
    }
 

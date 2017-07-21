@@ -2,21 +2,25 @@
 
 namespace FactorioBrowser.Prototypes {
 
-   abstract class FcModSetting<TValueType> : FcPrototype {
+   abstract class FcModSetting : FcPrototype {
 
       [DataFieldMirror(name: "setting_type", required: true)]
       public string SettingType { get; private set; }
 
-      [DataFieldMirror(name: "default_value", required: true)]
-      public TValueType DefaultValue { get; private set; }
    }
 
    [ModelMirror]
    [TypeDiscriminatorField(fieldName: "type", fieldValues: "bool-setting")]
-   sealed class FcBooleanSetting : FcModSetting<bool> {
+   sealed class FcBooleanSetting : FcModSetting {
+
+      [DataFieldMirror(name: "default_value", required: true)]
+      public bool DefaultValue { get; private set; }
    }
 
-   abstract class FcNumericSetting<TValueType> : FcModSetting<TValueType> {
+   abstract class FcNumericSetting<TValueType> : FcModSetting {
+
+      [DataFieldMirror(name: "default_value", required: true)]
+      public TValueType DefaultValue { get; private set; }
 
       [DataFieldMirror(name: "minimum_value", required: false)]
       public TValueType Minimum { get; private set; }
@@ -30,17 +34,20 @@ namespace FactorioBrowser.Prototypes {
 
    [ModelMirror]
    [TypeDiscriminatorField(fieldName: "type", fieldValues: "int-setting")]
-   sealed class FcIntegerSetting : FcModSetting<int> {
+   sealed class FcIntegerSetting : FcNumericSetting<long> {
    }
 
    [ModelMirror]
    [TypeDiscriminatorField(fieldName: "type", fieldValues: "double-setting")]
-   sealed class FcDoubleSetting : FcModSetting<double> {
+   sealed class FcDoubleSetting : FcNumericSetting<double> {
    }
 
    [ModelMirror]
    [TypeDiscriminatorField(fieldName: "type", fieldValues: "string-setting")]
-   sealed class FcStringSetting : FcModSetting<string> {
+   sealed class FcStringSetting : FcModSetting {
+
+      [DataFieldMirror(name: "default_value", required: true)]
+      public string DefaultValue { get; private set; }
 
       [DataFieldMirror(name: "allow_blank", required: false)]
       public bool AllowBlank { get; private set; } = false;

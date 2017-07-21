@@ -44,6 +44,9 @@ namespace FactorioBrowser.Prototypes.Unpacker {
          if (targetType == typeof(int)) {
             return Convert.ToInt32(data.AsNumber);
 
+         } else if (targetType == typeof(long)) {
+            return Convert.ToInt64(data.AsNumber);
+
          } else if (targetType == typeof(double)) {
             return data.AsNumber;
 
@@ -71,6 +74,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
             throw new PrototypeUnpackException(path, $"Cannot coerce string to {targetType}");
          }
       }
+
       private Type StripNullable(Type targetType) {
          if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Nullable<>)) {
             return targetType.GetGenericArguments()[0];

@@ -72,6 +72,12 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
    }
 
    [ModelMirror]
+   internal sealed class GenericStruct<T> {
+      [DataFieldMirror("f1", Required = false)]
+      public T FieldOne { get; private set; }
+   }
+
+   [ModelMirror]
    internal abstract class PolymorphicEntityBase {
 
       [DataFieldMirror("f1", Required = false)]
@@ -89,6 +95,17 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
    [ModelMirror]
    [TypeDiscriminatorField("type", "b")]
    internal sealed class ConcreteEntityB : PolymorphicEntityBase {
+   }
+
+   internal abstract class AbstractIntermediateLevel : PolymorphicEntityBase {
+   }
+
+   [ModelMirror]
+   [TypeDiscriminatorField("type", "c")]
+   internal sealed class ConcreteEntityC : AbstractIntermediateLevel {
+
+      [DataFieldMirror("f3", Required = false)]
+      public int FieldThree { get; private  set;}
    }
 
    [TestFixture]
@@ -150,6 +167,15 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
       }
 
       [Test]
+      public void TestUnpackGenericInstance() {
+         var unapcked = Unpack<GenericStruct<int>>(new Dictionary<object, object>() {
+            ["f1"] = TestFieldValue
+         });
+
+         Assert.AreEqual(TestFieldValue, unapcked.FieldOne);
+      }
+
+      [Test]
       public void TestPolymorphicUnpack() {
          var unpacked = Unpack<PolymorphicEntityBase>(new Dictionary<object, object> {
             ["type"] = "b",
@@ -178,6 +204,17 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
 
          Assert.IsInstanceOf<ConcreteEntityA>(unpacked);
          Assert.AreEqual(TestFieldValue, ((ConcreteEntityA) unpacked).FieldTwo);
+      }
+
+      [Test]
+      public void TestUnpackGrandchild() {
+         var unpacked = Unpack<PolymorphicEntityBase>(new Dictionary<object, object>() {
+            ["type"] = "c",
+            ["f3"] = TestFieldValue
+         });
+
+         Assert.IsInstanceOf<ConcreteEntityC>(unpacked);
+         Assert.AreEqual(TestFieldValue, ((ConcreteEntityC) unpacked).FieldThree);
       }
 
       private T Unpack<T>(IDictionary<object, object> table) where T : class {
