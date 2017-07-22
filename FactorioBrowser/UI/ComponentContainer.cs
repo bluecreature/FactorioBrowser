@@ -66,7 +66,7 @@ namespace FactorioBrowser.UI {
          Bind<IFcModFinder>().ToMethod(CreateModFinder);
          Bind<IFcModSorter>().To<DefaultFcModSorter>();
          Bind<IFcModDataLoader>().ToMethod(CreateModDataLoader);
-         Bind<IFcSettingsDefsUnpacker>().To<DefaultSettingsDefsUnpacker>();
+         Bind<IFcSettingDefsUnpacker>().To<DefaultSettingDefsUnpacker>();
          Bind<IFcPrototypeUnpacker>().To<DefaultPrototypeUnpacker>();
          Bind<IBrowseViewFactory>().To<BrowseViewFactoryImpl>();
          Bind<IBrowseViewModelFactory>().ToFactory();
@@ -78,7 +78,8 @@ namespace FactorioBrowser.UI {
       }
 
       private IFcModDataLoader CreateModDataLoader(IContext ctx) {
-         return new DefaultModDataLoader(_settings.GamePath);
+         return new DefaultModDataLoader(_settings.GamePath,
+            ctx.Kernel.Get<IFcSettingDefsUnpacker>(), ctx.Kernel.Get<IFcPrototypeUnpacker>());
       }
    }
 

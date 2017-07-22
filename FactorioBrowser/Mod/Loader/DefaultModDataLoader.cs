@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using FactorioBrowser.Mod.Finder;
+using FactorioBrowser.Prototypes;
 using FactorioBrowser.Prototypes.Unpacker;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Loaders;
@@ -26,23 +27,32 @@ namespace FactorioBrowser.Mod.Loader {
 
       private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
+      private readonly IFcSettingDefsUnpacker _settingDefsUnpacker;
+      private readonly IFcPrototypeUnpacker _prototypeUnpacker;
       private readonly string _luaLibPath;
       private readonly FcModFileInfo _coreModInfo;
 
-      public DefaultModDataLoader(string gamePath) {
+      public DefaultModDataLoader(string gamePath, IFcSettingDefsUnpacker settingDefsUnpacker,
+         IFcPrototypeUnpacker prototypeUnpacker) {
+         _settingDefsUnpacker = settingDefsUnpacker;
+         _prototypeUnpacker = prototypeUnpacker;
+
          _luaLibPath = Path.Combine(gamePath, LuaLibRelPath);
-         _coreModInfo = new FcModFileInfo("core", new FcVersion(1, 0, 0), Path.Combine(gamePath, CoreModRelPath),
-            FcModDeploymentType.Directory, null); // TODO : get the actual version
+         _coreModInfo = new FcModFileInfo("core", new FcVersion(1, 0, 0),  // TODO : get the actual version
+            Path.Combine(gamePath, CoreModRelPath),
+            FcModDeploymentType.Directory, null);
       }
 
-      public ILuaTable LoadSettings(IEnumerable<FcModFileInfo> mods) {
-         return LoadEntryPoints(mods, null, SettingsEntrypoints);
+      public IImmutableList<FcModSetting> LoadSettings(IEnumerable<FcModFileInfo> mods) {
+         var rawData = LoadEntryPoints(mods, null, SettingsEntrypoints);
+         return _settingDefsUnpacker.Unpack(rawData);
       }
 
-      public ILuaTable LoadPrototypes(IEnumerable<FcModFileInfo> mods,
+      public FcPrototypes LoadPrototypes(IEnumerable<FcModFileInfo> mods,
          IImmutableDictionary<string, object> settings) {
 
-         return LoadEntryPoints(mods, settings, PrototypesEntrypoints);
+         var rawData = LoadEntryPoints(mods, settings, PrototypesEntrypoints);
+         return _prototypeUnpacker.Unpack(rawData);
       }
 
       private ILuaTable LoadEntryPoints(IEnumerable<FcModFileInfo> mods,
@@ -95,7 +105,7 @@ namespace FactorioBrowser.Mod.Loader {
          using (var libSrc = Assembly.GetExecutingAssembly()
             .GetManifestResourceStream($"FactorioBrowser.Mod.BuiltinLibs.{libName}.lua")) {
 
-            var library = sharedState.LoadStream(libSrc, null, $"{libName}.lua");
+            var library = sharedState.LoadStream(libSrc, null, $"builtin/{libName}.lua");
             return sharedState.Call(library);
          }
       }
@@ -110,7 +120,7 @@ namespace FactorioBrowser.Mod.Loader {
       }
 
       private Table CreateSettingsTable(Script sharedState,
-                     IImmutableDictionary<string, object> settings) {
+         IImmutableDictionary<string, object> settings) {
 
          var startupSettingsTable = new Table(sharedState);
 

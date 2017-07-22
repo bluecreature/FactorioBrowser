@@ -8,6 +8,9 @@ using NLog;
 
 namespace FactorioBrowser.Mod.Loader {
 
+   /// <summary>
+   /// Load a mod's <see cref="EntryPoint"/> into a shared Lua state.
+   /// </summary>
    internal sealed class EntryPointLoader {
       private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 

@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
 
-   internal sealed class DefaultSettingsDefsUnpacker : IFcSettingsDefsUnpacker {
-      public IList<FcModSetting> Unpack(ILuaTable dataRaw) {
+   internal sealed class DefaultSettingDefsUnpacker : IFcSettingDefsUnpacker {
+      public IImmutableList<FcModSetting> Unpack(ILuaTable dataRaw) {
          var unpacked = new UnpackerDispatcher().
             Unpack<IDictionary<string, IDictionary<string, FcPrototype>>>(dataRaw.Self(), "data.raw");
 
@@ -17,7 +18,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
             }
          }
 
-         return settings;
+         return settings.ToImmutableList();
       }
    }
 }

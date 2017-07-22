@@ -50,9 +50,9 @@
     <Compile Include="Mod\Loader\IFcModDataLoader.cs" />
     <Compile Include="Mod\Loader\DefaultModDataLoader.cs" />
     <Compile Include="Prototypes\Unpacker\DefaultPrototypeUnpacker.cs" />
-    <Compile Include="Prototypes\Unpacker\DefaultSettingsDefsUnpacker.cs" />
+    <Compile Include="Prototypes\Unpacker\DefaultSettingDefsUnpacker.cs" />
     <Compile Include="Prototypes\Unpacker\IFcPrototypeUnpacker.cs" />
-    <Compile Include="Prototypes\Unpacker\IFcSettingsDefsUnpacker.cs" />
+    <Compile Include="Prototypes\Unpacker\IFcSettingDefsUnpacker.cs" />
     <Compile Include="DataDump.cs" />
     <Compile Include="Mod\Finder\IFcModSorter.cs" />
     <Compile Include="Mod\Finder\DefaultFcModSorter.cs" />

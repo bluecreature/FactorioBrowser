@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using FactorioBrowser.Mod.Finder;
+using FactorioBrowser.Prototypes;
 using FactorioBrowser.Prototypes.Unpacker;
 
 namespace FactorioBrowser.Mod.Loader {
@@ -35,9 +36,9 @@ namespace FactorioBrowser.Mod.Loader {
 
    public interface IFcModDataLoader {
 
-      ILuaTable LoadSettings(IEnumerable<FcModFileInfo> mods);
+      IImmutableList<FcModSetting> LoadSettings(IEnumerable<FcModFileInfo> mods);
 
-      ILuaTable LoadPrototypes(IEnumerable<FcModFileInfo> mods,
+      FcPrototypes LoadPrototypes(IEnumerable<FcModFileInfo> mods,
          IImmutableDictionary<string, object> settings);
    }
 }
