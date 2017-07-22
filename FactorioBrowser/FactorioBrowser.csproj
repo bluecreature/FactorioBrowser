@@ -59,8 +59,8 @@
     <Compile Include="Mod\Finder\ModDependencyValidator.cs" />
     <Compile Include="Mod\Loader\ModFileResolvers.cs" />
     <Compile Include="Mod\Loader\LegacyLuaModuleEmulator.cs" />
-    <Compile Include="Mod\Loader\ReadStage.cs" />
-    <Compile Include="Mod\Loader\StageLoader.cs" />
+    <Compile Include="Mod\Loader\EntryPoint.cs" />
+    <Compile Include="Mod\Loader\EntryPointLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FcVersion.cs" />
     <Compile Include="Prototypes\Attributes.cs" />

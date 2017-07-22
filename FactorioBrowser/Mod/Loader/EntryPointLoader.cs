@@ -2,39 +2,38 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using FactorioBrowser.Mod.Finder;
 using MoonSharp.Interpreter;
 using NLog;
 
 namespace FactorioBrowser.Mod.Loader {
 
-   internal sealed class StageLoader {
+   internal sealed class EntryPointLoader {
       private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
       private readonly IModFileResolver _commonLibLoader;
       private readonly Script _sharedState;
 
-      public StageLoader(IModFileResolver commonLibLoader, Script sharedState) {
+      public EntryPointLoader(IModFileResolver commonLibLoader, Script sharedState) {
          _commonLibLoader = commonLibLoader;
          _sharedState = sharedState;
       }
 
-      public void LoadStage(FcModFileInfo fileInfo, ReadStage stage) {
+      public void LoadEntryPoint(FcModFileInfo fileInfo, EntryPoint entryPoint) {
+         string entryPointFn = entryPoint.Filename();
          using (IModFileResolver resolver = CreateFileResolver(fileInfo)) {
-            string entryPoint = stage.EntryPoint();
-            if (resolver.Exists(entryPoint)) {
-               Log.Debug("Loading stage {0} for mod {1}", stage, fileInfo.Name);
-               LoadEntryPoint(resolver, entryPoint);
+            if (resolver.Exists(entryPointFn)) {
+               Log.Debug("Loading entry point {0} from mod {1}", entryPoint, fileInfo.Name);
+               LoadEntryPointWithResolver(resolver, entryPointFn);
 
             } else {
-               Log.Debug("Skipping stage {0} for mod {1} because {2} doesn't exist.",
-                  stage, fileInfo.Name, entryPoint);
+               Log.Debug("Skipping entry point {0} for mod {1} because it doesn't exist.",
+                  entryPointFn, fileInfo.Name);
             }
          }
       }
 
-      private void LoadEntryPoint(IModFileResolver fileResolver, string entryPointPath) {
+      private void LoadEntryPointWithResolver(IModFileResolver fileResolver, string entryPointPath) {
          DynValue originalRequire = _sharedState.Globals.RawGet("require");
          try {
             _sharedState.Globals["require"] = (Func<ScriptExecutionContext, CallbackArguments, DynValue>)
@@ -120,36 +119,6 @@ namespace FactorioBrowser.Mod.Loader {
                _loadPath.RemoveLast();
                stream.Close();
             }
-         }
-
-         private FoundModule? TryLoadByRelativePath(string moduleName, List<string> attemptedLocations) {
-
-            var childPathComponents = moduleName.Split(PathTools.PathSeparators);
-            var callingModule = _loadPath.Count > 0 ? _loadPath.Last.Value : null;
-            List<string> pathComponents;
-            if (callingModule != null) {
-               var callingModulePath = callingModule.Split(PathTools.PathSeparators);
-               pathComponents = new List<string>(callingModulePath.Take(callingModulePath.Length - 1));
-            } else {
-               pathComponents = new List<string>();
-            }
-
-            foreach (var component in childPathComponents) {
-               if (component.Equals(".")) {
-                  continue;
-
-               } else if (component.Equals("..")) {
-                  if (pathComponents.Count > 0) {
-                     pathComponents.RemoveAt(pathComponents.Count - 1);
-                  }
-
-               } else {
-                  pathComponents.Add(component);
-               }
-            }
-
-            string finalRelPath = string.Join("/", pathComponents) + ".lua";
-            return null;
          }
 
          private FoundModule? TryLoadModuleSibling(string moduleRelPath,

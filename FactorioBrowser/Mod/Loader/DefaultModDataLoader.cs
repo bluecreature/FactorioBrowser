@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using FactorioBrowser.Mod.Finder;
-using FactorioBrowser.Prototypes;
 using FactorioBrowser.Prototypes.Unpacker;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Loaders;
@@ -16,104 +16,67 @@ namespace FactorioBrowser.Mod.Loader {
    internal sealed class DefaultModDataLoader : IFcModDataLoader {
       private const string CoreModRelPath = "data/core";
       private const string LuaLibRelPath = CoreModRelPath + "/lualib";
-      private static readonly ReadStage[] SettingsStages = new[] {
-         ReadStage.Settings, ReadStage.SettingsUpdate, ReadStage.SettingsFinalFixes
+
+      private static readonly EntryPoint[] SettingsEntrypoints = new[] {
+         EntryPoint.Settings, EntryPoint.SettingsUpdate, EntryPoint.SettingsFinalFixes
       };
-      private static readonly ReadStage[] PrototypesStages = new[] {
-         ReadStage.Data, ReadStage.DataUpdate, ReadStage.DataFinalFixes
+      private static readonly EntryPoint[] PrototypesEntrypoints = new[] {
+         EntryPoint.Data, EntryPoint.DataUpdate, EntryPoint.DataFinalFixes
       };
 
       private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
       private readonly string _luaLibPath;
       private readonly FcModFileInfo _coreModInfo;
-      private readonly IFcSettingsDefsUnpacker _settingsUnpacker;
 
-      public DefaultModDataLoader(string gamePath, IFcSettingsDefsUnpacker settingsUnpacker) {
-
+      public DefaultModDataLoader(string gamePath) {
          _luaLibPath = Path.Combine(gamePath, LuaLibRelPath);
-         _coreModInfo = new FcModFileInfo("core", Path.Combine(gamePath, CoreModRelPath),
-            FcModDeploymentType.Directory, null);
-         // TODO : find a cleaner way than calling back and forth between loader and unpacker
-         _settingsUnpacker = settingsUnpacker;
+         _coreModInfo = new FcModFileInfo("core", new FcVersion(1, 0, 0), Path.Combine(gamePath, CoreModRelPath),
+            FcModDeploymentType.Directory, null); // TODO : get the actual version
       }
 
-      public ILuaTable LoadRawData(IEnumerable<FcModFileInfo> allMods) {
+      public ILuaTable LoadSettings(IEnumerable<FcModFileInfo> mods) {
+         return LoadEntryPoints(mods, null, SettingsEntrypoints);
+      }
+
+      public ILuaTable LoadPrototypes(IEnumerable<FcModFileInfo> mods,
+         IImmutableDictionary<string, object> settings) {
+
+         return LoadEntryPoints(mods, settings, PrototypesEntrypoints);
+      }
+
+      private ILuaTable LoadEntryPoints(IEnumerable<FcModFileInfo> mods,
+         IImmutableDictionary<string, object> settings, EntryPoint[] entryPoints) {
+
+         Script sharedState = SetupLuaState();
+         if (settings != null) {
+            sharedState.Globals["settings"] = CreateSettingsTable(sharedState, settings);
+         }
+
+         IList<FcModFileInfo> combinedModList = new[] { _coreModInfo }.Concat(mods).ToList();
+         var coreLibLoader = new DirModFileResolver(_luaLibPath);
+
+         sharedState.Globals["mods"] = CreateModsTable(sharedState, combinedModList);
+
+         var stageLoader = new EntryPointLoader(coreLibLoader, sharedState);
+         foreach (var stage in entryPoints) {
+            foreach (var modFile in combinedModList) {
+               stageLoader.LoadEntryPoint(modFile, stage);
+            }
+         }
+
+         return GetRawData(sharedState);
+      }
+
+      private Script SetupLuaState() {
          Script sharedState = new Script(CoreModules.Preset_SoftSandbox | CoreModules.LoadMethods);
          sharedState.Options.ScriptLoader = new FileSystemScriptLoader {
             IgnoreLuaPathGlobal = true,
             ModulePaths = new[] { Path.Combine(_luaLibPath, "?.lua") },
          };
 
-         Setup(sharedState);
-
-         IList<FcModFileInfo> combinedModList = new[] { _coreModInfo }.Concat(allMods).ToList();
-         var coreLibLoader = new DirModFileResolver(_luaLibPath);
-         CreateModsTable(sharedState, combinedModList);
-         LoadStages(sharedState, coreLibLoader, combinedModList, SettingsStages);
-         CreateSettingsTable(sharedState); // TODO : split the code
-         LoadStages(sharedState, coreLibLoader, combinedModList, PrototypesStages);
-
-         return GetRawData(sharedState);
-      }
-
-      private void CreateModsTable(Script sharedState, IEnumerable<FcModFileInfo> allMods) {
-         Table modsTable = new Table(sharedState);
-         foreach (var mod in allMods) {
-            modsTable.Set(mod.Name, DynValue.NewString("1.0")); // TODO : set the real version
-         }
-
-         sharedState.Globals["mods"] = modsTable;
-      }
-
-      private void CreateSettingsTable(Script sharedState) {
-         var startupSettingsTable = new Table(sharedState);
-
-         var settings = _settingsUnpacker.Unpack(GetRawData(sharedState));
-         foreach (var setting in settings.Where(s => s.SettingType == "startup")) {
-            var valueHolder = new Table(sharedState);
-            DynValue value;
-            if (setting is FcBooleanSetting) {
-               value = DynValue.NewBoolean(((FcBooleanSetting) setting).DefaultValue);
-
-            } else if (setting is FcIntegerSetting) {
-               value = DynValue.NewNumber(((FcIntegerSetting) setting).DefaultValue);
-
-            } else if (setting is FcDoubleSetting) {
-               value = DynValue.NewNumber(((FcDoubleSetting)setting).DefaultValue);
-
-            } else if (setting is FcStringSetting) {
-               value = DynValue.NewString(((FcStringSetting)setting).DefaultValue);
-
-            } else {
-               throw new NotImplementedException();
-            }
-
-            valueHolder.Set("value", value);
-            startupSettingsTable.Set(setting.Name, DynValue.NewTable(valueHolder));
-         }
-
-         var settingsTable = new Table(sharedState);
-         settingsTable.Set("startup", DynValue.NewTable(startupSettingsTable));
-
-         sharedState.Globals["settings"] = settingsTable;
-      }
-
-      private void LoadStages(Script sharedState, IModFileResolver coreLibLoader,
-         IList<FcModFileInfo> mods, ReadStage[] stages) {
-
-         var stageLoader = new StageLoader(coreLibLoader, sharedState);
-         foreach (var stage in stages) {
-            foreach (var modFile in mods) {
-               stageLoader.LoadStage(modFile, stage);
-            }
-         }
-      }
-
-      private void Setup(Script sharedState) {
-         LoadBuiltinLibrary(sharedState, "serpent");
-         LoadBuiltinLibrary(sharedState, "defines");
-
+         sharedState.Globals["serpent"] = LoadBuiltinLibrary(sharedState, "serpent");
+         sharedState.Globals["defines"] = LoadBuiltinLibrary(sharedState, "defines");
          sharedState.Globals["module"] = (Action)NoOp;
          sharedState.Globals["log"] = (Action<DynValue>)ModLogFunction;
 
@@ -124,15 +87,59 @@ namespace FactorioBrowser.Mod.Loader {
 
          new LegacyLuaModuleEmulator(sharedState, "util").LoadWithEmulation();
          sharedState.DoFile(Path.Combine(_luaLibPath, "dataloader.lua"));
+
+         return sharedState;
       }
 
-      private void LoadBuiltinLibrary(Script sharedState, string libName) {
+      private DynValue LoadBuiltinLibrary(Script sharedState, string libName) {
          using (var libSrc = Assembly.GetExecutingAssembly()
             .GetManifestResourceStream($"FactorioBrowser.Mod.BuiltinLibs.{libName}.lua")) {
 
             var library = sharedState.LoadStream(libSrc, null, $"{libName}.lua");
-            sharedState.Globals[libName] = sharedState.Call(library);
+            return sharedState.Call(library);
          }
+      }
+
+      private Table CreateModsTable(Script sharedState, IEnumerable<FcModFileInfo> allMods) {
+         Table modsTable = new Table(sharedState);
+         foreach (var mod in allMods) {
+            modsTable.Set(mod.Name, DynValue.NewString(mod.Version.ToDotNotation()));
+         }
+
+         return modsTable;
+      }
+
+      private Table CreateSettingsTable(Script sharedState,
+                     IImmutableDictionary<string, object> settings) {
+
+         var startupSettingsTable = new Table(sharedState);
+
+         foreach (var setting in settings) {
+            var value = setting.Value;
+            DynValue luaValue;
+            if (value is bool) {
+               luaValue = DynValue.NewBoolean((bool) value);
+
+            } else if (value is int || value is long || value is double) {
+               luaValue = DynValue.NewNumber(Convert.ToDouble(value));
+
+            } else if (value is string) {
+               luaValue = DynValue.NewString((string) value);
+
+            } else {
+               throw new NotImplementedException(
+                  "Internal error/incomplete implementation: can't handle settings of type " + value?.GetType());
+            }
+
+            var valueHolder = new Table(sharedState);
+            valueHolder.Set("value", luaValue);
+            startupSettingsTable.Set(setting.Key, DynValue.NewTable(valueHolder));
+         }
+
+         var settingsTable = new Table(sharedState);
+         settingsTable.Set("startup", DynValue.NewTable(startupSettingsTable));
+
+         return settingsTable;
       }
 
       private static DynValue WrapToNumber(Script script, DynValue origToNumber, DynValue argNum, DynValue argBase) {

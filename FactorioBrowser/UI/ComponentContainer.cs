@@ -78,8 +78,7 @@ namespace FactorioBrowser.UI {
       }
 
       private IFcModDataLoader CreateModDataLoader(IContext ctx) {
-         return new DefaultModDataLoader(_settings.GamePath,
-            ctx.Kernel.Get<IFcSettingsDefsUnpacker>());
+         return new DefaultModDataLoader(_settings.GamePath);
       }
    }
 

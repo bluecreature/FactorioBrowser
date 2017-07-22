@@ -149,7 +149,7 @@ namespace FactorioBrowser.UI.ViewModel {
       }
 
       private FcPrototypes LoadAndUnpackData() {
-         var rawData = _modLoader.LoadRawData(_modsToLoad);
+         var rawData = _modLoader.LoadPrototypes(_modsToLoad, ImmutableDictionary<string, object>.Empty); // TODO
          return _prototypeUnpacker.Unpack(rawData);
       }
    }

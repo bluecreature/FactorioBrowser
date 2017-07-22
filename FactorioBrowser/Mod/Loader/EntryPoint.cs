@@ -2,7 +2,7 @@ using System;
 
 namespace FactorioBrowser.Mod.Loader {
 
-   internal enum ReadStage {
+   internal enum EntryPoint {
       Settings,
       SettingsUpdate,
       SettingsFinalFixes,
@@ -11,30 +11,30 @@ namespace FactorioBrowser.Mod.Loader {
       DataFinalFixes,
    }
 
-   internal static class ReadStageExtension {
-      public static string EntryPoint(this ReadStage stage) {
-         switch (stage) {
-            case ReadStage.Settings:
+   internal static class EntryPointExtension {
+      public static string Filename(this EntryPoint ep) {
+         switch (ep) {
+            case EntryPoint.Settings:
                return "settings.lua";
 
-            case ReadStage.SettingsUpdate:
+            case EntryPoint.SettingsUpdate:
                return "settings-updates.lua";
 
-            case ReadStage.SettingsFinalFixes:
+            case EntryPoint.SettingsFinalFixes:
                return "settings-final-fixes.lua";
 
-            case ReadStage.Data:
+            case EntryPoint.Data:
                return "data.lua";
 
-            case ReadStage.DataUpdate:
+            case EntryPoint.DataUpdate:
                return "data-updates.lua";
 
-            case ReadStage.DataFinalFixes:
+            case EntryPoint.DataFinalFixes:
                return "data-final-fixes.lua";
 
             default:
                throw new NotImplementedException(
-                  $"Incomplete implementation for {typeof(ReadStage).Name}");
+                  $"Incomplete implementation for {typeof(EntryPoint).Name}");
          }
       }
    }

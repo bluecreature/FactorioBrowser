@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using FactorioBrowser.Mod.Finder;
@@ -50,9 +51,9 @@ namespace FactorioBrowser {
          var modSorter = new DefaultFcModSorter();
          var sorted = modSorter.Sort(allMods);
          var files = sorted.Where(s => s.Successful).Select(s => FcModFileInfo.FromMetaInfo(s.ModInfo));
-         var loader = new DefaultModDataLoader(GamePath, new DefaultSettingsDefsUnpacker());
+         var loader = new DefaultModDataLoader(GamePath);
          Log.Info("Start load data.raw");
-         var rawData = loader.LoadRawData(files);
+         var rawData = loader.LoadPrototypes(files, ImmutableDictionary<string, object>.Empty);
          Log.Info("End load data.raw");
 
          Log.Info("Start raw dump");
