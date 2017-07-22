@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
-using System.Linq;
+﻿using System.Linq;
 using FactorioBrowser.Mod.Finder;
 using FactorioBrowser.Mod.Loader;
 using FactorioBrowser.Prototypes.Unpacker;

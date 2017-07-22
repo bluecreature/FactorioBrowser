@@ -65,7 +65,6 @@ namespace FactorioBrowser.Mod.Finder {
             info = ReadZipModInfo(sourcePath);
 
          } else {
-            // TODO : log
             Log.Info("Skipping entry {0}: it's neither a directory nor a .zip file.", sourcePath);
             return null;
          }
