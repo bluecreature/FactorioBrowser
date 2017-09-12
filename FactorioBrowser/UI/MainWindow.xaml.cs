@@ -44,13 +44,13 @@ namespace FactorioBrowser.UI {
 
       private void ShowSettingsView(IEnumerable<FcModFileInfo> selectedMods) {
          Debug.Assert(_settingsView == null);
-         _settingsView = _components.Get<ISettingsViewFactory>().Create(selectedMods);
+         _settingsView = _components.Get<IViewsFactory>().CreateSettingsView(selectedMods);
          SwitchTo(_settingsView);
       }
 
       private void ShowBrowseView(IEnumerable<FcModFileInfo> selectedMods) {
          Debug.Assert(_browseView == null);
-         _browseView = _components.Get<IBrowseViewFactory>().Create(selectedMods);
+         _browseView = _components.Get<IViewsFactory>().CreateBrowseView(selectedMods);
          SwitchTo(_browseView);
       }
 

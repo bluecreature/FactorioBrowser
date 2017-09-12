@@ -1,19 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using Castle.Core.Internal;
-using FactorioBrowser.Mod.Loader;
 using FactorioBrowser.Prototypes;
 using FactorioBrowser.UI.ViewModel;
 
 namespace FactorioBrowser.UI {
-
-   public interface ISettingsViewFactory {
-
-      SettingsView Create(IEnumerable<FcModFileInfo> selectedMods);
-   }
 
    public sealed class ModSettingControlTemplateSelector : DataTemplateSelector {
 

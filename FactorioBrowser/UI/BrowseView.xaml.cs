@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Windows;
-using FactorioBrowser.Mod.Loader;
+﻿using System.Windows;
 using FactorioBrowser.Prototypes;
 using FactorioBrowser.UI.ViewModel;
 using GraphX.PCL.Common.Enums;
@@ -10,11 +8,6 @@ using GraphX.PCL.Logic.Models;
 using QuickGraph;
 
 namespace FactorioBrowser.UI {
-
-   public interface IBrowseViewFactory {
-
-      BrowseView Create(IEnumerable<FcModFileInfo> selectedMods);
-   }
 
    /// <summary>
    /// Interaction logic for BrowseWindow.xaml

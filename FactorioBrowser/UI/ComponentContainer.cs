@@ -32,6 +32,13 @@ namespace FactorioBrowser.UI {
       }
    }
 
+   public interface IViewsFactory {
+
+      SettingsView CreateSettingsView(IEnumerable<FcModFileInfo> selectedMods);
+
+      BrowseView CreateBrowseView(IEnumerable<FcModFileInfo> selectedMods);
+   }
+
    public sealed class ComponentContainer {
       private readonly StandardKernel _kernel;
 
@@ -68,10 +75,8 @@ namespace FactorioBrowser.UI {
          Bind<IFcModDataLoader>().ToMethod(CreateModDataLoader);
          Bind<IFcSettingDefsUnpacker>().To<DefaultSettingDefsUnpacker>();
          Bind<IFcPrototypeUnpacker>().To<DefaultPrototypeUnpacker>();
-         Bind<IBrowseViewFactory>().To<BrowseViewFactoryImpl>();
-         Bind<IBrowseViewModelFactory>().ToFactory();
-         Bind<ISettingsViewFactory>().To<SettingsViewFactoryImpl>();
-         Bind<ISettingsViewModelFactory>().ToFactory();
+         Bind<IViewModelsFactory>().ToFactory();
+         Bind<IViewsFactory>().To<ViewsFactoryImpl>();
       }
 
       private IFcModFinder CreateModFinder(IContext ctx) {
@@ -85,38 +90,28 @@ namespace FactorioBrowser.UI {
       }
    }
 
-   public interface IBrowseViewModelFactory {
-      BrowseViewModel Create(IEnumerable<FcModFileInfo> modsToLoad);
+   // needs to be public to be visible to the DynamicProxy
+   public interface IViewModelsFactory {
+
+      BrowseViewModel CreateBrowseViewModel(IEnumerable<FcModFileInfo> modsToLoad);
+
+      SettingsViewModel CreateSettingsViewModel(IEnumerable<FcModFileInfo> modsToLoad);
    }
 
-   internal sealed class BrowseViewFactoryImpl : IBrowseViewFactory {
-      private readonly IBrowseViewModelFactory _viewModelFactory;
+   internal sealed class ViewsFactoryImpl : IViewsFactory {
 
-      public BrowseViewFactoryImpl(IBrowseViewModelFactory viewModelFactory) {
-         _viewModelFactory = viewModelFactory;
+      private readonly IViewModelsFactory _viewModelsFactory;
+
+      public ViewsFactoryImpl(IViewModelsFactory viewModelsFactory) {
+         _viewModelsFactory = viewModelsFactory;
       }
 
-      public BrowseView Create(IEnumerable<FcModFileInfo> modsToLoad) {
-         var viewModel = _viewModelFactory.Create(modsToLoad);
-         return new BrowseView(viewModel);
-      }
-   }
-
-   public interface ISettingsViewModelFactory {
-      SettingsViewModel Create(IEnumerable<FcModFileInfo> modsToLoad);
-   }
-
-   internal sealed class SettingsViewFactoryImpl : ISettingsViewFactory {
-
-      private readonly ISettingsViewModelFactory _viewModelFactory;
-
-      public SettingsViewFactoryImpl(ISettingsViewModelFactory viewModelFactory) {
-         _viewModelFactory = viewModelFactory;
+      public SettingsView CreateSettingsView(IEnumerable<FcModFileInfo> selectedMods) {
+         return new SettingsView(_viewModelsFactory.CreateSettingsViewModel(selectedMods));
       }
 
-      public SettingsView Create(IEnumerable<FcModFileInfo> selectedMods) {
-         var viewModel = _viewModelFactory.Create(selectedMods);
-         return new SettingsView(viewModel);
+      public BrowseView CreateBrowseView(IEnumerable<FcModFileInfo> selectedMods) {
+         return new BrowseView(_viewModelsFactory.CreateBrowseViewModel(selectedMods));
       }
    }
 }
