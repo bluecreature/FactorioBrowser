@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace FactorioBrowser.Prototypes {
 
    [ModelMirror]
@@ -8,5 +10,7 @@ namespace FactorioBrowser.Prototypes {
 
       [DataFieldMirror("name")]
       public string Name { get; private set; }
+
+      public IImmutableList<string> History => ImmutableList.Create("base"); // TODO
    }
 }

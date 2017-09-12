@@ -178,7 +178,7 @@
                   Margin="6"
                   Padding="15,3,15,3"
                   Click="RefreshModList_Click" />
-               <Button Content="Load" Margin="6" Padding="4" Click="LoadModList_Click" />
+               <Button Content="Next" Margin="6" Padding="4" Click="Next_Click" />
             </UniformGrid>
          </Grid>
       </ContentControl.Content>

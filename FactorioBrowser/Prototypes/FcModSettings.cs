@@ -2,6 +2,15 @@
 
 namespace FactorioBrowser.Prototypes {
 
+   public static class SettingTypes {
+
+      public const string Startup = "startup";
+
+      public const string RuntimeGlobal = "runtime-global";
+
+      public const string RuntimePerUser = "runtime-per-user";
+   }
+
    public abstract class FcModSetting : FcPrototype {
 
       [DataFieldMirror(name: "setting_type", required: true)]
@@ -17,16 +26,16 @@ namespace FactorioBrowser.Prototypes {
       public bool DefaultValue { get; private set; }
    }
 
-   public abstract class FcNumericSetting<TValueType> : FcModSetting {
+   public abstract class FcNumericSetting<TValueType> : FcModSetting  where TValueType : struct {
 
       [DataFieldMirror(name: "default_value", required: true)]
-      public TValueType DefaultValue { get; private set; }
+      public TValueType? DefaultValue { get; private set; }
 
       [DataFieldMirror(name: "minimum_value", required: false)]
-      public TValueType Minimum { get; private set; }
+      public TValueType? Minimum { get; private set; }
 
       [DataFieldMirror(name: "maximum_value", required: false)]
-      public TValueType Maximum { get; private set; }
+      public TValueType? Maximum { get; private set; }
 
       [DataFieldMirror(name: "allowed_values", required: false)]
       public IList<TValueType> AllowedValues { get; private set; }

@@ -36,7 +36,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>FactorioBrowser.DataDump</StartupObject>
+    <StartupObject>FactorioBrowser.UI.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -96,8 +96,12 @@
     <Compile Include="UI\ModSelectionView.xaml.cs">
       <DependentUpon>ModSelectionView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\SettingsView.xaml.cs">
+      <DependentUpon>SettingsView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\ViewModel\BindableBase.cs" />
     <Compile Include="UI\ViewModel\BrowseViewModel.cs" />
+    <Compile Include="UI\ViewModel\SettingsViewModel.cs" />
     <Compile Include="UI\ViewModel\StructureGraphTypes.cs" />
     <Compile Include="UI\ViewModel\ModGraphControl.cs" />
     <Compile Include="UI\ViewModel\InitialConfigViewModel.cs" />
@@ -236,6 +240,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\ModSelectionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\SettingsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -12,7 +12,7 @@ using GraphX.PCL.Logic.Algorithms.LayoutAlgorithms;
 namespace FactorioBrowser.UI {
 
    /// <summary>
-   /// Interaction logic for ModSelectionWnd.xaml
+   /// Interaction logic for ModSelectionView.xaml
    /// </summary>
    public partial class ModSelectionView : IDisposable {
       private readonly ModSelectionViewModel _viewModel;
@@ -44,7 +44,7 @@ namespace FactorioBrowser.UI {
          await Refresh();
       }
 
-      private void LoadModList_Click(object sender, RoutedEventArgs e) {
+      private void Next_Click(object sender, RoutedEventArgs e) {
          var selectedMods = _viewModel.ModList
             .Where(i => i.Enabled)
             .Select(i => FcModFileInfo.FromMetaInfo(i.Info))

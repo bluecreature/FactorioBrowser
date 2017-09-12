@@ -10,13 +10,14 @@ namespace FactorioBrowser.UI {
    /// <summary>
    /// Interaction logic for MainWindow.xaml
    /// </summary>
-   public partial class MainWindow : Window {
+   public partial class MainWindow {
 
       private readonly AppSettings _settings;
       private readonly ComponentContainer _components;
 
-      private ModSelectionView _modSelectionView = null;
-      private BrowseView _browseView = null;
+      private ModSelectionView _modSelectionView;
+      private SettingsView _settingsView;
+      private BrowseView _browseView;
 
       public MainWindow() {
          InitializeComponent();
@@ -37,8 +38,14 @@ namespace FactorioBrowser.UI {
          if ((view = Interlocked.Exchange(ref _modSelectionView, null)) != null) {
             view.SelectionConfirmed -= LoadModListConfirmed;
             Layout.Children.Remove(view);
-            ShowBrowseView(selectedMods);
+            ShowSettingsView(selectedMods);
          }
+      }
+
+      private void ShowSettingsView(IEnumerable<FcModFileInfo> selectedMods) {
+         Debug.Assert(_settingsView == null);
+         _settingsView = _components.Get<ISettingsViewFactory>().Create(selectedMods);
+         SwitchTo(_settingsView);
       }
 
       private void ShowBrowseView(IEnumerable<FcModFileInfo> selectedMods) {

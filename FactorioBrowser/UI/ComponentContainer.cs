@@ -70,6 +70,8 @@ namespace FactorioBrowser.UI {
          Bind<IFcPrototypeUnpacker>().To<DefaultPrototypeUnpacker>();
          Bind<IBrowseViewFactory>().To<BrowseViewFactoryImpl>();
          Bind<IBrowseViewModelFactory>().ToFactory();
+         Bind<ISettingsViewFactory>().To<SettingsViewFactoryImpl>();
+         Bind<ISettingsViewModelFactory>().ToFactory();
       }
 
       private IFcModFinder CreateModFinder(IContext ctx) {
@@ -97,6 +99,24 @@ namespace FactorioBrowser.UI {
       public BrowseView Create(IEnumerable<FcModFileInfo> modsToLoad) {
          var viewModel = _viewModelFactory.Create(modsToLoad);
          return new BrowseView(viewModel);
+      }
+   }
+
+   public interface ISettingsViewModelFactory {
+      SettingsViewModel Create(IEnumerable<FcModFileInfo> modsToLoad);
+   }
+
+   internal sealed class SettingsViewFactoryImpl : ISettingsViewFactory {
+
+      private readonly ISettingsViewModelFactory _viewModelFactory;
+
+      public SettingsViewFactoryImpl(ISettingsViewModelFactory viewModelFactory) {
+         _viewModelFactory = viewModelFactory;
+      }
+
+      public SettingsView Create(IEnumerable<FcModFileInfo> selectedMods) {
+         var viewModel = _viewModelFactory.Create(selectedMods);
+         return new SettingsView(viewModel);
       }
    }
 }
