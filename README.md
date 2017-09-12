@@ -4,8 +4,9 @@ _(This is a work in progress which I started as a way to learn C# and .NET and n
 indispensable; it is not yet fully functional and it might never be)_
 
 Factorio Browser is an item, recipe and technology browser for the game [Factorio](https://www.factorio.com/). It is similar to the
-"[What is it used for?])[https://mods.factorio.com/mods/MrDoomah/what-is-it-used-for]" mod, but standalone i.e. doesn't require
-Factorio to be running and unpaused to work and so allows you to browse without having to worry about the pesky indigenous fauna.
+"[What is it used for?](https://mods.factorio.com/mods/MrDoomah/what-is-it-used-for)" mod, but this program doesn't require
+Factorio to be running and so you can browse without having to worry about the pesky indigenous fauna while planning your latest
+megabase.
 
 
 ### Copying
