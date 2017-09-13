@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Castle.Core.Internal;
+using FactorioBrowser.Mod.Loader;
 using FactorioBrowser.Prototypes;
 using FactorioBrowser.UI.ViewModel;
 
@@ -57,8 +61,21 @@ namespace FactorioBrowser.UI {
          DataContext = _viewModel;
       }
 
+      internal delegate void SettingsConfirmedEventHandler(
+         IEnumerable<FcModFileInfo> selectedMods,
+         IImmutableDictionary<string, object> settings);
+
+      internal event SettingsConfirmedEventHandler SelectionConfirmed;
+
       private async void SettingsView_OnLoaded(object sender, RoutedEventArgs e) {
          await _viewModel.LoadData();
+      }
+
+      private void Next_Click(object sender, RoutedEventArgs e) {
+         var settings = _viewModel.SettingsByMod
+            .SelectMany(group => group.Select(sv => new { sv.Definition.Name, sv.Value }))
+            .ToImmutableDictionary(sv => sv.Name, sv => sv.Value);
+         SelectionConfirmed?.Invoke(_viewModel.ModsToLoad, settings);
       }
    }
 }

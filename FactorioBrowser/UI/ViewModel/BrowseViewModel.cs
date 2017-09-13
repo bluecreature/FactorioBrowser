@@ -25,14 +25,17 @@ namespace FactorioBrowser.UI.ViewModel {
 
       private readonly IFcModDataLoader _modLoader;
       private readonly IEnumerable<FcModFileInfo> _modsToLoad;
+      private readonly IImmutableDictionary<string, object> _modSettings;
 
       private bool _isBusy;
 
-      public BrowseViewModel(IFcModDataLoader modLoader, IEnumerable<FcModFileInfo> modsToLoad) {
+      public BrowseViewModel(IFcModDataLoader modLoader, IEnumerable<FcModFileInfo> modsToLoad,
+         IImmutableDictionary<string, object> modSettings) {
 
          Debug.Assert(modsToLoad != null);
          _modLoader = modLoader;
          _modsToLoad = modsToLoad;
+         _modSettings = modSettings;
          _isBusy = false;
          Items = new ObservableCollection<FcItem>();
          Recipes = new ObservableCollection<FcRecipe>();
@@ -145,7 +148,7 @@ namespace FactorioBrowser.UI.ViewModel {
       }
 
       private FcPrototypes LoadAndUnpackData() {
-         return _modLoader.LoadPrototypes(_modsToLoad, ImmutableDictionary<string, object>.Empty); // TODO : settings
+         return _modLoader.LoadPrototypes(_modsToLoad, _modSettings);
       }
    }
 }

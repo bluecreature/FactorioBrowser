@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows;
@@ -42,15 +43,37 @@ namespace FactorioBrowser.UI {
          }
       }
 
+      private void ModSettingsConfirmed(IEnumerable<FcModFileInfo> selectedMods,
+         IImmutableDictionary<string, object> settings) {
+
+         SettingsView view;
+         if ((view = Interlocked.Exchange(ref _settingsView, null)) != null) {
+            view.SelectionConfirmed -= ModSettingsConfirmed;
+            Layout.Children.Remove(view);
+            ShowBrowseView(selectedMods, settings);
+         }
+      }
+
+      private void ShowModSelectionView() {
+         Debug.Assert(_modSelectionView == null);
+
+         _modSelectionView = _components.Get<ModSelectionView>();
+         _modSelectionView.SelectionConfirmed += LoadModListConfirmed;
+         SwitchTo(_modSelectionView);
+      }
+
       private void ShowSettingsView(IEnumerable<FcModFileInfo> selectedMods) {
          Debug.Assert(_settingsView == null);
          _settingsView = _components.Get<IViewsFactory>().CreateSettingsView(selectedMods);
+         _settingsView.SelectionConfirmed += ModSettingsConfirmed;
          SwitchTo(_settingsView);
       }
 
-      private void ShowBrowseView(IEnumerable<FcModFileInfo> selectedMods) {
+      private void ShowBrowseView(IEnumerable<FcModFileInfo> selectedMods,
+         IImmutableDictionary<string, object> modSettings) {
+
          Debug.Assert(_browseView == null);
-         _browseView = _components.Get<IViewsFactory>().CreateBrowseView(selectedMods);
+         _browseView = _components.Get<IViewsFactory>().CreateBrowseView(selectedMods, modSettings);
          SwitchTo(_browseView);
       }
 
@@ -61,14 +84,6 @@ namespace FactorioBrowser.UI {
          } else {
             Close();
          }
-      }
-
-      private void ShowModSelectionView() {
-         Debug.Assert(_modSelectionView == null);
-
-         _modSelectionView = _components.Get<ModSelectionView>();
-         _modSelectionView.SelectionConfirmed += LoadModListConfirmed;
-         SwitchTo(_modSelectionView);
       }
 
       private void SwitchTo(FrameworkElement ui) {

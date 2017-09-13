@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
@@ -36,7 +37,8 @@ namespace FactorioBrowser.UI {
 
       SettingsView CreateSettingsView(IEnumerable<FcModFileInfo> selectedMods);
 
-      BrowseView CreateBrowseView(IEnumerable<FcModFileInfo> selectedMods);
+      BrowseView CreateBrowseView(IEnumerable<FcModFileInfo> selectedMods,
+         IImmutableDictionary<string, object> modSettings);
    }
 
    public sealed class ComponentContainer {
@@ -93,9 +95,10 @@ namespace FactorioBrowser.UI {
    // needs to be public to be visible to the DynamicProxy
    public interface IViewModelsFactory {
 
-      BrowseViewModel CreateBrowseViewModel(IEnumerable<FcModFileInfo> modsToLoad);
-
       SettingsViewModel CreateSettingsViewModel(IEnumerable<FcModFileInfo> modsToLoad);
+
+      BrowseViewModel CreateBrowseViewModel(IEnumerable<FcModFileInfo> modsToLoad,
+         IImmutableDictionary<string, object> modSettings);
    }
 
    internal sealed class ViewsFactoryImpl : IViewsFactory {
@@ -110,8 +113,9 @@ namespace FactorioBrowser.UI {
          return new SettingsView(_viewModelsFactory.CreateSettingsViewModel(selectedMods));
       }
 
-      public BrowseView CreateBrowseView(IEnumerable<FcModFileInfo> selectedMods) {
-         return new BrowseView(_viewModelsFactory.CreateBrowseViewModel(selectedMods));
+      public BrowseView CreateBrowseView(IEnumerable<FcModFileInfo> selectedMods,
+         IImmutableDictionary<string, object> modSettings) {
+         return new BrowseView(_viewModelsFactory.CreateBrowseViewModel(selectedMods, modSettings));
       }
    }
 }

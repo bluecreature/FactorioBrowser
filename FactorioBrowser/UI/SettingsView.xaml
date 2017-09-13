@@ -13,40 +13,73 @@
 
    <UserControl.Resources>
       <DataTemplate x:Key="BooleanSettingTemplate" DataType="{x:Type views:FcModSettingValue}">
-         <CheckBox Content="{Binding Definition.Name}" IsChecked="{Binding Value}" />
+         <Grid>
+            <Grid.ColumnDefinitions>
+               <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+               <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding Definition.Name}" Grid.Column="0" />
+            <CheckBox IsChecked="{Binding Value}" Grid.Column="1" />
+         </Grid>
       </DataTemplate>
 
       <DataTemplate x:Key="IntegerSettingTemplate" DataType="{x:Type views:FcModSettingValue}">
-         <StackPanel Orientation="Horizontal">
-            <TextBlock Text="{Binding Definition.Name}" />
+         <Grid>
+            <Grid.ColumnDefinitions>
+               <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+               <ColumnDefinition Width="Auto" MinWidth="80" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding Definition.Name}" Grid.Column="0" />
             <wpfx:LongUpDown
                Minimum="{Binding Path=Definition.Minimum, Mode=OneWay}"
                Maximum="{Binding Path=Definition.Maximum, Mode=OneWay}"
-               Value="{Binding Value}" />
-         </StackPanel>
-      </DataTemplate>
-
-      <DataTemplate x:Key="ValueListTemplate" DataType="{x:Type views:FcModSettingValue}">
-         <StackPanel Orientation="Horizontal">
-            <TextBlock Text="{Binding Definition.Name}" />
-            <ComboBox ItemsSource="{Binding Definition.AllowedValues}" SelectedItem="{Binding Value}" />
-         </StackPanel>
+               Value="{Binding Value}"
+               Grid.Column="1" />
+         </Grid>
       </DataTemplate>
 
       <DataTemplate x:Key="DoubleSettingTemplate" DataType="{x:Type views:FcModSettingValue}">
-         <StackPanel Orientation="Horizontal">
-            <TextBlock Text="{Binding Definition.Name}" />
+         <Grid>
+            <Grid.ColumnDefinitions>
+               <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+               <ColumnDefinition Width="Auto" MinWidth="80" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding Definition.Name}" Grid.Column="0" />
             <wpfx:DoubleUpDown
                Minimum="{Binding Path=Definition.Minimum, Mode=OneWay}"
                Maximum="{Binding Path=Definition.Maximum, Mode=OneWay}"
                Increment="0.01"
                FormatString="F3"
-               Value="{Binding Value}" />
-         </StackPanel>
+               Value="{Binding Value}"
+               Grid.Column="1"/>
+         </Grid>
       </DataTemplate>
 
-      <DataTemplate x:Key="StubTemplate" DataType="{x:Type views:FcModSettingValue}">
-         <Label Content="{Binding Definition.Name}" />
+      <DataTemplate x:Key="ValueListTemplate" DataType="{x:Type views:FcModSettingValue}">
+         <Grid>
+            <Grid.ColumnDefinitions>
+               <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+               <ColumnDefinition Width="Auto" MinWidth="80" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+               Text="{Binding Definition.Name}"
+               Grid.Column="0" />
+            <ComboBox
+               ItemsSource="{Binding Definition.AllowedValues}"
+               SelectedItem="{Binding Value}"
+               Grid.Column="1"/>
+         </Grid>
+      </DataTemplate>
+
+      <DataTemplate x:Key="StringSettingTemplate" DataType="{x:Type views:FcModSettingValue}">
+         <Grid>
+            <Grid.ColumnDefinitions>
+               <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+               <ColumnDefinition Width="Auto" MinWidth="80" />
+            </Grid.ColumnDefinitions>
+            <Label Content="{Binding Definition.Name}" />
+            <TextBox Text="{Binding Value}" MaxLines="1" Grid.Column="1"/>
+         </Grid>
       </DataTemplate>
 
       <ui:ModSettingControlTemplateSelector
@@ -54,23 +87,38 @@
          BooleanSettingTemplate="{StaticResource BooleanSettingTemplate}"
          IntegerSettingTemplate="{StaticResource IntegerSettingTemplate}"
          DoubleSettingTemplate="{StaticResource DoubleSettingTemplate}"
-         StringSettingTemplate="{StaticResource StubTemplate}"
+         StringSettingTemplate="{StaticResource StringSettingTemplate}"
          ValueListTemplate="{StaticResource ValueListTemplate}" />
    </UserControl.Resources>
 
    <wpfx:BusyIndicator IsBusy="{Binding IsBusy}" BusyContent="Loading...">
-      <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto">
-         <ItemsControl ItemsSource="{Binding SettingsByMod}">
-            <ItemsControl.ItemTemplate>
-               <DataTemplate>
-                  <GroupBox Header="{Binding Key}">
-                     <ItemsControl
+      <Grid>
+         <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+         </Grid.RowDefinitions>
+         <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding SettingsByMod}"
+                       Padding="10,20,10,20">
+               <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                     <GroupBox Header="{Binding Key}" Padding="10">
+                        <ItemsControl
                         ItemsSource="{Binding}"
-                        ItemTemplateSelector="{StaticResource SettingControlTemplateSelector}" />
-                  </GroupBox>
-               </DataTemplate>
-            </ItemsControl.ItemTemplate>
-         </ItemsControl>
-      </ScrollViewer>
+                        ItemTemplateSelector="{StaticResource SettingControlTemplateSelector}"
+                        Grid.IsSharedSizeScope="True" />
+                     </GroupBox>
+                  </DataTemplate>
+               </ItemsControl.ItemTemplate>
+            </ItemsControl>
+         </ScrollViewer>
+         <UniformGrid
+            Rows="1"
+            Columns="1"
+            Grid.Row="1"
+            HorizontalAlignment="Right">
+            <Button Margin="6" Padding="15,4,15,4" Content="Next" Click="Next_Click" />
+         </UniformGrid>
+      </Grid>
    </wpfx:BusyIndicator>
 </UserControl>
