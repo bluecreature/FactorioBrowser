@@ -100,7 +100,15 @@ namespace FactorioBrowser.UI.ViewModel {
             }
 
             foreach (var ingredient in recipe.Ingredients) {
+               if (ingredient?.Item == null) {
+                  continue; // TODO : should we filter out these at unpacker level?
+               }
+
                foreach (var result in recipe.Results) {
+                  if (result?.Item == null) {
+                     continue;
+                  }
+
                   ItemGraphVertex ingredientItem;
                   ItemGraphVertex resultItem;
 
