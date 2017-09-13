@@ -19,6 +19,10 @@ namespace FactorioBrowser.Prototypes.Unpacker {
          Debug.Assert(TypeTools.IsStructureType<T>());
          _log.Debug("Start unpack structure {0} at path {1}", typeof(T).Name, currentPath);
 
+         if (data == null) {
+            return null;
+         }
+
          Type targetType = ResolveTargetType(typeof(T), data);
 
          if (targetType != null) {

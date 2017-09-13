@@ -185,6 +185,13 @@ namespace FactorioBrowserTests.Prototypes.Unpacker {
       }
 
       [Test]
+      public void TestPolymorphicUnpackNull() {
+         var unpacked = new StructureUnpacker<PolymorphicEntityBase>(new UnpackerDispatcher())
+            .Unpack(null, "root");
+         Assert.IsNull(unpacked);
+      }
+
+      [Test]
       public void TestUnpackBaseClassProperty() {
          var unpacked = Unpack<PolymorphicEntityBase>(new Dictionary<object, object> {
             ["type"] = "a",
