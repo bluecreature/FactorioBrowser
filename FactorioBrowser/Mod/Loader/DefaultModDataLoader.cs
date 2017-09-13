@@ -95,6 +95,17 @@ namespace FactorioBrowser.Mod.Loader {
          sharedState.Globals["tonumber"] = (Func<DynValue, DynValue, DynValue>)
             ((n, b) => WrapToNumber(sharedState, funcToNumber, n, b));
 
+         DynValue funcType = sharedState.Globals.RawGet("type");
+         Debug.Assert(funcType != null);
+         sharedState.Globals["type"] = (Func<DynValue, DynValue>)
+            (v => WrapWithNilSupport(sharedState, funcType, v));
+
+         DynValue funcToString = sharedState.Globals.RawGet("tostring");
+         Debug.Assert(funcToString != null);
+         sharedState.Globals["tostring"] = (Func<DynValue, DynValue>)
+            (v => WrapWithNilSupport(sharedState, funcToString, v));
+
+
          new LegacyLuaModuleEmulator(sharedState, "util").LoadWithEmulation();
          sharedState.DoFile(Path.Combine(_luaLibPath, "dataloader.lua"));
 
@@ -166,6 +177,15 @@ namespace FactorioBrowser.Mod.Loader {
 
          } catch (FormatException) {
             return DynValue.Nil;
+         }
+      }
+
+      private static DynValue WrapWithNilSupport(Script script, DynValue origFunction, DynValue value) {
+         if (value == null || value.IsNil()) {
+            return DynValue.NewString("nil");
+
+         } else {
+            return script.Call(origFunction, value);
          }
       }
 

@@ -37,7 +37,7 @@ namespace FactorioBrowser.Mod.Loader {
       }
 
       private void LoadEntryPointWithResolver(IModFileResolver fileResolver, string entryPointPath) {
-         DynValue originalRequire = _sharedState.Globals.RawGet("require");
+         DynValue originalRequireFunction = _sharedState.Globals.RawGet("require");
          try {
             _sharedState.Globals["require"] = (Func<ScriptExecutionContext, CallbackArguments, DynValue>)
                (new ModLocalRequireImpl(_sharedState, fileResolver, _commonLibLoader).RequireModule);
@@ -46,7 +46,7 @@ namespace FactorioBrowser.Mod.Loader {
             _sharedState.DoStream(entryPoint, null, fileResolver.FriendlyName(entryPointPath));
 
          } finally {
-            _sharedState.Globals["require"] = originalRequire;
+            _sharedState.Globals["require"] = originalRequireFunction;
          }
       }
 
