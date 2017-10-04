@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
 using FactorioBrowser.Mod.Finder;
+using FactorioBrowser.Mod.Loader;
 using QuickGraph;
 
 namespace FactorioBrowser.UI.ViewModel {
@@ -40,8 +42,8 @@ namespace FactorioBrowser.UI.ViewModel {
       }
 
       public ModListItem(FcModMetaInfo modInfo, SortStatus sortStatus) {
-         Contract.Requires(modInfo != null);
-         Contract.Requires(sortStatus != null);
+         Contract.Requires(modInfo != null, "modInfo");
+         Contract.Requires(sortStatus != null, "sortStatus");
 
          Info = modInfo;
          SortStatus = sortStatus;
@@ -55,6 +57,21 @@ namespace FactorioBrowser.UI.ViewModel {
       private readonly IFcModFinder _modFinder;
       private readonly IFcModSorter _modSorter;
       private bool _isBusy;
+
+      public ModSelectionViewModel(IFcModFinder modFinder, IFcModSorter modSorter) {
+         _modFinder = modFinder;
+         _modSorter = modSorter;
+         _isBusy = false;
+         ModList = new ObservableCollection<ModListItem>();
+         DependencyGraph = null;
+      }
+
+      public IImmutableList<FcModFileInfo> GetSelectedMods() { // TODO : return MetaInfo (?)
+         return ModList
+            .Where(i => i.Enabled)
+            .Select(i => FcModFileInfo.FromMetaInfo(i.Info))
+            .ToImmutableList();
+      }
 
       public ObservableCollection<ModListItem> ModList { get; }
 
@@ -70,15 +87,7 @@ namespace FactorioBrowser.UI.ViewModel {
          }
       }
 
-      public ModSelectionViewModel(IFcModFinder modFinder, IFcModSorter modSorter) {
-         _modFinder = modFinder;
-         _modSorter = modSorter;
-         _isBusy = false;
-         ModList = new ObservableCollection<ModListItem>();
-         DependencyGraph = null;
-      }
-
-      public async Task RefreshModList() {
+      public async Task Refresh() {
          IsBusy = true;
          try {
             ModList.Clear();

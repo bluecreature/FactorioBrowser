@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Castle.Core.Internal;
@@ -72,10 +71,7 @@ namespace FactorioBrowser.UI {
       }
 
       private void Next_Click(object sender, RoutedEventArgs e) {
-         var settings = _viewModel.SettingsByMod
-            .SelectMany(group => group.Select(sv => new { sv.Definition.Name, sv.Value }))
-            .ToImmutableDictionary(sv => sv.Name, sv => sv.Value);
-         SelectionConfirmed?.Invoke(_viewModel.ModsToLoad, settings);
+         SelectionConfirmed?.Invoke(_viewModel.ModsToLoad, _viewModel.GetSettingsValues());
       }
    }
 }

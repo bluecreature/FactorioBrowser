@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using FactorioBrowser.Mod.Loader;
@@ -35,7 +34,7 @@ namespace FactorioBrowser.UI {
 
       public async Task Refresh() {
          ModGraph.ClearLayout();
-         await _viewModel.RefreshModList();
+         await _viewModel.Refresh();
          ModGraph.GenerateGraph(_viewModel.DependencyGraph);
          ModGraphZoom.ZoomToFill();
       }
@@ -45,11 +44,7 @@ namespace FactorioBrowser.UI {
       }
 
       private void Next_Click(object sender, RoutedEventArgs e) {
-         var selectedMods = _viewModel.ModList
-            .Where(i => i.Enabled)
-            .Select(i => FcModFileInfo.FromMetaInfo(i.Info))
-            .ToList();
-         SelectionConfirmed?.Invoke(selectedMods);
+         SelectionConfirmed?.Invoke(_viewModel.GetSelectedMods());
       }
 
       private ModGraphLogic InitModGraphLogic() {
@@ -81,10 +76,8 @@ namespace FactorioBrowser.UI {
          ModListView.ScrollIntoView(vertex.Item);
       }
 
-      private void ModSelectionView_OnLoaded(object sender, RoutedEventArgs e) {
-#pragma warning disable 4014
-         Refresh();
-#pragma warning restore 4014
+      private async void ModSelectionView_OnLoaded(object sender, RoutedEventArgs e) {
+         await Refresh();
       }
    }
 }

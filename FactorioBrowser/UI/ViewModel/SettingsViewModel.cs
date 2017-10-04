@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -32,6 +33,12 @@ namespace FactorioBrowser.UI.ViewModel {
          _dataLoader = dataLoader;
          _modsToLoad = new List<FcModFileInfo>(modsToLoad);
          SettingsByMod = new ObservableCollection<IGrouping<string, FcModSettingValue>>();
+      }
+
+      public IImmutableDictionary<string, object> GetSettingsValues() {
+         return SettingsByMod
+            .SelectMany(group => group.Select(sv => new { sv.Definition.Name, sv.Value }))
+            .ToImmutableDictionary(sv => sv.Name, sv => sv.Value);
       }
 
       public bool IsBusy {
@@ -68,7 +75,7 @@ namespace FactorioBrowser.UI.ViewModel {
          }
       }
 
-      private FcModSettingValue ToSettingValue(FcModSetting definition) {
+      private static FcModSettingValue ToSettingValue(FcModSetting definition) {
          Debug.Assert(definition != null);
 
          object defaultValue;
