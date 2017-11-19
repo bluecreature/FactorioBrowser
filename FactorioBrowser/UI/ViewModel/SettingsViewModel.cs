@@ -24,14 +24,14 @@ namespace FactorioBrowser.UI.ViewModel {
 
    public sealed class SettingsViewModel : BindableBase {
       private readonly IFcModDataLoader _dataLoader;
-      private readonly IList<FcModFileInfo> _modsToLoad;
+      private readonly IImmutableList<FcModFileInfo> _modsToLoad;
 
       private bool _isBusy;
 
       public SettingsViewModel(IFcModDataLoader dataLoader,
-         IEnumerable<FcModFileInfo> modsToLoad) {
+         IImmutableList<FcModFileInfo> modsToLoad) {
          _dataLoader = dataLoader;
-         _modsToLoad = new List<FcModFileInfo>(modsToLoad);
+         _modsToLoad = modsToLoad;
          SettingsByMod = new ObservableCollection<IGrouping<string, FcModSettingValue>>();
       }
 

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using System.Windows;
 using FactorioBrowser.Mod.Loader;
@@ -28,19 +28,23 @@ namespace FactorioBrowser.UI {
          ModGraph?.Dispose();
       }
 
-      internal delegate void SelectionConfirmedEventHandler(IEnumerable<FcModFileInfo> selectedMods);
+      public delegate void SelectionConfirmedEventHandler(IImmutableList<FcModFileInfo> selectedMods);
 
-      internal event SelectionConfirmedEventHandler SelectionConfirmed;
+      public event SelectionConfirmedEventHandler SelectionConfirmed;
 
-      public async Task Refresh() {
+      private async void RefreshModList_Click(object sender, RoutedEventArgs e) {
+         await Refresh();
+      }
+
+      private async void ModSelectionView_OnLoaded(object sender, RoutedEventArgs e) {
+         await Refresh();
+      }
+
+      private async Task Refresh() {
          ModGraph.ClearLayout();
          await _viewModel.Refresh();
          ModGraph.GenerateGraph(_viewModel.DependencyGraph);
          ModGraphZoom.ZoomToFill();
-      }
-
-      private async void RefreshModList_Click(object sender, RoutedEventArgs e) {
-         await Refresh();
       }
 
       private void Next_Click(object sender, RoutedEventArgs e) {
@@ -74,10 +78,6 @@ namespace FactorioBrowser.UI {
 
          vertex.Item.Selected = true;
          ModListView.ScrollIntoView(vertex.Item);
-      }
-
-      private async void ModSelectionView_OnLoaded(object sender, RoutedEventArgs e) {
-         await Refresh();
       }
    }
 }

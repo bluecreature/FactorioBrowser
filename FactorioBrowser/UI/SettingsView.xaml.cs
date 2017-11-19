@@ -60,10 +60,10 @@ namespace FactorioBrowser.UI {
          DataContext = _viewModel;
       }
 
-      internal delegate void SettingsConfirmedEventHandler(
+      public delegate void SettingsConfirmedEventHandler(
          IImmutableDictionary<string, object> settings);
 
-      internal event SettingsConfirmedEventHandler SelectionConfirmed;
+      public event SettingsConfirmedEventHandler SelectionConfirmed;
 
       private async void SettingsView_OnLoaded(object sender, RoutedEventArgs e) {
          await _viewModel.LoadData();

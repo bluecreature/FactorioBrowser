@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,20 +31,22 @@ namespace FactorioBrowser.UI {
 
       public override FrameworkElement View => _view;
 
-      private void ModSelectionConfirmed(IEnumerable<FcModFileInfo> selectedMods) {
+      private void ModSelectionConfirmed(IImmutableList<FcModFileInfo> selectedMods) {
          _view.SelectionConfirmed -= ModSelectionConfirmed;
          InvokeSwitchState(new ModSettingsState(_viewsFactory, selectedMods));
       }
    }
 
    public sealed class ModSettingsState : BrowserState {
-      private readonly IList<FcModFileInfo> _selectedMods;
+      private readonly IImmutableList<FcModFileInfo> _selectedMods;
       private readonly SettingsView _view;
       private readonly IViewsFactory _viewsFactory;
 
-      public ModSettingsState(IViewsFactory viewsFactory, IEnumerable<FcModFileInfo> selectedMods) {
+      public ModSettingsState(IViewsFactory viewsFactory,
+         IImmutableList<FcModFileInfo> selectedMods) {
+
          _viewsFactory = viewsFactory;
-         _selectedMods = new List<FcModFileInfo>(selectedMods);
+         _selectedMods = selectedMods;
          _view = viewsFactory.CreateSettingsView(_selectedMods);
          _view.SelectionConfirmed += ModSettingsConfirmed;
       }
@@ -61,7 +62,7 @@ namespace FactorioBrowser.UI {
 
    public sealed class BrowseState : BrowserState {
 
-      public BrowseState(IViewsFactory viewsFactory, IEnumerable<FcModFileInfo> selectedMods,
+      public BrowseState(IViewsFactory viewsFactory, IImmutableList<FcModFileInfo> selectedMods,
          IImmutableDictionary<string, object> settings) {
 
          View = viewsFactory.CreateBrowseView(selectedMods, settings);

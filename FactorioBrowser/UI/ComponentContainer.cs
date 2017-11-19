@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
@@ -37,9 +36,9 @@ namespace FactorioBrowser.UI {
 
       ModSelectionView CreateModSelectionView();
 
-      SettingsView CreateSettingsView(IEnumerable<FcModFileInfo> selectedMods);
+      SettingsView CreateSettingsView(IImmutableList<FcModFileInfo> selectedMods);
 
-      BrowseView CreateBrowseView(IEnumerable<FcModFileInfo> selectedMods,
+      BrowseView CreateBrowseView(IImmutableList<FcModFileInfo> selectedMods,
          IImmutableDictionary<string, object> modSettings);
    }
 
@@ -99,9 +98,9 @@ namespace FactorioBrowser.UI {
 
       ModSelectionViewModel CreateModSelectionViewModel();
 
-      SettingsViewModel CreateSettingsViewModel(IEnumerable<FcModFileInfo> modsToLoad);
+      SettingsViewModel CreateSettingsViewModel(IImmutableList<FcModFileInfo> modsToLoad);
 
-      BrowseViewModel CreateBrowseViewModel(IEnumerable<FcModFileInfo> modsToLoad,
+      BrowseViewModel CreateBrowseViewModel(IImmutableList<FcModFileInfo> modsToLoad,
          IImmutableDictionary<string, object> modSettings);
    }
 
@@ -117,11 +116,11 @@ namespace FactorioBrowser.UI {
          return new ModSelectionView(_viewModelsFactory.CreateModSelectionViewModel());
       }
 
-      public SettingsView CreateSettingsView(IEnumerable<FcModFileInfo> selectedMods) {
+      public SettingsView CreateSettingsView(IImmutableList<FcModFileInfo> selectedMods) {
          return new SettingsView(_viewModelsFactory.CreateSettingsViewModel(selectedMods));
       }
 
-      public BrowseView CreateBrowseView(IEnumerable<FcModFileInfo> selectedMods,
+      public BrowseView CreateBrowseView(IImmutableList<FcModFileInfo> selectedMods,
          IImmutableDictionary<string, object> modSettings) {
          return new BrowseView(_viewModelsFactory.CreateBrowseViewModel(selectedMods, modSettings));
       }

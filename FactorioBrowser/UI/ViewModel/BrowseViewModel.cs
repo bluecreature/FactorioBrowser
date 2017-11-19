@@ -24,12 +24,12 @@ namespace FactorioBrowser.UI.ViewModel {
    public sealed class BrowseViewModel : BindableBase {
 
       private readonly IFcModDataLoader _modLoader;
-      private readonly IEnumerable<FcModFileInfo> _modsToLoad;
+      private readonly IImmutableList<FcModFileInfo> _modsToLoad;
       private readonly IImmutableDictionary<string, object> _modSettings;
 
       private bool _isBusy;
 
-      public BrowseViewModel(IFcModDataLoader modLoader, IEnumerable<FcModFileInfo> modsToLoad,
+      public BrowseViewModel(IFcModDataLoader modLoader, IImmutableList<FcModFileInfo> modsToLoad,
          IImmutableDictionary<string, object> modSettings) {
 
          Debug.Assert(modsToLoad != null);
