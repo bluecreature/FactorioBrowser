@@ -35,6 +35,8 @@ namespace FactorioBrowser.UI {
 
    public interface IViewsFactory {
 
+      ModSelectionView CreateModSelectionView();
+
       SettingsView CreateSettingsView(IEnumerable<FcModFileInfo> selectedMods);
 
       BrowseView CreateBrowseView(IEnumerable<FcModFileInfo> selectedMods,
@@ -95,6 +97,8 @@ namespace FactorioBrowser.UI {
    // needs to be public to be visible to the DynamicProxy
    public interface IViewModelsFactory {
 
+      ModSelectionViewModel CreateModSelectionViewModel();
+
       SettingsViewModel CreateSettingsViewModel(IEnumerable<FcModFileInfo> modsToLoad);
 
       BrowseViewModel CreateBrowseViewModel(IEnumerable<FcModFileInfo> modsToLoad,
@@ -107,6 +111,10 @@ namespace FactorioBrowser.UI {
 
       public ViewsFactoryImpl(IViewModelsFactory viewModelsFactory) {
          _viewModelsFactory = viewModelsFactory;
+      }
+
+      public ModSelectionView CreateModSelectionView() {
+         return new ModSelectionView(_viewModelsFactory.CreateModSelectionViewModel());
       }
 
       public SettingsView CreateSettingsView(IEnumerable<FcModFileInfo> selectedMods) {

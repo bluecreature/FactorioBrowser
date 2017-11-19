@@ -1,13 +1,75 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using FactorioBrowser.Mod.Loader;
 using FactorioBrowser.UI.ViewModel;
 
 namespace FactorioBrowser.UI {
+
+   public abstract class BrowserState {
+      public delegate void SwitchEventHandler(BrowserState nextState);
+
+      public event SwitchEventHandler SwitchState;
+
+      public abstract FrameworkElement View { get; }
+
+      protected void InvokeSwitchState(BrowserState nextState) {
+         SwitchState?.Invoke(nextState);
+      }
+   }
+
+   public sealed class ModSelectionState : BrowserState {
+      private readonly ModSelectionView _view;
+      private readonly IViewsFactory _viewsFactory;
+
+      public ModSelectionState(IViewsFactory viewsFactory) {
+         _viewsFactory = viewsFactory;
+         _view = _viewsFactory.CreateModSelectionView();
+         _view.SelectionConfirmed += ModSelectionConfirmed;
+      }
+
+      public override FrameworkElement View => _view;
+
+      private void ModSelectionConfirmed(IEnumerable<FcModFileInfo> selectedMods) {
+         _view.SelectionConfirmed -= ModSelectionConfirmed;
+         InvokeSwitchState(new ModSettingsState(_viewsFactory, selectedMods));
+      }
+   }
+
+   public sealed class ModSettingsState : BrowserState {
+      private readonly IList<FcModFileInfo> _selectedMods;
+      private readonly SettingsView _view;
+      private readonly IViewsFactory _viewsFactory;
+
+      public ModSettingsState(IViewsFactory viewsFactory, IEnumerable<FcModFileInfo> selectedMods) {
+         _viewsFactory = viewsFactory;
+         _selectedMods = new List<FcModFileInfo>(selectedMods);
+         _view = viewsFactory.CreateSettingsView(_selectedMods);
+         _view.SelectionConfirmed += ModSettingsConfirmed;
+      }
+
+      private void ModSettingsConfirmed(IImmutableDictionary<string, object> settings) {
+
+         _view.SelectionConfirmed -= ModSettingsConfirmed;
+         InvokeSwitchState(new BrowseState(_viewsFactory, _selectedMods, settings));
+      }
+
+      public override FrameworkElement View => _view;
+   }
+
+   public sealed class BrowseState : BrowserState {
+
+      public BrowseState(IViewsFactory viewsFactory, IEnumerable<FcModFileInfo> selectedMods,
+         IImmutableDictionary<string, object> settings) {
+
+         View = viewsFactory.CreateBrowseView(selectedMods, settings);
+      }
+
+      public override FrameworkElement View { get; }
+   }
+
    /// <summary>
    /// Interaction logic for MainWindow.xaml
    /// </summary>
@@ -16,9 +78,7 @@ namespace FactorioBrowser.UI {
       private readonly AppSettings _settings;
       private readonly ComponentContainer _components;
 
-      private ModSelectionView _modSelectionView;
-      private SettingsView _settingsView;
-      private BrowseView _browseView;
+      private BrowserState _currentState;
 
       public MainWindow() {
          InitializeComponent();
@@ -34,48 +94,20 @@ namespace FactorioBrowser.UI {
          }
       }
 
-      private void LoadModListConfirmed(IEnumerable<FcModFileInfo> selectedMods) {
-         ModSelectionView view;
-         if ((view = Interlocked.Exchange(ref _modSelectionView, null)) != null) {
-            view.SelectionConfirmed -= LoadModListConfirmed;
-            Layout.Children.Remove(view);
-            ShowSettingsView(selectedMods);
-         }
-      }
-
-      private void ModSettingsConfirmed(IEnumerable<FcModFileInfo> selectedMods,
-         IImmutableDictionary<string, object> settings) {
-
-         SettingsView view;
-         if ((view = Interlocked.Exchange(ref _settingsView, null)) != null) {
-            view.SelectionConfirmed -= ModSettingsConfirmed;
-            Layout.Children.Remove(view);
-            ShowBrowseView(selectedMods, settings);
-         }
-      }
-
       private void ShowModSelectionView() {
-         Debug.Assert(_modSelectionView == null);
-
-         _modSelectionView = _components.Get<ModSelectionView>();
-         _modSelectionView.SelectionConfirmed += LoadModListConfirmed;
-         SwitchTo(_modSelectionView);
+         _currentState = _components.Get<ModSelectionState>();
+         _currentState.SwitchState += OnSwitchState;
+         ShowView(_currentState.View);
       }
 
-      private void ShowSettingsView(IEnumerable<FcModFileInfo> selectedMods) {
-         Debug.Assert(_settingsView == null);
-         _settingsView = _components.Get<IViewsFactory>().CreateSettingsView(selectedMods);
-         _settingsView.SelectionConfirmed += ModSettingsConfirmed;
-         SwitchTo(_settingsView);
+      private void OnSwitchState(BrowserState nextState) {
+         Layout.Children.Remove(_currentState.View);
+         _currentState.SwitchState -= OnSwitchState;
+         nextState.SwitchState += OnSwitchState;
+         _currentState = nextState;
+         ShowView(_currentState.View);
       }
 
-      private void ShowBrowseView(IEnumerable<FcModFileInfo> selectedMods,
-         IImmutableDictionary<string, object> modSettings) {
-
-         Debug.Assert(_browseView == null);
-         _browseView = _components.Get<IViewsFactory>().CreateBrowseView(selectedMods, modSettings);
-         SwitchTo(_browseView);
-      }
 
       private void AskForInitialConfiguration() {
          Window configWnd = new InitialConfigWnd(new InitialConfigViewModel(_settings));
@@ -86,7 +118,7 @@ namespace FactorioBrowser.UI {
          }
       }
 
-      private void SwitchTo(FrameworkElement ui) {
+      private void ShowView(FrameworkElement ui) {
          Debug.Assert(ui != null);
 
          ui.VerticalAlignment = VerticalAlignment.Stretch;

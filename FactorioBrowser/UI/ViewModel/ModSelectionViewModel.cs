@@ -52,7 +52,7 @@ namespace FactorioBrowser.UI.ViewModel {
       }
    }
 
-   internal sealed class ModSelectionViewModel : BindableBase {
+   public sealed class ModSelectionViewModel : BindableBase {
 
       private readonly IFcModFinder _modFinder;
       private readonly IFcModSorter _modSorter;

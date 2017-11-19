@@ -6,7 +6,7 @@ using QuickGraph;
 
 namespace FactorioBrowser.UI.ViewModel {
 
-   internal sealed class ModGraphVertex : VertexBase, IComparable<ModGraphVertex> {
+   public sealed class ModGraphVertex : VertexBase, IComparable<ModGraphVertex> {
       public ModListItem Item { get; }
 
       public ModGraphVertex(ModListItem item) {
@@ -30,7 +30,7 @@ namespace FactorioBrowser.UI.ViewModel {
       }
    }
 
-   internal sealed class ModGraphEdge : EdgeBase<ModGraphVertex> {
+   public sealed class ModGraphEdge : EdgeBase<ModGraphVertex> {
 
       public ModGraphEdge(ModGraphVertex source, ModGraphVertex target, bool isOptionalDependency)
          : base(source, target, 1) {

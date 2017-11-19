@@ -53,12 +53,6 @@ namespace FactorioBrowser.UI.ViewModel {
 
       public ObservableCollection<IGrouping<string, FcModSettingValue>> SettingsByMod { get; }
 
-      /*
-       * TODO: this ViewModel shouldn't be exposing this information;
-       *       Rewrite the state handling in the main window and hide it.
-       */
-      public IEnumerable<FcModFileInfo> ModsToLoad => _modsToLoad;
-
       public async Task LoadData() {
          IsBusy = true;
          try {

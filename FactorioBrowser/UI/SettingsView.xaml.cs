@@ -61,7 +61,6 @@ namespace FactorioBrowser.UI {
       }
 
       internal delegate void SettingsConfirmedEventHandler(
-         IEnumerable<FcModFileInfo> selectedMods,
          IImmutableDictionary<string, object> settings);
 
       internal event SettingsConfirmedEventHandler SelectionConfirmed;
@@ -71,7 +70,7 @@ namespace FactorioBrowser.UI {
       }
 
       private void Next_Click(object sender, RoutedEventArgs e) {
-         SelectionConfirmed?.Invoke(_viewModel.ModsToLoad, _viewModel.GetSettingsValues());
+         SelectionConfirmed?.Invoke(_viewModel.GetSettingsValues());
       }
    }
 }
