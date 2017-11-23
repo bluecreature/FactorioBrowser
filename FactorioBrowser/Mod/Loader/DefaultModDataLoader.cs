@@ -59,6 +59,10 @@ namespace FactorioBrowser.Mod.Loader {
          IImmutableDictionary<string, object> settings, EntryPoint[] entryPoints) {
 
          Script sharedState = SetupLuaState();
+
+         DynValue dataRaw = GetRawData(sharedState);
+         ChangeTracking changeTracking = new ChangeTracking(sharedState, dataRaw.Table);
+
          if (settings != null) {
             sharedState.Globals["settings"] = CreateSettingsTable(sharedState, settings);
          }
@@ -71,11 +75,13 @@ namespace FactorioBrowser.Mod.Loader {
          var stageLoader = new EntryPointLoader(coreLibLoader, sharedState);
          foreach (var stage in entryPoints) {
             foreach (var modFile in combinedModList) {
+               changeTracking.CurrentMod = modFile.Name;
                stageLoader.LoadEntryPoint(modFile, stage);
+               changeTracking.CurrentMod = null;
             }
          }
 
-         return GetRawData(sharedState);
+         return new MoonSharpTable(dataRaw.Table, dataRaw);
       }
 
       private Script SetupLuaState() {
@@ -90,21 +96,7 @@ namespace FactorioBrowser.Mod.Loader {
          sharedState.Globals["module"] = (Action)NoOp;
          sharedState.Globals["log"] = (Action<DynValue>)ModLogFunction;
 
-         DynValue funcToNumber = sharedState.Globals.RawGet("tonumber");
-         Debug.Assert(funcToNumber != null);
-         sharedState.Globals["tonumber"] = (Func<DynValue, DynValue, DynValue>)
-            ((n, b) => WrapToNumber(sharedState, funcToNumber, n, b));
-
-         DynValue funcType = sharedState.Globals.RawGet("type");
-         Debug.Assert(funcType != null);
-         sharedState.Globals["type"] = (Func<DynValue, DynValue>)
-            (v => WrapWithNilSupport(sharedState, funcType, v));
-
-         DynValue funcToString = sharedState.Globals.RawGet("tostring");
-         Debug.Assert(funcToString != null);
-         sharedState.Globals["tostring"] = (Func<DynValue, DynValue>)
-            (v => WrapWithNilSupport(sharedState, funcToString, v));
-
+         ApplyWorkarounds(sharedState);
 
          new LegacyLuaModuleEmulator(sharedState, "util").LoadWithEmulation();
          sharedState.DoFile(Path.Combine(_luaLibPath, "dataloader.lua"));
@@ -119,6 +111,23 @@ namespace FactorioBrowser.Mod.Loader {
             var library = sharedState.LoadStream(libSrc, null, $"builtin/{libName}.lua");
             return sharedState.Call(library);
          }
+      }
+
+      private static void ApplyWorkarounds(Script sharedState) {
+         DynValue funcToNumber = sharedState.Globals.RawGet("tonumber");
+         Debug.Assert(funcToNumber != null);
+         sharedState.Globals["tonumber"] = (Func<DynValue, DynValue, DynValue>)
+            ((n, b) => WrapWithHexSupport(sharedState, funcToNumber, n, b));
+
+         DynValue funcType = sharedState.Globals.RawGet("type");
+         Debug.Assert(funcType != null);
+         sharedState.Globals["type"] = (Func<DynValue, DynValue>)
+            (v => WrapWithNilSupport(sharedState, funcType, v));
+
+         DynValue funcToString = sharedState.Globals.RawGet("tostring");
+         Debug.Assert(funcToString != null);
+         sharedState.Globals["tostring"] = (Func<DynValue, DynValue>)
+            (v => WrapWithNilSupport(sharedState, funcToString, v));
       }
 
       private Table CreateModsTable(Script sharedState, IEnumerable<FcModFileInfo> allMods) {
@@ -163,7 +172,7 @@ namespace FactorioBrowser.Mod.Loader {
          return settingsTable;
       }
 
-      private static DynValue WrapToNumber(Script script, DynValue origToNumber, DynValue argNum, DynValue argBase) {
+      private static DynValue WrapWithHexSupport(Script script, DynValue origToNumber, DynValue argNum, DynValue argBase) {
          if ((argBase == null || argBase.IsNil())
              && argNum.Type == DataType.String && argNum.String.StartsWith("0x")) {
 
@@ -189,9 +198,9 @@ namespace FactorioBrowser.Mod.Loader {
          }
       }
 
-      private static ILuaTable GetRawData(Script sharedState) {
+      private static DynValue GetRawData(Script sharedState) {
          var rawData = sharedState.Globals.RawGet("data").Table.RawGet("raw");
-         return new MoonSharpTable(rawData.Table, rawData);
+         return rawData;
       }
 
       private void ModLogFunction(DynValue param) {

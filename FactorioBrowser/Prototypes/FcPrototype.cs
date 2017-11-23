@@ -11,6 +11,7 @@ namespace FactorioBrowser.Prototypes {
       [DataFieldMirror("name")]
       public string Name { get; private set; }
 
-      public IImmutableList<string> History => ImmutableList.Create("base"); // TODO
+      [DataFieldMirror("__mod__")]
+      public string SourceMod { get; private set; } = "base";
    }
 }

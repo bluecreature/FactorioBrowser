@@ -45,6 +45,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Mod\Loader\ChangeTracking.cs" />
     <Compile Include="Prototypes\FcModSettings.cs" />
     <Compile Include="IProgressReporter.cs" />
     <Compile Include="Mod\Loader\IFcModDataLoader.cs" />

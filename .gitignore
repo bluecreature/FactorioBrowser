@@ -8,5 +8,6 @@ artifacts/
 *.user
 *.suo
 *.userprefs
+*.VC.db
 *DS_Store
 *.sln.ide

@@ -61,7 +61,7 @@ namespace FactorioBrowser.UI.ViewModel {
             var groups = settings
                .Where(s => s.SettingType == SettingTypes.Startup)
                .Select(ToSettingValue)
-               .GroupBy(s => s.Definition.History[0]);
+               .GroupBy(s => s.Definition.SourceMod);
             SettingsByMod.Clear();
             SettingsByMod.AddRange(groups);
          } finally {
