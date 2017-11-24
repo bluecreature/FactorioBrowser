@@ -74,8 +74,7 @@ namespace FactorioBrowser.Mod.Finder {
             return null;
          }
 
-         FcVersion version = FcVersion.FromDotNotation(info.Version);
-         return new FcModMetaInfo(sourcePath, depType, info.Name, version, info.Dependencies);
+         return new FcModMetaInfo(sourcePath, depType, info.Name, info.Version, info.Dependencies);
       }
 
       private InfoJson ReadDirModeInfo(string sourcePath) {

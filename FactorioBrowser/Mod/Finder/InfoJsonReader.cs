@@ -11,17 +11,19 @@ namespace FactorioBrowser.Mod.Finder {
 
    public class InfoJson {
       public string Name { get; }
-      public string Version { get; } // TODO : switch for FcVersion
+
+      public FcVersion Version { get; }
+
       public FcModDependency[] Dependencies { get; }
 
-      public InfoJson(string name, string version, FcModDependency[] dependencies) {
+      public InfoJson(string name, FcVersion version, FcModDependency[] dependencies) {
          Name = name;
          Version = version;
          Dependencies = dependencies;
       }
 
       public override string ToString() {
-         return $"info.json {{ name: {Name}, version: {Version}, " +
+         return $"info.json {{ name: {Name}, version: {Version.ToDotNotation()}, " +
                 $"dependencies: [{String.Join("", Dependencies.Select(d => d.ToString()))}] }}";
       }
    }
@@ -55,7 +57,9 @@ namespace FactorioBrowser.Mod.Finder {
             deps = ParseDependencies(rawDeps);
          }
 
-         return new InfoJson(name, version, deps);
+         var parsedVersion = FcVersion.FromDotNotation(version);
+
+         return new InfoJson(name, parsedVersion, deps);
       }
 
       private object RequireKey(Dictionary<string, object> info, string key) {

@@ -21,7 +21,7 @@ namespace FactorioBrowserTests.Mod.Finder {
          }");
 
          Assert.AreEqual("testName", info.Name);
-         Assert.AreEqual("0.0.1", info.Version);
+         Assert.AreEqual(new FcVersion(0, 0, 1), info.Version);
          Assert.IsEmpty(info.Dependencies);
       }
 
