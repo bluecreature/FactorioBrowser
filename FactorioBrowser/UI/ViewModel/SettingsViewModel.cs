@@ -14,23 +14,36 @@ namespace FactorioBrowser.UI.ViewModel {
 
       public FcModSetting Definition { get; }
 
+      public string LocalizedName { get; }
+
+      public string LocalizedDescription { get; }
+
       public object Value { get; set; }
 
-      public FcModSettingValue(FcModSetting definition, object value) {
+      public FcModSettingValue(FcModSetting definition, object value,
+         string localizedName, string localizedDescription) {
+
          Definition = definition;
          Value = value;
+         LocalizedDescription = localizedDescription;
+         LocalizedName = localizedName;
       }
    }
 
    public sealed class SettingsViewModel : BindableBase {
+      private static readonly IImmutableList<string> DefaultLocalePreference = new[] { "en" }.ToImmutableList();
+
       private readonly IFcModDataLoader _dataLoader;
+      private readonly IFcLocalizationLoader _localizationLoader;
       private readonly IImmutableList<FcModFileInfo> _modsToLoad;
 
+      private ILocalizationDirectory _localizationDirectory;
       private bool _isBusy;
 
       public SettingsViewModel(IFcModDataLoader dataLoader,
-         IImmutableList<FcModFileInfo> modsToLoad) {
+         IFcLocalizationLoader localizationLoader, IImmutableList<FcModFileInfo> modsToLoad) {
          _dataLoader = dataLoader;
+         _localizationLoader = localizationLoader;
          _modsToLoad = modsToLoad;
          SettingsByMod = new ObservableCollection<IGrouping<string, FcModSettingValue>>();
       }
@@ -56,6 +69,8 @@ namespace FactorioBrowser.UI.ViewModel {
       public async Task LoadData() {
          IsBusy = true;
          try {
+            _localizationDirectory = await Task.Factory.StartNew(
+               () => _localizationLoader.LoadLocalizationTables(_modsToLoad));
             var settings = await Task.Factory.StartNew(
                () => _dataLoader.LoadSettings(_modsToLoad));
             var groups = settings
@@ -69,7 +84,8 @@ namespace FactorioBrowser.UI.ViewModel {
          }
       }
 
-      private static FcModSettingValue ToSettingValue(FcModSetting definition) {
+      private FcModSettingValue ToSettingValue(FcModSetting definition) {
+
          Debug.Assert(definition != null);
 
          object defaultValue;
@@ -90,7 +106,14 @@ namespace FactorioBrowser.UI.ViewModel {
                $"Internal error/incomplete implementation for FcModSetting of type {definition.GetType()}");
          }
 
-         return new FcModSettingValue(definition, defaultValue);
+         string localizedName = _localizationDirectory.GetLocalizedName(
+            "mod-setting-name", definition.Name, DefaultLocalePreference);
+         string localizedDescription = _localizationDirectory.GetLocalizedName(
+            "mod-setting-description", definition.Name, DefaultLocalePreference);
+
+         return new FcModSettingValue(definition, defaultValue,
+            localizedName: localizedName ?? definition.Name,
+            localizedDescription: localizedDescription);
       }
    }
 }

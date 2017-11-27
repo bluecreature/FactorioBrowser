@@ -76,6 +76,7 @@ namespace FactorioBrowser.UI {
          Bind<IFcModFinder>().ToMethod(CreateModFinder);
          Bind<IFcModSorter>().To<DefaultFcModSorter>();
          Bind<IFcModDataLoader>().ToMethod(CreateModDataLoader);
+         Bind<IFcLocalizationLoader>().To<DefaultLocalizationLoader>();
          Bind<IFcSettingDefsUnpacker>().To<DefaultSettingDefsUnpacker>();
          Bind<IFcPrototypeUnpacker>().To<DefaultPrototypeUnpacker>();
          Bind<IViewModelsFactory>().ToFactory();

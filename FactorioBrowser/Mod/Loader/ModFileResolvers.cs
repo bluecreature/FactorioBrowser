@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text.RegularExpressions;
+using FactorioBrowser.Mod.Finder;
+using Ninject.Infrastructure.Language;
 using NLog;
 
 namespace FactorioBrowser.Mod.Loader {
@@ -10,7 +15,7 @@ namespace FactorioBrowser.Mod.Loader {
    internal interface IModFileResolver : IDisposable {
 
       /// <summary>
-      /// Checks whether the supplied <param name="relPath">path</param> exists.
+      /// Checks whether there exists a file with the supplied <param name="relPath">path</param>.
       /// </summary>
       bool Exists(string relPath);
 
@@ -19,6 +24,12 @@ namespace FactorioBrowser.Mod.Loader {
       /// No check is performed whether it actually exists.
       /// </summary>
       string FriendlyName(string relPath);
+
+      /// <summary>
+      /// Returns the list of files (and files only, no child directories) in the specified
+      /// directory. If no such directory exists, an empty list is returned.
+      /// </summary>
+      IImmutableList<string> ListDirectory(string relPath);
 
       /// <summary>
       /// Open the file at the supplied <param name="relPath">path</param> for
@@ -41,16 +52,38 @@ namespace FactorioBrowser.Mod.Loader {
       }
 
       public bool Exists(string relPath) {
-         string fullPath = GetFilePath(relPath);
+         string fullPath = GetFullPath(relPath);
          return File.Exists(fullPath);
       }
 
       public string FriendlyName(string relPath) {
-         return GetFilePath(relPath);
+         return GetFullPath(relPath);
       }
 
+      public IImmutableList<string> ListDirectory(string relPath) {
+         string fullPath = GetFullPath(relPath);
+         try {
+            if (File.GetAttributes(fullPath).HasFlag(FileAttributes.Directory)) {
+               var entries = Directory.GetFileSystemEntries(fullPath)
+                  .Where(e => !File.GetAttributes(e).HasFlag(FileAttributes.Directory))
+                  .ToImmutableList();
+               return entries;
+
+            } else {
+               return ImmutableList.Create<string>();
+            }
+
+         } catch (FileNotFoundException) {
+            return ImmutableList.Create<string>();
+
+         } catch (DirectoryNotFoundException) {
+            return ImmutableList.Create<string>();
+         }
+      }
+
+
       public Stream Open(string relPath) {
-         string fullPath = GetFilePath(relPath);
+         string fullPath = GetFullPath(relPath);
          Log.Trace("Loading file {0}", fullPath);
          try {
             return new FileStream(fullPath, FileMode.Open, FileAccess.Read);
@@ -60,7 +93,7 @@ namespace FactorioBrowser.Mod.Loader {
          }
       }
 
-      private string GetFilePath(string relPath) {
+      private string GetFullPath(string relPath) {
          return Path.GetFullPath(Path.Combine(_path, PathTools.NormalizePath(relPath)));
       }
    }
@@ -91,6 +124,16 @@ namespace FactorioBrowser.Mod.Loader {
          return Path.Combine(
             Path.GetFullPath(_modFilePath),
             GetEntryPath(relPath));
+      }
+
+      public IImmutableList<string> ListDirectory(string relPath) {
+         string entryPath = GetEntryPath(relPath);
+         return _modFile.Entries
+            .Select(e => e.FullName)
+            .Where(e => e.StartsWith(entryPath, StringComparison.OrdinalIgnoreCase) &&
+                  !e.EndsWith("/", StringComparison.OrdinalIgnoreCase))
+            .Select(e => e.Substring(_entryBaseName.Length + 1))
+            .ToImmutableList();
       }
 
       public Stream Open(string relPath) {
@@ -175,6 +218,17 @@ namespace FactorioBrowser.Mod.Loader {
          return relPath;
       }
 
+      public IImmutableList<string> ListDirectory(string relPath) {
+         IModFileResolver resolver;
+         string modRelPath;
+         if (RouteToSpecificResolver(relPath, out resolver, out modRelPath)) {
+            return resolver.ListDirectory(modRelPath);
+
+         } else {
+            return ImmutableList.Create<string>();
+         }
+      }
+
       public Stream Open(string relPath) {
          IModFileResolver resolver;
          string modRelPath;
@@ -199,6 +253,19 @@ namespace FactorioBrowser.Mod.Loader {
          } else {
             modRelPath = match.Groups[2].Value;
             return true;
+         }
+      }
+   }
+
+   internal static class ModFileResolverFactory {
+
+      public static IModFileResolver CreateResolver(FcModFileInfo modInfo) {
+         if (modInfo.DeploymentType == FcModDeploymentType.Directory) {
+            return new DirModFileResolver(modInfo.Path);
+
+         } else {
+            Debug.Assert(modInfo.DeploymentType == FcModDeploymentType.ZipFile);
+            return new ZipModFileResolver(modInfo.Path, modInfo.ZipEntryBaseName);
          }
       }
    }
