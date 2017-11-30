@@ -44,24 +44,26 @@ namespace FactorioBrowser.Mod.Loader {
       }
 
       public IImmutableList<FcModSetting> LoadSettings(IEnumerable<FcModFileInfo> mods) {
-         var rawData = LoadEntryPoints(mods, null, SettingsEntrypoints);
+         var rawData = LoadEntryPoints(mods, SettingsEntrypoints,
+            settings: null, enableTracking: true);
          return _settingDefsUnpacker.Unpack(rawData);
       }
 
       public FcPrototypes LoadPrototypes(IEnumerable<FcModFileInfo> mods,
          IImmutableDictionary<string, object> settings) {
 
-         var rawData = LoadEntryPoints(mods, settings, PrototypesEntrypoints);
+         var rawData = LoadEntryPoints(mods, PrototypesEntrypoints,
+            settings: settings, enableTracking: false);
          return _prototypeUnpacker.Unpack(rawData);
       }
 
-      private ILuaTable LoadEntryPoints(IEnumerable<FcModFileInfo> mods,
-         IImmutableDictionary<string, object> settings, EntryPoint[] entryPoints) {
+      private ILuaTable LoadEntryPoints(IEnumerable<FcModFileInfo> mods, EntryPoint[] entryPoints,
+         IImmutableDictionary<string, object> settings, bool enableTracking) {
 
          Script sharedState = SetupLuaState();
 
          DynValue dataRaw = GetRawData(sharedState);
-         ChangeTracking changeTracking = new ChangeTracking(sharedState, dataRaw.Table);
+         ChangeTracking changeTracking = enableTracking ? new ChangeTracking(sharedState, dataRaw.Table) : null;
 
          if (settings != null) {
             sharedState.Globals["settings"] = CreateSettingsTable(sharedState, settings);
@@ -75,9 +77,9 @@ namespace FactorioBrowser.Mod.Loader {
          var stageLoader = new EntryPointLoader(coreLibLoader, sharedState);
          foreach (var stage in entryPoints) {
             foreach (var modFile in combinedModList) {
-               changeTracking.CurrentMod = modFile.Name;
+               changeTracking?.SetCurrentMod(modFile.Name);
                stageLoader.LoadEntryPoint(modFile, stage);
-               changeTracking.CurrentMod = null;
+               changeTracking?.SetCurrentMod(null);
             }
          }
 
