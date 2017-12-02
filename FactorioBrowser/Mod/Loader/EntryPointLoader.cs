@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using FactorioBrowser.Mod.Finder;
 using MoonSharp.Interpreter;
 using NLog;
 
@@ -24,7 +23,7 @@ namespace FactorioBrowser.Mod.Loader {
 
       public void LoadEntryPoint(FcModFileInfo fileInfo, EntryPoint entryPoint) {
          string entryPointFn = entryPoint.Filename();
-         using (IModFileResolver resolver = CreateFileResolver(fileInfo)) {
+         using (IModFileResolver resolver = ModFileResolverFactory.CreateResolver(fileInfo)) {
             if (resolver.Exists(entryPointFn)) {
                Log.Debug("Loading entry point {0} from mod {1}", entryPoint, fileInfo.Name);
                LoadEntryPointWithResolver(resolver, entryPointFn);
@@ -49,17 +48,6 @@ namespace FactorioBrowser.Mod.Loader {
             _sharedState.Globals["require"] = originalRequireFunction;
          }
       }
-
-      private IModFileResolver CreateFileResolver(FcModFileInfo file) {
-         if (file.DeploymentType == FcModDeploymentType.Directory) {
-            return new DirModFileResolver(file.Path);
-
-         } else {
-            Debug.Assert(file.DeploymentType == FcModDeploymentType.ZipFile);
-            return new ZipModFileResolver(file.Path, file.ZipEntryBaseName);
-         }
-      }
-
 
       private sealed class ModLocalRequireImpl {
 
