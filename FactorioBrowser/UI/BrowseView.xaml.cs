@@ -1,4 +1,8 @@
-﻿using System.Windows;
+﻿using System;
+using System.Globalization;
+using System.Windows;
+using System.Windows.Data;
+using System.Windows.Media;
 using FactorioBrowser.Prototypes;
 using FactorioBrowser.UI.ViewModel;
 using GraphX.PCL.Common.Enums;
@@ -8,6 +12,54 @@ using GraphX.PCL.Logic.Models;
 using QuickGraph;
 
 namespace FactorioBrowser.UI {
+
+   [ValueConversion(typeof(string), typeof(ImageSource))]
+   public sealed class ItemTypeIconSelector : IValueConverter {
+
+      public ImageSource ItemIcon { get; set; }
+
+      public ImageSource FluidIcon { get; set; }
+
+      public ImageSource ToolIcon { get; set; }
+
+      public ImageSource ModuleIcon { get; set; }
+
+      public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
+         switch (value?.ToString().ToLower()) {
+            case "item":
+               return ItemIcon;
+
+            case "fluid":
+               return FluidIcon;
+
+            case "tool":
+               return ToolIcon;
+
+            case "module":
+               return ModuleIcon;
+
+            default:
+               throw new NotImplementedException();
+         }
+      }
+
+      public object ConvertBack(object value, Type targetType, object parameter,
+         CultureInfo culture) {
+         throw new NotImplementedException();
+      }
+   }
+
+   public sealed class ItemIconLoader : IValueConverter {
+      public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
+         throw new NotImplementedException();
+      }
+
+      public object ConvertBack(object value, Type targetType, object parameter,
+         CultureInfo culture) {
+
+         throw new NotImplementedException();
+      }
+   }
 
    /// <summary>
    /// Interaction logic for BrowseWindow.xaml
@@ -23,9 +75,6 @@ namespace FactorioBrowser.UI {
 
          TechGraph.LogicCore = CreateTechGraphLogic();
          TechGraph.SetVerticesDrag(true);
-
-         ItemGraph.LogicCore = CreateItemRecipeGraphLogic<ItemGraphLogic, FcItem>();
-         ItemGraph.SetVerticesDrag(true);
 
          RecipeGraph.LogicCore = CreateItemRecipeGraphLogic<RecipeGraphLogic, FcRecipe>();
          RecipeGraph.SetVerticesDrag(true);
@@ -98,9 +147,6 @@ namespace FactorioBrowser.UI {
          await _viewModel.LoadData();
          TechGraph.GenerateGraph(_viewModel.TechnologyGraph);
          TechGraphZoom.ZoomToFill();
-
-         ItemGraph.GenerateGraph(_viewModel.ItemGraph);
-         ItemGraphZoom.ZoomToFill();
       }
    }
 }

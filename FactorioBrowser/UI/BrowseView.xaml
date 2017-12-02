@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:FactorioBrowser.UI.ViewModel"
+        xmlns:ui="clr-namespace:FactorioBrowser.UI"
         xmlns:wpfx="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:gx="http://schemas.panthernet.ru/graphx/"
         mc:Ignorable="d"
@@ -13,76 +14,82 @@
         d:DataContext="{d:DesignInstance views:BrowseViewModel, IsDesignTimeCreatable=False}"
         Loaded="BrowseView_OnLoaded">
 
+   <UserControl.Resources>
+      <ui:ItemTypeIconSelector x:Key="ItemTypeIconSelector">
+         <ui:ItemTypeIconSelector.ItemIcon>
+            <BitmapImage UriSource="../Resources/Icons/item.png" />
+         </ui:ItemTypeIconSelector.ItemIcon>
+         <ui:ItemTypeIconSelector.FluidIcon>
+            <BitmapImage UriSource="../Resources/Icons/fluid.png" />
+         </ui:ItemTypeIconSelector.FluidIcon>
+         <ui:ItemTypeIconSelector.ToolIcon>
+            <BitmapImage UriSource="../Resources/Icons/tool.png" />
+         </ui:ItemTypeIconSelector.ToolIcon>
+         <ui:ItemTypeIconSelector.ModuleIcon>
+            <BitmapImage UriSource="../Resources/Icons/module.png" />
+         </ui:ItemTypeIconSelector.ModuleIcon>
+      </ui:ItemTypeIconSelector>
+
+      <Style x:Key="GridTextCellStyle" TargetType="TextBlock">
+         <Setter Property="VerticalAlignment" Value="Center" />
+      </Style>
+   </UserControl.Resources>
+
    <wpfx:BusyIndicator IsBusy="{Binding IsBusy}" BusyContent="Loading...">
       <ContentControl.Content>
          <TabControl>
             <TabItem Header="Items">
                <Grid>
                   <Grid.ColumnDefinitions>
-                     <ColumnDefinition Width="20*" />
+                     <ColumnDefinition Width="70*" />
                      <ColumnDefinition Width="5" />
-                     <ColumnDefinition Width="60*" />
-                     <ColumnDefinition Width="5" />
-                     <ColumnDefinition Width="20*" />
+                     <ColumnDefinition Width="30*" />
                   </Grid.ColumnDefinitions>
 
                   <DockPanel Grid.Column="0">
                      <TextBox DockPanel.Dock="Top" />
-                     <ListBox ItemsSource="{Binding Items}">
-                        <ListBox.ItemTemplate>
-                           <DataTemplate>
-                              <TextBlock Text="{Binding Name}" />
-                           </DataTemplate>
-                        </ListBox.ItemTemplate>
-                     </ListBox>
+                     <StatusBar DockPanel.Dock="Bottom">
+                        <StatusBarItem>
+                           <StackPanel Orientation="Horizontal">
+                              <TextBlock Text="Total: " />
+                              <TextBlock Text="{Binding Path=Items.Count}" />
+                           </StackPanel>
+                        </StatusBarItem>
+                     </StatusBar>
+                     <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False"
+                        IsReadOnly="True" GridLinesVisibility="None">
+                        <DataGrid.Columns>
+                           <DataGridTemplateColumn>
+                              <DataGridTemplateColumn.CellTemplate>
+                                 <DataTemplate>
+                                    <Image Source="{Binding Path=Type, Converter={StaticResource ItemTypeIconSelector}}">
+                                       <Image.ToolTip>
+                                          <ToolTip>
+                                             <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="Category: " FontWeight="Bold" />
+                                                <TextBlock Text="{Binding Path=Type}" />
+                                             </StackPanel>
+                                          </ToolTip>
+                                       </Image.ToolTip>
+                                    </Image>
+                                 </DataTemplate>
+                              </DataGridTemplateColumn.CellTemplate>
+                           </DataGridTemplateColumn>
+                           <DataGridTemplateColumn>
+                              <DataGridTemplateColumn.CellTemplate>
+                                 <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Icon}" />
+                                 </DataTemplate>
+                              </DataGridTemplateColumn.CellTemplate>
+                           </DataGridTemplateColumn>
+                           <DataGridTextColumn
+                              ElementStyle="{StaticResource GridTextCellStyle}"
+                              Binding="{Binding Name}" />
+                        </DataGrid.Columns>
+                     </DataGrid>
                   </DockPanel>
 
-                  <GridSplitter
-                     Grid.Column="1"
-                     HorizontalAlignment="Stretch"
-                     VerticalAlignment="Stretch" />
-
-                  <gx:ZoomControl
-                     x:Name="ItemGraphZoom"
-                     Grid.Column="2"
-                     VerticalAlignment="Stretch"
-                     HorizontalAlignment="Stretch">
-                     <gx:ZoomControl.Resources>
-                        <Style TargetType="{x:Type gx:VertexControl}">
-                           <Setter Property="Template">
-                              <Setter.Value>
-                                 <ControlTemplate TargetType="{x:Type gx:VertexControl}">
-                                    <Border>
-                                       <Border.Style>
-                                          <Style TargetType="Border">
-                                             <Setter Property="Background" Value="LightGreen" />
-                                             <Setter Property="CornerRadius" Value="5" />
-                                             <Setter Property="BorderThickness" Value="1" />
-                                             <Setter Property="BorderBrush" Value="Navy" />
-                                          </Style>
-                                       </Border.Style>
-                                       <TextBlock
-                                          Grid.Column="0" Text="{Binding Data.Name}" Foreground="Black"
-                                          Margin="5,0,5,0"  />
-                                    </Border>
-                                 </ControlTemplate>
-                              </Setter.Value>
-                           </Setter>
-                        </Style>
-                     </gx:ZoomControl.Resources>
-                     <views:ItemGraphControl
-                        x:Name="ItemGraph"
-                        AutoAssignMissingDataId="True"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch" />
-                  </gx:ZoomControl>
-
-                  <GridSplitter
-                     Grid.Column="3"
-                     HorizontalAlignment="Stretch"
-                     VerticalAlignment="Stretch" />
-
-                  <Canvas Grid.Column="4" Background="Blue" />
+                  <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
                </Grid>
             </TabItem>
             <TabItem Header="Recipes">
@@ -128,7 +135,10 @@
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Stretch" />
 
-                  <Canvas Grid.Column="4" Background="Blue" />
+                  <StackPanel Grid.Column="4" Orientation="Horizontal">
+                     <TextBlock Text="Item count: "/>
+                     <TextBlock Text="{Binding Path=Recipes.Count}" />
+                  </StackPanel>
                </Grid>
             </TabItem>
             <TabItem Header="Technologies">
@@ -196,7 +206,10 @@
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Stretch" />
 
-                  <Canvas Grid.Column="4" Background="Blue" />
+                  <StackPanel Grid.Column="4" Orientation="Horizontal">
+                     <TextBlock Text="Item count: "/>
+                     <TextBlock Text="{Binding Path=Technologies.Count}" />
+                  </StackPanel>
                </Grid>
             </TabItem>
          </TabControl>
