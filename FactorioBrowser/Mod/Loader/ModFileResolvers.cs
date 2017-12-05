@@ -195,17 +195,22 @@ namespace FactorioBrowser.Mod.Loader {
       }
    }
 
-   internal sealed class AssetPathFileResolver : IModFileResolver {
+   internal sealed class PathRoutingFileResolver : IModFileResolver {
       private static readonly char[] PathSeparators = {
          Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar
 
       };
 
       private static readonly Regex QualifiedPathPattern = new Regex("^__([^/]+)__/(.+)$");
-      private readonly IDictionary<string, IModFileResolver> _modSpecificResolvers;
+      private readonly IImmutableDictionary<string, IModFileResolver> _modSpecificResolvers;
 
-      public AssetPathFileResolver(IDictionary<string, IModFileResolver> modSpecificResolvers) {
-         _modSpecificResolvers = modSpecificResolvers;
+      public PathRoutingFileResolver(IEnumerable<FcModFileInfo> modList) {
+         var resolverDictBuilder = ImmutableDictionary.CreateBuilder<string, IModFileResolver>();
+         foreach (var modInfo in modList) {
+            resolverDictBuilder.Add(modInfo.Name, ModFileResolverFactory.CreateResolver(modInfo));
+         }
+
+         _modSpecificResolvers = resolverDictBuilder.ToImmutable();
       }
 
       public bool Exists(string relPath) {
@@ -241,9 +246,14 @@ namespace FactorioBrowser.Mod.Loader {
       }
 
       public void Dispose() {
+         foreach (var modFileResolver in _modSpecificResolvers.Values) {
+            modFileResolver.Dispose();
+         }
       }
 
-      private bool RouteToSpecificResolver(string relPath, out IModFileResolver resolver, out string modRelPath) {
+      private bool RouteToSpecificResolver(string relPath, out IModFileResolver resolver,
+         out string modRelPath) {
+
          resolver = null;
          modRelPath = null;
          var match = QualifiedPathPattern.Match(relPath);
@@ -267,6 +277,10 @@ namespace FactorioBrowser.Mod.Loader {
             Debug.Assert(modInfo.DeploymentType == FcModDeploymentType.ZipFile);
             return new ZipModFileResolver(modInfo.Path, modInfo.ZipEntryBaseName);
          }
+      }
+
+      public static IModFileResolver CreateRoutingResolver(IEnumerable<FcModFileInfo> modList) {
+         return new PathRoutingFileResolver(modList);
       }
    }
 }

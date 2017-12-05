@@ -1,8 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using FactorioBrowser.Mod.Loader;
 using FactorioBrowser.Prototypes;
 using FactorioBrowser.Prototypes.Unpacker;
@@ -15,11 +20,45 @@ using TechnologyGraph = QuickGraph.BidirectionalGraph<
 
 namespace FactorioBrowser.UI.ViewModel {
 
-   public sealed class BrowseViewModel : BindableBase {
+   public sealed class ImageAssetsCache : IDisposable {
+      private readonly IModFileResolver _assetsResolver;
+      private readonly ConcurrentDictionary<string, ImageSource> _cache;
+
+      public ImageAssetsCache(IEnumerable<FcModFileInfo> modList) {
+         _assetsResolver = ModFileResolverFactory.CreateRoutingResolver(modList);
+         _cache = new ConcurrentDictionary<string, ImageSource>();
+      }
+
+      public ImageSource GetImage(string path) {
+         return _cache.GetOrAdd(path, LoadImage);
+      }
+
+      public void Dispose() {
+         _assetsResolver.Dispose();
+      }
+
+      private ImageSource LoadImage(string path) {
+         Stream stream = null;
+         try {
+            stream = _assetsResolver.Open(path);
+            var imageSource = new BitmapImage();
+            imageSource.BeginInit();
+            imageSource.CacheOption = BitmapCacheOption.OnLoad;
+            imageSource.StreamSource = stream;
+            imageSource.EndInit();
+            return imageSource;
+         } finally {
+            stream?.Close();
+         }
+      }
+   }
+
+   public sealed class BrowseViewModel : BindableBase, IDisposable {
 
       private readonly IFcModDataLoader _modLoader;
       private readonly IImmutableList<FcModFileInfo> _modsToLoad;
       private readonly IImmutableDictionary<string, object> _modSettings;
+      private readonly ImageAssetsCache _imageCache;
 
       private bool _isBusy;
 
@@ -30,6 +69,7 @@ namespace FactorioBrowser.UI.ViewModel {
          _modLoader = modLoader;
          _modsToLoad = modsToLoad;
          _modSettings = modSettings;
+         _imageCache = new ImageAssetsCache(modsToLoad);
          _isBusy = false;
          Items = new ObservableCollection<FcItem>();
          Recipes = new ObservableCollection<FcRecipe>();
@@ -46,6 +86,8 @@ namespace FactorioBrowser.UI.ViewModel {
          }
       }
 
+      public ImageAssetsCache ImageCache => _imageCache;
+
       public ObservableCollection<FcItem> Items { get; }
 
       public ObservableCollection<FcRecipe> Recipes { get; }
@@ -53,6 +95,10 @@ namespace FactorioBrowser.UI.ViewModel {
       public ObservableCollection<FcTechnology> Technologies { get; }
 
       public TechnologyGraph TechnologyGraph { get; private set; }
+
+      public void Dispose() {
+         _imageCache.Dispose();
+      }
 
       public async Task LoadData() {
          IsBusy = true;

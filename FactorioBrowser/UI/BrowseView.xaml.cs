@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -49,14 +50,26 @@ namespace FactorioBrowser.UI {
       }
    }
 
-   public sealed class ItemIconLoader : IValueConverter {
-      public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-         throw new NotImplementedException();
+   public sealed class ItemIconLoader : IMultiValueConverter {
+
+      public ImageSource MissingImagePlaceholder { get; set; }
+
+      public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture) {
+         string path = values[0] as string;
+         ImageAssetsCache imageCache = values[1] as ImageAssetsCache;
+         if (path == null || imageCache == null) {
+            return null;
+         }
+
+         try {
+            return imageCache.GetImage(path);
+
+         } catch (FileNotFoundException) {
+            return MissingImagePlaceholder;
+         }
       }
 
-      public object ConvertBack(object value, Type targetType, object parameter,
-         CultureInfo culture) {
-
+      public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) {
          throw new NotImplementedException();
       }
    }
