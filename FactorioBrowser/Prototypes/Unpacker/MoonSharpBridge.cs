@@ -4,6 +4,7 @@ using System.Diagnostics;
 using MoonSharp.Interpreter;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
+
    internal class MoonSharpVariantValue : ILuaVariant {
       private readonly DynValue _value;
 
@@ -55,7 +56,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
       public ILuaTable AsTable {
          get {
             EnsureType(LuaValueType.Table);
-            return new MoonSharpTable(_value.Table, _value);
+            return new MoonSharpTable(_value.Table);
          }
       }
 
@@ -83,11 +84,9 @@ namespace FactorioBrowser.Prototypes.Unpacker {
 
    internal class MoonSharpTable : ILuaTable {
       private readonly Table _table;
-      private readonly DynValue _self;
 
-      public MoonSharpTable(Table table, DynValue origValue) {
+      public MoonSharpTable(Table table) {
          _table = table;
-         _self = origValue;
       }
 
       public IEnumerable<ILuaVariant> Keys() {
@@ -112,10 +111,6 @@ namespace FactorioBrowser.Prototypes.Unpacker {
          var rawValue = _table.RawGet(key);
          return rawValue == null || rawValue.Type == DataType.Nil ? null :
             new MoonSharpVariantValue(rawValue);
-      }
-
-      public ILuaVariant Self() {
-         return new MoonSharpVariantValue(_self ?? DynValue.NewTable(_table));
       }
    }
 }

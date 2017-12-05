@@ -104,7 +104,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
                "SelfMirror without CustomUnpacker is not implemented.");
          }
 
-         HandleCustomUnpacker(target, data.Self(), path, propInfo, customUnpacker);
+         HandleCustomUnpacker(target, data.ToVariant(), path, propInfo, customUnpacker);
       }
 
       private void HandleCustomUnpacker(T target, ILuaVariant data, string path,

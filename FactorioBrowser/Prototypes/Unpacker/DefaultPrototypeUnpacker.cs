@@ -8,7 +8,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
 
       public FcPrototypes Unpack(ILuaTable dataRaw) {
          var unpacked = new UnpackerDispatcher().
-            Unpack<IDictionary<string, IDictionary<string, FcPrototype>>>(dataRaw.Self(), "data.raw");
+            Unpack<IDictionary<string, IDictionary<string, FcPrototype>>>(dataRaw.ToVariant(), "data.raw");
 
          IList<FcItem> items = new List<FcItem>();
          IList<FcRecipe>recipes = new List<FcRecipe>();

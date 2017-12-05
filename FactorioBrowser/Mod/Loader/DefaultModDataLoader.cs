@@ -62,8 +62,8 @@ namespace FactorioBrowser.Mod.Loader {
 
          Script sharedState = SetupLuaState();
 
-         DynValue dataRaw = GetRawData(sharedState);
-         ChangeTracking changeTracking = enableTracking ? new ChangeTracking(sharedState, dataRaw.Table) : null;
+         Table dataRaw = GetRawData(sharedState);
+         ChangeTracking changeTracking = enableTracking ? new ChangeTracking(sharedState, dataRaw) : null;
 
          if (settings != null) {
             sharedState.Globals["settings"] = CreateSettingsTable(sharedState, settings);
@@ -83,7 +83,7 @@ namespace FactorioBrowser.Mod.Loader {
             }
          }
 
-         return new MoonSharpTable(dataRaw.Table, dataRaw);
+         return new MoonSharpTable(dataRaw);
       }
 
       private Script SetupLuaState() {
@@ -200,9 +200,9 @@ namespace FactorioBrowser.Mod.Loader {
          }
       }
 
-      private static DynValue GetRawData(Script sharedState) {
+      private static Table GetRawData(Script sharedState) {
          var rawData = sharedState.Globals.RawGet("data").Table.RawGet("raw");
-         return rawData;
+         return rawData.Table;
       }
 
       private void ModLogFunction(DynValue param) {

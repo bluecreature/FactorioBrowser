@@ -6,7 +6,7 @@ namespace FactorioBrowser.Prototypes.Unpacker {
    internal sealed class DefaultSettingDefsUnpacker : IFcSettingDefsUnpacker {
       public IImmutableList<FcModSetting> Unpack(ILuaTable dataRaw) {
          var unpacked = new UnpackerDispatcher().
-            Unpack<IDictionary<string, IDictionary<string, FcPrototype>>>(dataRaw.Self(), "data.raw");
+            Unpack<IDictionary<string, IDictionary<string, FcPrototype>>>(dataRaw.ToVariant(), "data.raw");
 
          IList<FcModSetting> settings = new List<FcModSetting>();
          foreach (var category in unpacked.Values) {

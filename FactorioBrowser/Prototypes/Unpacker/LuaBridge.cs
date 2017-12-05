@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace FactorioBrowser.Prototypes.Unpacker {
+
    public enum LuaValueType {
       Nil,
       Boolean,
@@ -28,7 +30,42 @@ namespace FactorioBrowser.Prototypes.Unpacker {
       IEnumerable<KeyValuePair<ILuaVariant, ILuaVariant>> Entries();
 
       ILuaVariant Get(object key);
+   }
 
-      ILuaVariant Self(); // TODO : refactor the unpackers to eliminate the need and remove
+   public static class LuaTableExtension {
+
+      public static ILuaVariant ToVariant(this ILuaTable table) {
+         return new TableVariantWrapper(table);
+
+      }
+
+      private class TableVariantWrapper : ILuaVariant {
+
+         public TableVariantWrapper(ILuaTable table) {
+            AsTable = table;
+         }
+
+         public LuaValueType ValueType => LuaValueType.Table;
+
+         public bool AsBoolean {
+            get {
+               throw new InvalidOperationException();
+            }
+         }
+
+         public double AsNumber {
+            get {
+               throw new InvalidOperationException();
+            }
+         }
+
+         public string AsString {
+            get {
+               throw new InvalidOperationException();
+            }
+         }
+
+         public ILuaTable AsTable { get; }
+      }
    }
 }
