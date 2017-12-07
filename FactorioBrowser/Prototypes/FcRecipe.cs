@@ -3,9 +3,60 @@ using FactorioBrowser.Prototypes.Unpacker;
 
 namespace FactorioBrowser.Prototypes {
 
+   public sealed class FcRecipeIngredient {
+
+      public string Item { get; }
+
+      public string ItemType { get; }
+
+      public int Count { get; }
+
+      public FcRecipeIngredient(string item, string itemType, int count) {
+         Item = item;
+         ItemType = itemType;
+         Count = count;
+      }
+
+      public FcRecipeIngredient(string item, int count) : this(item, "item", count) {
+      }
+   }
+
    [ModelMirror]
-   [TypeDiscriminatorField("type", "recipe")]
-   public sealed class FcRecipe : FcPrototype {
+   public sealed class FcRecipeProduct {
+
+      [DataFieldMirror("name")]
+      public string Item { get; private set; }
+
+      [DataFieldMirror("type")]
+      public string ItemType { get; private set; }
+
+      [DataFieldMirror("amount")]
+      public double Amount { get; private set; }
+
+      [DataFieldMirror("amount_min")]
+      public int AmountMin { get; private set; }
+
+      [DataFieldMirror("amount_max")]
+      public int AmountMax { get; private set; }
+
+      [DataFieldMirror("probability")]
+      public double Probability { get; private set; }
+
+      public FcRecipeProduct() {
+      }
+
+      public FcRecipeProduct(string item, double amount) {
+         Item = item;
+         ItemType = "item";
+         Amount = amount;
+         AmountMin = 0;
+         AmountMax = 0;
+         Probability = 1;
+      }
+   }
+
+   [ModelMirror]
+   public sealed class FcRecipeDefinition {
 
       [DataFieldMirror("enabled")]
       public bool Enabled { get; private set; }
@@ -18,11 +69,8 @@ namespace FactorioBrowser.Prototypes {
       [CustomUnpacker(nameof(UnpackResults))]
       public IList<FcRecipeProduct> Results { get; private set; }
 
-      [DataFieldMirror("icon")]
-      public string Icon { get; private set; }
-
-      [DataFieldMirror("category")]
-      public string Category { get; private set; }
+      [DataFieldMirror("energy_required")]
+      public double EnergyRequired { get; private set; }
 
       private static IList<FcRecipeProduct> UnpackResults(IVariantUnpacker unpacker,
          ILuaVariant recipe, string path) {
@@ -106,55 +154,37 @@ namespace FactorioBrowser.Prototypes {
       }
    }
 
-   public sealed class FcRecipeIngredient {
-
-      public string Item { get; }
-
-      public string ItemType { get; }
-
-      public int Count { get; }
-
-      public FcRecipeIngredient(string item, string itemType, int count) {
-         Item = item;
-         ItemType = itemType;
-         Count = count;
-      }
-
-      public FcRecipeIngredient(string item, int count) : this(item, "item", count) {
-      }
-   }
-
    [ModelMirror]
-   public sealed class FcRecipeProduct {
+   [TypeDiscriminatorField("type", "recipe")]
+   public sealed class FcRecipe : FcPrototype {
 
-      [DataFieldMirror("name")]
-      public string Item { get; private set; }
+      [DataFieldMirror("icon")]
+      public string Icon { get; private set; }
 
-      [DataFieldMirror("type")]
-      public string ItemType { get; private set; }
+      [DataFieldMirror("category")]
+      public string Category { get; private set; }
 
-      [DataFieldMirror("amount")]
-      public double Amount { get; private set; }
+      [SelfMirror]
+      [CustomUnpacker(nameof(NormalComplexityDefinitionUnpacker))]
+      public FcRecipeDefinition NormalComplexity { get; private set; }
 
-      [DataFieldMirror("amount_min")]
-      public int AmountMin { get; private set; }
+      [DataFieldMirror("expensive", required: false)]
+      public FcRecipeDefinition ExpensiveComplexity { get; private set; }
 
-      [DataFieldMirror("amount_max")]
-      public int AmountMax { get; private set; }
+      private static FcRecipeDefinition NormalComplexityDefinitionUnpacker(
+         IVariantUnpacker unpacker, ILuaVariant recipe, string path) {
 
-      [DataFieldMirror("probability")]
-      public double Probability { get; private set; }
+         // TODO : require table
+         var recipeTable = recipe.AsTable;
+         ILuaVariant explicitNormal = recipeTable.Get("normal");
+         FcRecipeDefinition normalComplexity;
+         if (explicitNormal != null) {
+            normalComplexity = unpacker.Unpack<FcRecipeDefinition>(explicitNormal, path = ".normal");
+         } else {
+            normalComplexity = unpacker.Unpack<FcRecipeDefinition>(recipe, path);
+         }
 
-      public FcRecipeProduct() {
-      }
-
-      public FcRecipeProduct(string item, double amount) {
-         Item = item;
-         ItemType = "item";
-         Amount = amount;
-         AmountMin = 0;
-         AmountMax = 0;
-         Probability = 1;
+         return normalComplexity;
       }
    }
 }
