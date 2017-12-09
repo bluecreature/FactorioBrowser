@@ -55,14 +55,14 @@ namespace FactorioBrowser.UI {
       public ImageSource MissingImagePlaceholder { get; set; }
 
       public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture) {
-         string path = values[0] as string;
-         ImageAssetsCache imageCache = values[1] as ImageAssetsCache;
-         if (path == null || imageCache == null) {
+         FcItem item = values[0] as FcItem;
+         IconCache imageCache = values[1] as IconCache;
+         if (item == null || imageCache == null) {
             return null;
          }
 
          try {
-            return imageCache.GetImage(path);
+            return imageCache.GetIcon(item);
 
          } catch (FileNotFoundException) {
             return MissingImagePlaceholder;

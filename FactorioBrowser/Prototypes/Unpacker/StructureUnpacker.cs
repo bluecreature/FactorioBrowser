@@ -83,7 +83,8 @@ namespace FactorioBrowser.Prototypes.Unpacker {
 
          if (rawValue == null) {
             if (dataFieldDef.Required) {
-               throw new PrototypeUnpackException(path);
+               throw new PrototypeUnpackException(
+                  message: $"Required table key is missing: {dataFieldDef.Name}", path: path);
             } else {
                PopulateDataField(target, propInfo, null);
             }
