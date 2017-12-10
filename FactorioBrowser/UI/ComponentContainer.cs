@@ -73,7 +73,7 @@ namespace FactorioBrowser.UI {
       }
 
       public override void Load() {
-         Bind<IFcModFinder>().ToMethod(CreateModFinder);
+         Bind<IFcModFinder>().To<DefaultFcModFinder>();
          Bind<IFcModSorter>().To<DefaultFcModSorter>();
          Bind<IFcModDataLoader>().ToMethod(CreateModDataLoader);
          Bind<IFcLocalizationLoader>().To<DefaultLocalizationLoader>();
@@ -81,11 +81,6 @@ namespace FactorioBrowser.UI {
          Bind<IFcPrototypeUnpacker>().To<DefaultPrototypeUnpacker>();
          Bind<IViewModelsFactory>().ToFactory();
          Bind<IViewsFactory>().To<ViewsFactoryImpl>();
-      }
-
-      private IFcModFinder CreateModFinder(IContext ctx) {
-         return new DefaultFcModFinder(
-            _settings.GamePath, _settings.ModsPath);
       }
 
       private IFcModDataLoader CreateModDataLoader(IContext ctx) {

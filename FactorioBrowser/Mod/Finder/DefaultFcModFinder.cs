@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Immutable;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -9,59 +8,64 @@ using NLog;
 namespace FactorioBrowser.Mod.Finder {
 
    public class DefaultFcModFinder : IFcModFinder {
-      private const string BaseModRelativePath = "data/base";
+      private const string BaseModName = "base";
+      private const string CoreModName = "core";
       private const string InfoJsonName = "info.json";
 
       private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-      private readonly string _gamePath;
-      private readonly string _modsPath;
-
-      public DefaultFcModFinder(string gamePath, string modsPath) {
-         Contract.Requires(gamePath != null);
-         Contract.Requires(modsPath != null);
-         _gamePath = gamePath;
-         _modsPath = modsPath;
-      }
-
-      public IImmutableList<FcModMetaInfo> FindAll() {
+      public FcModList FindAll(string gamePath, string modsPath) {
          var builder = ImmutableArray.CreateBuilder<FcModMetaInfo>(2);
 
-         var baseModInfo = ReadBaseMod();
+         var baseModInfo = ReadGameDataMod(gamePath, BaseModName, ReadModInfo);
          builder.Add(baseModInfo);
 
-         foreach (string modDirEntry in Directory.GetFileSystemEntries(_modsPath)) {
+         // The 'core' mod isn't (always?) versioned, so pretend its version is the same as the game's version.
+         var coreModInfo = ReadGameDataMod(gamePath, CoreModName,
+            (path) => ReadCoreModInfo(GameVersionFromBase(baseModInfo.Version), path));
+
+         foreach (string modDirEntry in Directory.GetFileSystemEntries(modsPath)) {
             var modInfo = ReadModInfo(modDirEntry);
             if (modInfo != null) {
                builder.Add(modInfo);
             }
          }
 
-         return builder.ToImmutable();
+         return new FcModList(coreModInfo, builder.ToImmutable());
       }
 
-      private FcModMetaInfo ReadBaseMod() {
-         string baseModPath = Path.Combine(_gamePath, BaseModRelativePath);
+      private FcModMetaInfo ReadGameDataMod(string gamePath, string modName,
+         Func<string, FcModMetaInfo> readerMethod) {
+         string baseModPath = Path.Combine(gamePath, "data", modName);
          if (!Directory.Exists(baseModPath)) {
-            throw new FcModInfoException($"Base data directory {baseModPath} is missing.");
+            throw new FcModInfoException($"Required data directory {baseModPath} is missing.");
          }
 
-         var baseInfo = ReadModInfo(baseModPath);
+         var baseInfo = readerMethod.Invoke(baseModPath);
          if (baseInfo == null) {
-            throw new FcModInfoException($"{InfoJsonName} missing in ${BaseModRelativePath}.");
+            throw new FcModInfoException($"{InfoJsonName} missing in ${baseModPath}.");
          }
 
          return baseInfo;
       }
 
+      private FcModMetaInfo ReadCoreModInfo(FcVersion gameVersion, string sourcePath) {
+         // TODO : less hacky way to handle a mod without a version?
+         return new FcModMetaInfo(sourcePath,
+            FcModDeploymentType.Directory,
+            CoreModName,
+            gameVersion,
+            dependencies: null);
+      }
+
       private FcModMetaInfo ReadModInfo(string sourcePath) {
          InfoJson info;
-         FcModDeploymentType depType;
+         FcModDeploymentType deploymentType;
          if (IsDir(sourcePath)) {
-            depType = FcModDeploymentType.Directory;
-            info = ReadDirModeInfo(sourcePath);
+            deploymentType = FcModDeploymentType.Directory;
+            info = ReadDirModInfo(sourcePath);
          } else if (sourcePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)) {
-            depType = FcModDeploymentType.ZipFile;
+            deploymentType = FcModDeploymentType.ZipFile;
             info = ReadZipModInfo(sourcePath);
 
          } else {
@@ -74,10 +78,10 @@ namespace FactorioBrowser.Mod.Finder {
             return null;
          }
 
-         return new FcModMetaInfo(sourcePath, depType, info.Name, info.Version, info.Dependencies);
+         return new FcModMetaInfo(sourcePath, deploymentType, info.Name, info.Version, info.Dependencies);
       }
 
-      private InfoJson ReadDirModeInfo(string sourcePath) {
+      private InfoJson ReadDirModInfo(string sourcePath) {
          string infoJsonPath = Path.Combine(sourcePath, InfoJsonName);
          if (File.Exists(infoJsonPath)) {
             using (var infoJsonReader = new StreamReader(
@@ -115,6 +119,10 @@ namespace FactorioBrowser.Mod.Finder {
 
       private InfoJson ReadInfoJson(string source, StreamReader reader) {
          return new InfoJsonReader(source, reader).Read();
+      }
+
+      private static FcVersion GameVersionFromBase(FcVersion version) {
+         return new FcVersion(version.Major, version.Minor, 0);
       }
 
       private static bool IsDir(string path) {

@@ -110,7 +110,6 @@ namespace FactorioBrowser.Mod.Finder {
          } else {
             requiredVersion = null;
          }
-         // TODO : support optional version requirement
 
          return new FcModDependency(modName, requiredVersion, optional);
       }

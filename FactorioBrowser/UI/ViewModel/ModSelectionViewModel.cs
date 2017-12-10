@@ -55,9 +55,11 @@ namespace FactorioBrowser.UI.ViewModel {
 
       private readonly IFcModFinder _modFinder;
       private readonly IFcModSorter _modSorter;
+      private readonly AppSettings _settings;
       private bool _isBusy;
 
-      public ModSelectionViewModel(IFcModFinder modFinder, IFcModSorter modSorter) {
+      public ModSelectionViewModel(AppSettings settings, IFcModFinder modFinder, IFcModSorter modSorter) {
+         _settings = settings; // TODO : replace with explicit parameters
          _modFinder = modFinder;
          _modSorter = modSorter;
          _isBusy = false;
@@ -99,7 +101,8 @@ namespace FactorioBrowser.UI.ViewModel {
       }
 
       private IImmutableList<SortStatus> FindAndSortMods() {
-         return _modSorter.Sort(_modFinder.FindAll());
+         FcModList mods = _modFinder.FindAll(_settings.GamePath, _settings.ModsPath);
+         return _modSorter.Sort(mods.SelectableMods);
       }
 
       private BidirectionalGraph<ModGraphVertex, ModGraphEdge> BuildDependencyGraph(

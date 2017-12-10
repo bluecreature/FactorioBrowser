@@ -28,9 +28,11 @@ namespace FactorioBrowser.Mod.Finder {
    }
 
    public sealed class FcVersionRequirement {
+
       public FcVersion Version { get; }
 
       public FcVersionRange Range { get; }
+
       public FcVersionRequirement(FcVersion version, FcVersionRange range) {
          Version = version;
          Range = range;
@@ -86,7 +88,23 @@ namespace FactorioBrowser.Mod.Finder {
       }
    }
 
+   public sealed class FcModList {
+
+      public FcModMetaInfo CoreMod { get; }
+
+      public IImmutableList<FcModMetaInfo> SelectableMods { get; }
+
+      public FcModList(FcModMetaInfo coreMod, IImmutableList<FcModMetaInfo> selectableMods) {
+         CoreMod = coreMod;
+         SelectableMods = selectableMods;
+      }
+   }
+
+   /// <summary>
+   /// The mod discovery entry point.
+   /// </summary>
    public interface IFcModFinder {
-      IImmutableList<FcModMetaInfo> FindAll();
+
+      FcModList FindAll(string gamePath, string modsPath);
    }
 }
