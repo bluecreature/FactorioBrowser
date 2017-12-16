@@ -7,41 +7,38 @@ using Ookii.Dialogs.Wpf;
 namespace FactorioBrowser.UI {
 
    /// <summary>
-   ///    Interaction logic for InitialConfigWnd.xaml
+   /// Interaction logic for InitialConfigView.xaml
    /// </summary>
-   public partial class InitialConfigWnd : Window {
+   public partial class InitialConfigView {
 
       private readonly InitialConfigViewModel _viewModel;
 
-      public InitialConfigWnd(InitialConfigViewModel viewModel) {
+      public InitialConfigView(InitialConfigViewModel viewModel) {
          _viewModel = viewModel;
          InitializeComponent();
          DataContext = _viewModel;
       }
+
+      public delegate void ConfigurationConfirmedEventHandler();
+
+      public event ConfigurationConfirmedEventHandler ConfigurationConfirmed;
 
       private void BrowseDirClick(object sender, RoutedEventArgs e) {
          Debug.Assert(sender is Button);
          Button browseButton = (Button) sender;
 
          var dialog = new VistaFolderBrowserDialog();
-         if (dialog.ShowDialog(this) ?? false) {
+         if (dialog.ShowDialog(null) ?? false) { // TODO: parent window
             if (browseButton.Tag.Equals("1")) {
                _viewModel.GamePath = dialog.SelectedPath;
             } else {
-               _viewModel.UserDataPath = dialog.SelectedPath;
+               _viewModel.ModsPath = dialog.SelectedPath;
             }
          }
       }
 
-      private void SubmitClick(object sender, RoutedEventArgs e) {
-         // TODO : validate settings
-         DialogResult = true;
-         Close();
-      }
-
-      private void CancelClick(object sender, RoutedEventArgs e) {
-         DialogResult = false;
-         Close();
+      private void OkButton_OnClick(object sender, RoutedEventArgs e) {
+         ConfigurationConfirmed?.Invoke();
       }
    }
 }

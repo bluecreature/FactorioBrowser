@@ -15,24 +15,35 @@ using Ninject.Modules;
 
 namespace FactorioBrowser.UI {
 
-   public sealed class AppSettings : SettingsContainer {
+   public interface IAppSettings {
 
-      public readonly Option<string> GamePath = new Option<string>("game_path", null);
+      [Option(Alias = "game_path")]
+      string GamePath { get; set; }
 
-      public readonly Option<string> ModsPath = new Option<string>("mods_path", null);
+      [Option(Alias = "mods_path")]
+      string ModsPath { get; set; }
 
-      public readonly Option<bool> UseSavedSettings = new Option<bool>("use_saved_settings", false);
+      [Option(Alias = "use_saved_settings", DefaultValue = false)]
+      bool UseSavedSettings { get; set; }
 
-      protected override void OnConfigure(IConfigConfiguration configuration) {
+   }
+
+   public static class AppSettingsFactory {
+
+      public static IAppSettings Create() {
          var exePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
          Debug.Assert(exePath != null);
          var cfgPath = Path.Combine(exePath, "config.ini");
 
-         configuration.UseIniFile(cfgPath);
+         return new ConfigurationBuilder<IAppSettings>()
+            .UseIniFile(cfgPath)
+            .Build();
       }
    }
 
    public interface IViewsFactory {
+
+      InitialConfigView CreateInitialConfigView();
 
       ModSelectionView CreateModSelectionView();
 
@@ -45,16 +56,14 @@ namespace FactorioBrowser.UI {
    public sealed class ComponentContainer {
       private readonly StandardKernel _kernel;
 
-      public ComponentContainer(AppSettings settings) {
-         Contract.Assert(settings != null);
-
+      public ComponentContainer() {
          var krnlConfig = new NinjectSettings {
             LoadExtensions = false,
             InjectNonPublic = true,
          };
 
          _kernel = new StandardKernel(krnlConfig,
-            new ModComponents(settings),
+            new ModComponents(),
             new FuncModule()
          );
       }
@@ -66,13 +75,8 @@ namespace FactorioBrowser.UI {
 
    internal sealed class ModComponents : NinjectModule {
 
-      private readonly AppSettings _settings;
-
-      public ModComponents(AppSettings settings) {
-         _settings = settings;
-      }
-
       public override void Load() {
+         Bind<IAppSettings>().ToMethod((ctx) => AppSettingsFactory.Create()).InSingletonScope();
          Bind<IFcModFinder>().To<DefaultFcModFinder>();
          Bind<IFcModSorter>().To<DefaultFcModSorter>();
          Bind<IFcModDataLoader>().ToMethod(CreateModDataLoader);
@@ -84,13 +88,17 @@ namespace FactorioBrowser.UI {
       }
 
       private IFcModDataLoader CreateModDataLoader(IContext ctx) {
-         return new DefaultModDataLoader(_settings.GamePath,
-            ctx.Kernel.Get<IFcSettingDefsUnpacker>(), ctx.Kernel.Get<IFcPrototypeUnpacker>());
+         return new DefaultModDataLoader(
+            ctx.Kernel.Get<IAppSettings>().GamePath,
+            ctx.Kernel.Get<IFcSettingDefsUnpacker>(),
+            ctx.Kernel.Get<IFcPrototypeUnpacker>());
       }
    }
 
    // needs to be public to be visible to the DynamicProxy
    public interface IViewModelsFactory {
+
+      InitialConfigViewModel CreateInitialConfigViewModel();
 
       ModSelectionViewModel CreateModSelectionViewModel();
 
@@ -106,6 +114,10 @@ namespace FactorioBrowser.UI {
 
       public ViewsFactoryImpl(IViewModelsFactory viewModelsFactory) {
          _viewModelsFactory = viewModelsFactory;
+      }
+
+      public InitialConfigView CreateInitialConfigView() {
+         return new InitialConfigView(_viewModelsFactory.CreateInitialConfigViewModel());
       }
 
       public ModSelectionView CreateModSelectionView() {

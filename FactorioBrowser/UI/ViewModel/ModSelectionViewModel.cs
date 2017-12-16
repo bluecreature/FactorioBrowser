@@ -55,10 +55,10 @@ namespace FactorioBrowser.UI.ViewModel {
 
       private readonly IFcModFinder _modFinder;
       private readonly IFcModSorter _modSorter;
-      private readonly AppSettings _settings;
+      private readonly IAppSettings _settings;
       private bool _isBusy;
 
-      public ModSelectionViewModel(AppSettings settings, IFcModFinder modFinder, IFcModSorter modSorter) {
+      public ModSelectionViewModel(IAppSettings settings, IFcModFinder modFinder, IFcModSorter modSorter) {
          _settings = settings; // TODO : replace with explicit parameters
          _modFinder = modFinder;
          _modSorter = modSorter;

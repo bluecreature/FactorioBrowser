@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using FactorioBrowser.Mod.Loader;
-using FactorioBrowser.UI.ViewModel;
 
 namespace FactorioBrowser.UI {
 
@@ -17,6 +16,24 @@ namespace FactorioBrowser.UI {
       protected void InvokeSwitchState(BrowserState nextState) {
          SwitchState?.Invoke(nextState);
       }
+   }
+
+   public sealed class InitialConfigState : BrowserState {
+      private readonly IViewsFactory _viewsFactory;
+      private readonly InitialConfigView _view;
+
+      public InitialConfigState(IViewsFactory viewsFactory) {
+         _viewsFactory = viewsFactory;
+         _view = viewsFactory.CreateInitialConfigView();
+         _view.ConfigurationConfirmed += InitialConfigConfirmed;
+      }
+
+      private void InitialConfigConfirmed() {
+         _view.ConfigurationConfirmed -= InitialConfigConfirmed;
+         InvokeSwitchState(new ModSelectionState(_viewsFactory));
+      }
+
+      public override FrameworkElement View => _view;
    }
 
    public sealed class ModSelectionState : BrowserState {
@@ -76,27 +93,21 @@ namespace FactorioBrowser.UI {
    /// </summary>
    public partial class MainWindow {
 
-      private readonly AppSettings _settings;
       private readonly ComponentContainer _components;
 
       private BrowserState _currentState;
 
       public MainWindow() {
          InitializeComponent();
-         _settings = new AppSettings();
-         _components = new ComponentContainer(_settings);
+         _components = new ComponentContainer();
       }
 
       private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
-         if (_settings.UseSavedSettings) { // TODO : validate existing values
-            ShowModSelectionView();
-         } else {
-            AskForInitialConfiguration();
-         }
+         ShowInitialConfigView();
       }
 
-      private void ShowModSelectionView() {
-         _currentState = _components.Get<ModSelectionState>();
+      private void ShowInitialConfigView() {
+         _currentState = _components.Get<InitialConfigState>();
          _currentState.SwitchState += OnSwitchState;
          ShowView(_currentState.View);
       }
@@ -107,16 +118,6 @@ namespace FactorioBrowser.UI {
          nextState.SwitchState += OnSwitchState;
          _currentState = nextState;
          ShowView(_currentState.View);
-      }
-
-
-      private void AskForInitialConfiguration() {
-         Window configWnd = new InitialConfigWnd(new InitialConfigViewModel(_settings));
-         if (configWnd.ShowDialog() == true) {
-            ShowModSelectionView();
-         } else {
-            Close();
-         }
       }
 
       private void ShowView(FrameworkElement ui) {

@@ -2,15 +2,15 @@
 
    public sealed class InitialConfigViewModel : BindableBase {
 
-      private readonly AppSettings _settings;
+      private readonly IAppSettings _settings;
       private string _gamePath;
-      private string _userDataPath;
+      private string _modsPath;
       private bool? _useByDefault;
 
-      public InitialConfigViewModel(AppSettings settings) {
+      public InitialConfigViewModel(IAppSettings settings) {
          _settings = settings;
          _gamePath = _settings.GamePath;
-         _userDataPath = _settings.ModsPath;
+         _modsPath = _settings.ModsPath;
          _useByDefault = _settings.UseSavedSettings;
       }
 
@@ -20,19 +20,19 @@
          }
 
          set {
-            _settings.GamePath.Write(value);
+            _settings.GamePath = value;
             UpdateProperty(ref _gamePath, value);
          }
       }
 
-      public string UserDataPath {
+      public string ModsPath {
          get {
-            return _userDataPath;
+            return _modsPath;
          }
 
          set {
-            _settings.ModsPath.Write(value);
-            UpdateProperty(ref _userDataPath, value);
+            _settings.ModsPath = value;
+            UpdateProperty(ref _modsPath, value);
          }
       }
 
@@ -42,7 +42,7 @@
          }
 
          set {
-            _settings.UseSavedSettings.Write(value ?? false);
+            _settings.UseSavedSettings = value ?? false;
             UpdateProperty(ref _useByDefault, value);
          }
       }
