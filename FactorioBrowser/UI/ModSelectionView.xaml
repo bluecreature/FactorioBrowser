@@ -11,8 +11,7 @@
         d:DesignHeight="720"
         Background="{DynamicResource {x:Static SystemColors.MenuBarBrushKey}}"
         d:DataContext="{d:DesignInstance views:ModSelectionViewModel, IsDesignTimeCreatable=False}"
-        Loaded="ModSelectionView_OnLoaded"
-        >
+        Unloaded="ModSelectionView_OnUnloaded">
 
    <UserControl.Resources>
       <Style TargetType="{x:Type gx:VertexControl}">

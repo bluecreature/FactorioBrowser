@@ -1,50 +1,53 @@
-﻿using System;
-using System.Collections.Immutable;
-using System.Threading.Tasks;
-using System.Windows;
-using FactorioBrowser.Mod.Loader;
+﻿using System.Windows;
 using FactorioBrowser.UI.ViewModel;
 using GraphX.Controls.Models;
 using GraphX.PCL.Common.Enums;
 using GraphX.PCL.Logic.Algorithms.LayoutAlgorithms;
+using QuickGraph;
 
 namespace FactorioBrowser.UI {
 
    /// <summary>
    /// Interaction logic for ModSelectionView.xaml
    /// </summary>
-   public partial class ModSelectionView : IDisposable {
-      internal ModSelectionView() {
+   public partial class ModSelectionView {
+
+      public static DependencyProperty ModDependencyGraphProperty = DependencyProperty.Register(
+         "ModDependencyGraph",
+         typeof(BidirectionalGraph<ModGraphVertex, ModGraphEdge>),
+         typeof(ModSelectionView),
+         new FrameworkPropertyMetadata() {
+            PropertyChangedCallback = OnDependencyGraphChanged,
+            BindsTwoWayByDefault = false
+         }
+      );
+
+      public BidirectionalGraph<ModGraphVertex, ModGraphEdge> ModDependencyGraph {
+         get {
+            return (BidirectionalGraph<ModGraphVertex, ModGraphEdge>) GetValue(ModDependencyGraphProperty);
+         }
+
+         set {
+            SetValue(ModDependencyGraphProperty, value);
+         }
+      }
+
+      private static void OnDependencyGraphChanged(DependencyObject d,
+         DependencyPropertyChangedEventArgs e) {
+
+         var view = d as ModSelectionView;
+         var graph = e.NewValue as BidirectionalGraph<ModGraphVertex, ModGraphEdge>;
+         if (view != null && graph != null) {
+            view.ModGraph.GenerateGraph(graph);
+            view.ModGraphZoom.ZoomToFill();
+         }
+      }
+
+      public ModSelectionView() {
          InitializeComponent();
          ModGraph.LogicCore = InitModGraphLogic();
          ModGraph.SetVerticesDrag(true);
-      }
-
-      public void Dispose() {
-         ModGraph?.Dispose();
-      }
-
-      public delegate void SelectionConfirmedEventHandler(IImmutableList<FcModFileInfo> selectedMods);
-
-      public event SelectionConfirmedEventHandler SelectionConfirmed;
-
-      private async void RefreshModList_Click(object sender, RoutedEventArgs e) {
-         await Refresh();
-      }
-
-      private async void ModSelectionView_OnLoaded(object sender, RoutedEventArgs e) {
-         await Refresh();
-      }
-
-      private async Task Refresh() {
-         // TODO
-         //ModGraph.ClearLayout();
-         //ModGraph.GenerateGraph(_viewModel.DependencyGraph);
-         //ModGraphZoom.ZoomToFill();
-      }
-
-      private void Next_Click(object sender, RoutedEventArgs e) {
-
+         SetBinding(ModDependencyGraphProperty, nameof(ModSelectionViewModel.DependencyGraph));
       }
 
       private ModGraphLogic InitModGraphLogic() {
@@ -65,15 +68,12 @@ namespace FactorioBrowser.UI {
 
       private void ModGraph_OnVertexSelected(object sender, VertexSelectedEventArgs args) {
          ModGraphVertex vertex = (ModGraphVertex) args.VertexControl.Vertex;
-
-         /*foreach (var modListItem in _viewModel.ModList) {
-            if (modListItem != vertex.Item) {
-               modListItem.Selected = false;
-            }
-         }*/
-
          vertex.Item.Selected = true;
          ModListView.ScrollIntoView(vertex.Item);
+      }
+
+      private void ModSelectionView_OnUnloaded(object sender, RoutedEventArgs e) {
+         ModGraph?.Dispose();
       }
    }
 }
