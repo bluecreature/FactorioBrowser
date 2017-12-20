@@ -1,9 +1,6 @@
-﻿using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.IO;
+﻿using System;
+using System.Collections.Immutable;
 using System.Reflection;
-using Config.Net;
 using FactorioBrowser.Mod.Finder;
 using FactorioBrowser.Mod.Loader;
 using FactorioBrowser.Prototypes.Unpacker;
@@ -14,44 +11,6 @@ using Ninject.Extensions.Factory;
 using Ninject.Modules;
 
 namespace FactorioBrowser.UI {
-
-   public interface IAppSettings {
-
-      [Option(Alias = "game_path")]
-      string GamePath { get; set; }
-
-      [Option(Alias = "mods_path")]
-      string ModsPath { get; set; }
-
-      [Option(Alias = "use_saved_settings", DefaultValue = false)]
-      bool UseSavedSettings { get; set; }
-
-   }
-
-   public static class AppSettingsFactory {
-
-      public static IAppSettings Create() {
-         var exePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-         Debug.Assert(exePath != null);
-         var cfgPath = Path.Combine(exePath, "config.ini");
-
-         return new ConfigurationBuilder<IAppSettings>()
-            .UseIniFile(cfgPath)
-            .Build();
-      }
-   }
-
-   public interface IViewsFactory {
-
-      InitialConfigView CreateInitialConfigView();
-
-      ModSelectionView CreateModSelectionView();
-
-      SettingsView CreateSettingsView(IImmutableList<FcModFileInfo> selectedMods);
-
-      BrowseView CreateBrowseView(IImmutableList<FcModFileInfo> selectedMods,
-         IImmutableDictionary<string, object> modSettings);
-   }
 
    public sealed class ComponentContainer {
       private readonly StandardKernel _kernel;
@@ -83,8 +42,7 @@ namespace FactorioBrowser.UI {
          Bind<IFcLocalizationLoader>().To<DefaultLocalizationLoader>();
          Bind<IFcSettingDefsUnpacker>().To<DefaultSettingDefsUnpacker>();
          Bind<IFcPrototypeUnpacker>().To<DefaultPrototypeUnpacker>();
-         Bind<IViewModelsFactory>().ToFactory();
-         Bind<IViewsFactory>().To<ViewsFactoryImpl>();
+         Bind<IBrowserStepsFactory>().ToFactory(() => new BrowserStepInstanceProvider());
       }
 
       private IFcModDataLoader CreateModDataLoader(IContext ctx) {
@@ -95,42 +53,28 @@ namespace FactorioBrowser.UI {
       }
    }
 
-   // needs to be public to be visible to the DynamicProxy
-   public interface IViewModelsFactory {
+   internal sealed class BrowserStepInstanceProvider : StandardInstanceProvider {
 
-      InitialConfigViewModel CreateInitialConfigViewModel();
+      private readonly IImmutableDictionary<string, Type> _factoryMethodToTypeMap;
 
-      ModSelectionViewModel CreateModSelectionViewModel();
-
-      SettingsViewModel CreateSettingsViewModel(IImmutableList<FcModFileInfo> modsToLoad);
-
-      BrowseViewModel CreateBrowseViewModel(IImmutableList<FcModFileInfo> modsToLoad,
-         IImmutableDictionary<string, object> modSettings);
-   }
-
-   internal sealed class ViewsFactoryImpl : IViewsFactory {
-
-      private readonly IViewModelsFactory _viewModelsFactory;
-
-      public ViewsFactoryImpl(IViewModelsFactory viewModelsFactory) {
-         _viewModelsFactory = viewModelsFactory;
+      public BrowserStepInstanceProvider() {
+         var builder = ImmutableDictionary.CreateBuilder<string, Type>();
+         builder.Add(nameof(IBrowserStepsFactory.CreateInitialConfigStep), typeof(InitialConfigurationStep));
+         builder.Add(nameof(IBrowserStepsFactory.CreateModSelectionStep), typeof(ModSelectionStep));
+         builder.Add(nameof(IBrowserStepsFactory.CreateModSettingsStep), typeof(ModSettingsStep));
+         builder.Add(nameof(IBrowserStepsFactory.CreateBrowseStep), typeof(BrowseStep));
+         _factoryMethodToTypeMap = builder.ToImmutable();
       }
 
-      public InitialConfigView CreateInitialConfigView() {
-         return new InitialConfigView(_viewModelsFactory.CreateInitialConfigViewModel());
-      }
+      protected override Type GetType(MethodInfo methodInfo, object[] arguments) {
+         Type resolvedType;
+         if (methodInfo.DeclaringType == typeof(IBrowserStepsFactory) &&
+            _factoryMethodToTypeMap.TryGetValue(methodInfo.Name, out resolvedType)) {
 
-      public ModSelectionView CreateModSelectionView() {
-         return new ModSelectionView(_viewModelsFactory.CreateModSelectionViewModel());
-      }
+            return resolvedType;
+         }
 
-      public SettingsView CreateSettingsView(IImmutableList<FcModFileInfo> selectedMods) {
-         return new SettingsView(_viewModelsFactory.CreateSettingsViewModel(selectedMods));
-      }
-
-      public BrowseView CreateBrowseView(IImmutableList<FcModFileInfo> selectedMods,
-         IImmutableDictionary<string, object> modSettings) {
-         return new BrowseView(_viewModelsFactory.CreateBrowseViewModel(selectedMods, modSettings));
+         return base.GetType(methodInfo, arguments);
       }
    }
 }

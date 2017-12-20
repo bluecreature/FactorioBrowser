@@ -12,6 +12,6 @@ namespace FactorioBrowser.Mod.Loader {
 
    public interface IFcLocalizationLoader {
 
-      ILocalizationDirectory LoadLocalizationTables(IEnumerable<FcModFileInfo> mod);
+      ILocalizationDirectory LoadLocalizationTables(IEnumerable<FcModFileInfo> mods);
    }
 }

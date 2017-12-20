@@ -11,17 +11,15 @@ namespace FactorioBrowser.UI {
    /// </summary>
    public partial class InitialConfigView {
 
-      private readonly InitialConfigViewModel _viewModel;
-
-      public InitialConfigView(InitialConfigViewModel viewModel) {
-         _viewModel = viewModel;
-         InitializeComponent();
-         DataContext = _viewModel;
+      private InitialConfigViewModel GetViewModel() {
+         var viewModel = DataContext as InitialConfigViewModel;
+         Debug.Assert(viewModel != null);
+         return viewModel;
       }
 
-      public delegate void ConfigurationConfirmedEventHandler();
-
-      public event ConfigurationConfirmedEventHandler ConfigurationConfirmed;
+      public InitialConfigView() {
+         InitializeComponent();
+      }
 
       private void BrowseDirClick(object sender, RoutedEventArgs e) {
          Debug.Assert(sender is Button);
@@ -30,15 +28,11 @@ namespace FactorioBrowser.UI {
          var dialog = new VistaFolderBrowserDialog();
          if (dialog.ShowDialog(null) ?? false) { // TODO: parent window
             if (browseButton.Tag.Equals("1")) {
-               _viewModel.GamePath = dialog.SelectedPath;
+               GetViewModel().GamePath = dialog.SelectedPath;
             } else {
-               _viewModel.ModsPath = dialog.SelectedPath;
+               GetViewModel().ModsPath = dialog.SelectedPath;
             }
          }
-      }
-
-      private void OkButton_OnClick(object sender, RoutedEventArgs e) {
-         ConfigurationConfirmed?.Invoke();
       }
    }
 }

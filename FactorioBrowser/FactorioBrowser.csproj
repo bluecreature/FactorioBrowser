@@ -88,6 +88,7 @@
     <Compile Include="UI\BrowseView.xaml.cs">
       <DependentUpon>BrowseView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\IAppSettings.cs" />
     <Compile Include="UI\InitialConfigView.xaml.cs">
       <DependentUpon>InitialConfigView.xaml</DependentUpon>
     </Compile>
@@ -103,7 +104,9 @@
     </Compile>
     <Compile Include="UI\ViewModel\BindableBase.cs" />
     <Compile Include="UI\ViewModel\BrowseViewModel.cs" />
+    <Compile Include="UI\ViewModel\MainWindowViewModel.cs" />
     <Compile Include="UI\ViewModel\SettingsViewModel.cs" />
+    <Compile Include="UI\ViewModel\IBrowserStep.cs" />
     <Compile Include="UI\ViewModel\StructureGraphTypes.cs" />
     <Compile Include="UI\ViewModel\ModGraphControl.cs" />
     <Compile Include="UI\ViewModel\InitialConfigViewModel.cs" />

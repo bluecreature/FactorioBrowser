@@ -5,102 +5,84 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:FactorioBrowser.UI.ViewModel"
         mc:Ignorable="d"
-        Height="180"
         MinHeight="180"
-        MaxHeight="180"
-        Width="600"
         MinWidth="600"
         Background="{DynamicResource {x:Static SystemColors.MenuBarBrushKey}}"
         d:DataContext="{d:DesignInstance views:InitialConfigViewModel, d:IsDesignTimeCreatable = False}"
         >
 
-   <Grid Margin="0,0,0,2">
-      <Grid.ColumnDefinitions>
-         <ColumnDefinition Width="100" />
-         <ColumnDefinition Width="*" />
-      </Grid.ColumnDefinitions>
-      <Grid.RowDefinitions>
-         <RowDefinition Height="25"/>
-         <RowDefinition Height="Auto"/>
-         <RowDefinition Height="5"/>
-         <RowDefinition Height="Auto"/>
-         <RowDefinition Height="5"/>
-         <RowDefinition Height="Auto"/>
-         <RowDefinition Height="*"/>
-      </Grid.RowDefinitions>
-
-      <Label Grid.Row="0" Content="Select game home and data directories" Grid.ColumnSpan="2" />
-
-      <Label Grid.Row="1" Grid.Column="0" Content="Home directory:" />
-      <Grid Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Margin="0,0,0,0">
-         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="30" />
-         </Grid.ColumnDefinitions>
-
-         <TextBox
-            Grid.Row="0"
-            Grid.Column="0"
-            HorizontalAlignment="Stretch"
-            Text="{Binding GamePath}"
-            Margin="3,3,3,3"
-            />
-         <Button
-            Grid.Row="0" Grid.Column="1"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            Margin="3,3,3,3"
-            Content="?"
-            Click="BrowseDirClick"
-            Tag="1" />
-      </Grid>
-
-      <Label Grid.Row="3" Grid.Column="0" Content="Mods directory:" />
-      <Grid Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Margin="0,0,0,0">
-         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="30" />
-         </Grid.ColumnDefinitions>
-
-         <TextBox
-            Grid.Row="0"
-            Grid.Column="0"
-            HorizontalAlignment="Stretch"
-            Text="{Binding ModsPath}"
-            Margin="3,3,3,3" />
-         <Button
-            Grid.Row="0" Grid.Column="1"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            Margin="3,3,3,3"
-            Content="?"
-            Click="BrowseDirClick"
-            Tag="2" />
-      </Grid>
-
-      <CheckBox
-         Grid.Row="5"
-         Grid.Column="1"
-         IsChecked="{Binding UseByDefault}"
-         Content="Use these paths by default and don't ask again."
-         Margin="5"
-         HorizontalAlignment="Left"
-         />
-
-      <StackPanel
-         Grid.Column="0"
-         Grid.ColumnSpan="2"
-         Grid.Row="6"
-         HorizontalAlignment="Right"
-         VerticalAlignment="Center">
-
-         <Button
-            Content="OK"
-            Margin="6"
-            Padding="20,3,20,3"
-            Click="OkButton_OnClick"
-            />
+   <DockPanel>
+      <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
+         HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10">
+         <Button Content="Next" Padding="5" Command="{Binding SubmitCommand}" />
       </StackPanel>
+      <Grid Margin="0,0,0,2">
+         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="*" />
+         </Grid.ColumnDefinitions>
+         <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="Auto"/>
+         </Grid.RowDefinitions>
 
-   </Grid>
+         <Label Grid.Row="0" Content="Select game home and data directories" Grid.ColumnSpan="2" />
+
+         <Label Grid.Row="1" Grid.Column="0" Content="Home directory:" />
+         <Grid Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Margin="0,0,0,0">
+            <Grid.ColumnDefinitions>
+               <ColumnDefinition Width="*" />
+               <ColumnDefinition Width="30" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox
+               Grid.Row="0"
+               Grid.Column="0"
+               HorizontalAlignment="Stretch"
+               Text="{Binding GamePath}"
+               Margin="3,3,3,3"
+               />
+            <Button
+               Grid.Row="0" Grid.Column="1"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               Margin="3,3,3,3"
+               Content="?"
+               Click="BrowseDirClick"
+               Tag="1" />
+         </Grid>
+
+         <Label Grid.Row="3" Grid.Column="0" Content="Mods directory:" />
+         <Grid Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Margin="0,0,0,0">
+            <Grid.ColumnDefinitions>
+               <ColumnDefinition Width="*" />
+               <ColumnDefinition Width="30" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch"
+               Text="{Binding ModsPath}" Margin="3,3,3,3" />
+            <Button
+               Grid.Row="0" Grid.Column="1"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               Margin="3,3,3,3"
+               Content="?"
+               Click="BrowseDirClick"
+               Tag="2" />
+         </Grid>
+
+         <CheckBox
+            Grid.Row="5"
+            Grid.Column="1"
+            IsChecked="{Binding UseByDefault}"
+            Content="Use these paths by default and don't ask again."
+            Margin="5"
+            HorizontalAlignment="Left"
+            />
+      </Grid>
+   </DockPanel>
 </UserControl>

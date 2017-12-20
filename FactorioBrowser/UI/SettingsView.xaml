@@ -9,8 +9,7 @@
              xmlns:qc="clr-namespace:QuickConverter;assembly=QuickConverter"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance views:SettingsViewModel, IsDesignTimeCreatable=False}"
-             d:DesignHeight="300" d:DesignWidth="300"
-             Loaded="SettingsView_OnLoaded">
+             d:DesignHeight="300" d:DesignWidth="300">
 
    <UserControl.Resources>
       <DataTemplate x:Key="BooleanSettingTemplate" DataType="{x:Type views:FcModSettingValue}">
@@ -52,66 +51,64 @@
          ValueListTemplate="{StaticResource ValueListTemplate}" />
    </UserControl.Resources>
 
-   <wpfx:BusyIndicator IsBusy="{Binding IsBusy}" BusyContent="Loading...">
-      <DockPanel>
-         <UniformGrid
-            Rows="1"
-            Columns="1"
-            DockPanel.Dock="Bottom"
-            HorizontalAlignment="Right">
-            <Button Margin="6" Padding="15,4,15,4" Content="Next" Click="Next_Click" />
-         </UniformGrid>
-         <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto">
-            <Grid IsSharedSizeScope="True">
-               <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="Auto" />
-               </Grid.ColumnDefinitions>
-               <ItemsControl ItemsSource="{Binding SettingsByMod}"
-                       Padding="10,20,10,20">
-                  <ItemsControl.ItemTemplate>
-                     <DataTemplate>
-                        <GroupBox Header="{Binding Key}" Padding="10" Margin="4,8,0,0">
-                           <ItemsControl ItemsSource="{Binding}">
-                              <ItemsControl.ItemTemplate>
-                                 <DataTemplate>
-                                    <Grid>
-                                       <Grid.ColumnDefinitions>
-                                          <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
-                                          <ColumnDefinition Width="Auto" MinWidth="80" />
-                                       </Grid.ColumnDefinitions>
-                                       <TextBlock Grid.Column="0" Text="{Binding LocalizedName}">
-                                          <TextBlock.ToolTip>
-                                             <ToolTip>
-                                                <StackPanel Orientation="Vertical" MaxWidth="480">
-                                                   <StackPanel Orientation="Horizontal">
-                                                      <TextBlock Text="Internal name: " FontWeight="Bold" />
-                                                      <TextBlock Text="{Binding Definition.Name}" />
-                                                   </StackPanel>
-                                                   <TextBlock
-                                                      Margin="0,4,0,0" TextWrapping="Wrap"
-                                                      Text="{Binding LocalizedDescription}"
-                                                      Visibility="{qc:Binding
-                                                         '$P != null ? Visibility.Visible : Visibility.Collapsed',
-                                                         P={Binding Path=LocalizedDescription}}"/>
+   <DockPanel>
+      <UniformGrid
+         Rows="1"
+         Columns="1"
+         DockPanel.Dock="Bottom"
+         HorizontalAlignment="Right">
+         <Button Margin="6" Padding="15,4,15,4" Content="Next" Command="{Binding SubmitCommand}" />
+      </UniformGrid>
+      <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto">
+         <Grid IsSharedSizeScope="True">
+            <Grid.ColumnDefinitions>
+               <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ItemsControl ItemsSource="{Binding SettingsByMod}"
+                     Padding="10,20,10,20">
+               <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                     <GroupBox Header="{Binding Key}" Padding="10" Margin="4,8,0,0">
+                        <ItemsControl ItemsSource="{Binding}">
+                           <ItemsControl.ItemTemplate>
+                              <DataTemplate>
+                                 <Grid>
+                                    <Grid.ColumnDefinitions>
+                                       <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+                                       <ColumnDefinition Width="Auto" MinWidth="80" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding LocalizedName}">
+                                       <TextBlock.ToolTip>
+                                          <ToolTip>
+                                             <StackPanel Orientation="Vertical" MaxWidth="480">
+                                                <StackPanel Orientation="Horizontal">
+                                                   <TextBlock Text="Internal name: " FontWeight="Bold" />
+                                                   <TextBlock Text="{Binding Definition.Name}" />
                                                 </StackPanel>
-                                             </ToolTip>
-                                          </TextBlock.ToolTip>
-                                       </TextBlock>
-                                       <ContentPresenter
-                                          Grid.Column="1"
-                                          DataContext="{Binding}"
-                                          Margin="15,5,0,0"
-                                          ContentTemplateSelector="{StaticResource SettingControlTemplateSelector}" />
-                                    </Grid>
-                                 </DataTemplate>
-                              </ItemsControl.ItemTemplate>
-                           </ItemsControl>
-                        </GroupBox>
-                     </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-               </ItemsControl>
-            </Grid>
-         </ScrollViewer>
-      </DockPanel>
-   </wpfx:BusyIndicator>
+                                                <TextBlock
+                                                   Margin="0,4,0,0" TextWrapping="Wrap"
+                                                   Text="{Binding LocalizedDescription}"
+                                                   Visibility="{qc:Binding
+                                                      '$P != null ? Visibility.Visible : Visibility.Collapsed',
+                                                      P={Binding Path=LocalizedDescription}}"/>
+                                             </StackPanel>
+                                          </ToolTip>
+                                       </TextBlock.ToolTip>
+                                    </TextBlock>
+                                    <ContentPresenter
+                                       Grid.Column="1"
+                                       DataContext="{Binding}"
+                                       Margin="15,5,0,0"
+                                       ContentTemplateSelector="{StaticResource SettingControlTemplateSelector}" />
+                                 </Grid>
+                              </DataTemplate>
+                           </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                     </GroupBox>
+                  </DataTemplate>
+               </ItemsControl.ItemTemplate>
+            </ItemsControl>
+         </Grid>
+      </ScrollViewer>
+   </DockPanel>
 </UserControl>

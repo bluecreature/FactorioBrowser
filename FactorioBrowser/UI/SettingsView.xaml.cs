@@ -52,25 +52,9 @@ namespace FactorioBrowser.UI {
    /// Interaction logic for SettingsView.xaml
    /// </summary>
    public partial class SettingsView {
-      private readonly SettingsViewModel _viewModel;
 
-      public SettingsView(SettingsViewModel viewModel) {
-         _viewModel = viewModel;
+      public SettingsView() {
          InitializeComponent();
-         DataContext = _viewModel;
-      }
-
-      public delegate void SettingsConfirmedEventHandler(
-         IImmutableDictionary<string, object> settings);
-
-      public event SettingsConfirmedEventHandler SelectionConfirmed;
-
-      private async void SettingsView_OnLoaded(object sender, RoutedEventArgs e) {
-         await _viewModel.LoadData();
-      }
-
-      private void Next_Click(object sender, RoutedEventArgs e) {
-         SelectionConfirmed?.Invoke(_viewModel.GetSettingsValues());
       }
    }
 }

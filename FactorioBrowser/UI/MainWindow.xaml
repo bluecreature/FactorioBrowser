@@ -3,13 +3,35 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wpfx="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:views="clr-namespace:FactorioBrowser.UI.ViewModel"
+        xmlns:ui="clr-namespace:FactorioBrowser.UI"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance views:MainWindowViewModel, IsDesignTimeCreatable=False}"
         Title="Factorio Browser"
         Background="{DynamicResource {x:Static SystemColors.MenuBarBrushKey}}"
         Height="768" Width="1024"
         Loaded="MainWindow_OnLoaded">
 
-   <Grid x:Name="Layout">
+   <Window.Resources>
+      <DataTemplate DataType="{x:Type views:InitialConfigViewModel}">
+         <ui:InitialConfigView />
+      </DataTemplate>
+      <DataTemplate DataType="{x:Type views:ModSelectionViewModel}">
+         <ui:ModSelectionView />
+      </DataTemplate>
+      <DataTemplate DataType="{x:Type views:SettingsViewModel}">
+         <ui:SettingsView />
+      </DataTemplate>
+      <DataTemplate DataType="{x:Type views:BrowseViewModel}">
+         <ui:BrowseView />
+      </DataTemplate>
+   </Window.Resources>
 
-   </Grid>
+   <wpfx:BusyIndicator IsBusy="{Binding IsBusy}" BusyContent="Loading...">
+      <ContentPresenter
+         HorizontalAlignment="Stretch"
+         VerticalAlignment="Stretch"
+         Content="{Binding CurrentScreen.ViewModel}" />
+   </wpfx:BusyIndicator>
 </Window>

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using FactorioBrowser.Prototypes;
@@ -79,12 +78,8 @@ namespace FactorioBrowser.UI {
    /// </summary>
    public partial class BrowseView {
 
-      private readonly BrowseViewModel _viewModel;
-
-      internal BrowseView(BrowseViewModel viewModel) {
-         _viewModel = viewModel;
+      internal BrowseView() {
          InitializeComponent();
-         DataContext = _viewModel;
 
          TechGraph.LogicCore = CreateTechGraphLogic();
          TechGraph.SetVerticesDrag(true);
@@ -154,12 +149,6 @@ namespace FactorioBrowser.UI {
          logic.AsyncAlgorithmCompute = true;
 
          return logic;
-      }
-
-      private async void BrowseView_OnLoaded(object sender, RoutedEventArgs e) {
-         await _viewModel.LoadData();
-         TechGraph.GenerateGraph(_viewModel.TechnologyGraph);
-         TechGraphZoom.ZoomToFill();
       }
    }
 }

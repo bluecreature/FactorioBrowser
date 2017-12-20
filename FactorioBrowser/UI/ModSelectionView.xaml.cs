@@ -14,12 +14,8 @@ namespace FactorioBrowser.UI {
    /// Interaction logic for ModSelectionView.xaml
    /// </summary>
    public partial class ModSelectionView : IDisposable {
-      private readonly ModSelectionViewModel _viewModel;
-
-      internal ModSelectionView(ModSelectionViewModel viewModel) {
-         _viewModel = viewModel;
+      internal ModSelectionView() {
          InitializeComponent();
-         DataContext = _viewModel;
          ModGraph.LogicCore = InitModGraphLogic();
          ModGraph.SetVerticesDrag(true);
       }
@@ -41,14 +37,14 @@ namespace FactorioBrowser.UI {
       }
 
       private async Task Refresh() {
-         ModGraph.ClearLayout();
-         await _viewModel.Refresh();
-         ModGraph.GenerateGraph(_viewModel.DependencyGraph);
-         ModGraphZoom.ZoomToFill();
+         // TODO
+         //ModGraph.ClearLayout();
+         //ModGraph.GenerateGraph(_viewModel.DependencyGraph);
+         //ModGraphZoom.ZoomToFill();
       }
 
       private void Next_Click(object sender, RoutedEventArgs e) {
-         SelectionConfirmed?.Invoke(_viewModel.GetSelectedMods());
+
       }
 
       private ModGraphLogic InitModGraphLogic() {
@@ -70,11 +66,11 @@ namespace FactorioBrowser.UI {
       private void ModGraph_OnVertexSelected(object sender, VertexSelectedEventArgs args) {
          ModGraphVertex vertex = (ModGraphVertex) args.VertexControl.Vertex;
 
-         foreach (var modListItem in _viewModel.ModList) {
+         /*foreach (var modListItem in _viewModel.ModList) {
             if (modListItem != vertex.Item) {
                modListItem.Selected = false;
             }
-         }
+         }*/
 
          vertex.Item.Selected = true;
          ModListView.ScrollIntoView(vertex.Item);

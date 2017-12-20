@@ -1,14 +1,106 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using FactorioBrowser.Mod.Finder;
-using FactorioBrowser.Mod.Loader;
 using QuickGraph;
 
 namespace FactorioBrowser.UI.ViewModel {
+
+   public sealed class ModSelectionStep : BindableBase, IBrowserStep<FcModList> {
+      private readonly IFcModFinder _modFinder;
+      private readonly IFcModSorter _modSorter;
+      private readonly GameDirectories _gameDirectories;
+
+      private bool _isBusy;
+      private object _viewModel;
+
+      private sealed class DiscoveryResult {
+
+         public DiscoveryResult(FcModMetaInfo coreData,
+            IImmutableList<SortStatus> selectableMods) {
+            CoreData = coreData;
+            SelectableMods = selectableMods;
+         }
+
+         public FcModMetaInfo CoreData { get; }
+
+         public IImmutableList<SortStatus> SelectableMods { get; }
+      }
+
+      public ModSelectionStep(IFcModFinder modFinder, IFcModSorter modSorter,
+         GameDirectories gameDirectories) {
+         _modFinder = modFinder;
+         _modSorter = modSorter;
+         _gameDirectories = gameDirectories;
+         _isBusy = false;
+         _viewModel = null;
+      }
+
+      public async Task<FcModList> Run() {
+         var discovery = await Refresh();
+
+         if (discovery.SelectableMods.Count > 1) {
+            Func<Task<IImmutableList<SortStatus>>> refreshFuncion = () => {
+               return Refresh().ContinueWith(t => t.Result.SelectableMods);
+            };
+
+            TaskCompletionSource<FcModList> runTaskSource = new TaskCompletionSource<FcModList>();
+            Action<IImmutableList<FcModMetaInfo>> submitAction = selectedMods => {
+               runTaskSource.SetResult(new FcModList(discovery.CoreData, selectedMods));
+            };
+
+            var viewModel = new ModSelectionViewModel(discovery.SelectableMods, refreshFuncion,
+               submitAction);
+            ViewModel = viewModel;
+            return await runTaskSource.Task;
+
+         } else {
+            return new FcModList(discovery.CoreData,
+               discovery.SelectableMods.Select(s => s.ModInfo).ToImmutableList());
+         }
+      }
+
+      public object ViewModel {
+         get {
+            return _viewModel;
+         }
+
+         private set {
+            UpdateProperty(ref _viewModel, value);
+         }
+      }
+
+      public bool IsBusy {
+         get {
+            return _isBusy;
+         }
+
+         set {
+            UpdateProperty(ref _isBusy, value);
+         }
+      }
+
+      private async Task<DiscoveryResult> Refresh() {
+         IsBusy = true;
+         try {
+            return await Task.Factory.StartNew(DiscoverAndSort);
+         } finally {
+            IsBusy = false;
+         }
+      }
+
+      private DiscoveryResult DiscoverAndSort() {
+         var fcMods = _modFinder.FindAll(_gameDirectories.GamePath, _gameDirectories.ModsPath);
+         var coreMod = fcMods.CoreMod;
+         var sortedSelectableMods = _modSorter.Sort(fcMods.SelectableMods);
+         return new DiscoveryResult(coreMod, sortedSelectableMods);
+      }
+   }
 
    public sealed class ModListItem : BindableBase {
       private bool _enabled;
@@ -40,11 +132,10 @@ namespace FactorioBrowser.UI.ViewModel {
          }
       }
 
-      public ModListItem(FcModMetaInfo modInfo, SortStatus sortStatus) {
-         Contract.Requires(modInfo != null, "modInfo");
-         Contract.Requires(sortStatus != null, "sortStatus");
+      public ModListItem(SortStatus sortStatus) {
+         Debug.Assert(sortStatus != null);
 
-         Info = modInfo;
+         Info = sortStatus.ModInfo;
          SortStatus = sortStatus;
          Enabled = sortStatus.Successful;
          Selectable = sortStatus.Successful;
@@ -52,57 +143,46 @@ namespace FactorioBrowser.UI.ViewModel {
    }
 
    public sealed class ModSelectionViewModel : BindableBase {
+      private readonly Func<Task<IImmutableList<SortStatus>>> _refreshFunction;
+      private readonly Action<IImmutableList<FcModMetaInfo>> _submitAction;
 
-      private readonly IFcModFinder _modFinder;
-      private readonly IFcModSorter _modSorter;
-      private readonly IAppSettings _settings;
-      private bool _isBusy;
 
-      public ModSelectionViewModel(IAppSettings settings, IFcModFinder modFinder, IFcModSorter modSorter) {
-         _settings = settings; // TODO : replace with explicit parameters
-         _modFinder = modFinder;
-         _modSorter = modSorter;
-         _isBusy = false;
+      // TODO: unify the first two parameters
+      public ModSelectionViewModel(IImmutableList<SortStatus> selectableMods,
+         Func<Task<IImmutableList<SortStatus>>> refreshFunction,
+         Action<IImmutableList<FcModMetaInfo>> submitAction) {
+
+         _refreshFunction = refreshFunction;
+         _submitAction = submitAction;
+
+         RefreshCommand = new ActionCommand(Refresh);
+         SubmitCommand = new ActionCommand(Submit);
          ModList = new ObservableCollection<ModListItem>();
-         DependencyGraph = null;
+         ModList.AddRange(selectableMods.Select(s => new ModListItem(s)));
+         DependencyGraph = BuildDependencyGraph(ModList);
       }
 
-      public IImmutableList<FcModFileInfo> GetSelectedMods() { // TODO : return MetaInfo (?)
-         return ModList
-            .Where(i => i.Enabled)
-            .Select(i => FcModFileInfo.FromMetaInfo(i.Info))
-            .ToImmutableList();
-      }
+      public ICommand RefreshCommand { get; }
+
+      public ICommand SubmitCommand { get; }
 
       public ObservableCollection<ModListItem> ModList { get; }
 
       public BidirectionalGraph<ModGraphVertex, ModGraphEdge> DependencyGraph { get; private set; }
 
-      public bool IsBusy {
-         get {
-            return _isBusy;
-         }
-
-         private set {
-            UpdateProperty(ref _isBusy, value);
-         }
+      private async void Refresh() {
+         var refreshed = await _refreshFunction.Invoke();
+         ModList.Clear();
+         ModList.AddRange(refreshed.Select(s => new ModListItem(s)));
+         DependencyGraph = BuildDependencyGraph(ModList);
       }
 
-      public async Task Refresh() {
-         IsBusy = true;
-         try {
-            ModList.Clear();
-            var allMods = await Task.Factory.StartNew(FindAndSortMods);
-            ModList.AddRange(allMods.Select(m => new ModListItem(m.ModInfo, m)));
-            DependencyGraph = BuildDependencyGraph(ModList);
-         } finally {
-            IsBusy = false;
-         }
-      }
-
-      private IImmutableList<SortStatus> FindAndSortMods() {
-         FcModList mods = _modFinder.FindAll(_settings.GamePath, _settings.ModsPath);
-         return _modSorter.Sort(mods.SelectableMods);
+      private void Submit() {
+         var selectedMods = ModList
+            .Where(i => i.Enabled)
+            .Select(i => i.SortStatus.ModInfo)
+            .ToImmutableList();
+         _submitAction.Invoke(selectedMods);
       }
 
       private BidirectionalGraph<ModGraphVertex, ModGraphEdge> BuildDependencyGraph(

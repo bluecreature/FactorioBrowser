@@ -5,10 +5,12 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using FactorioBrowser.Mod.Finder;
 using FactorioBrowser.Mod.Loader;
 using FactorioBrowser.Prototypes;
 using FactorioBrowser.Prototypes.Unpacker;
@@ -205,27 +207,21 @@ namespace FactorioBrowser.UI.ViewModel {
       }
    }
 
-   public sealed class BrowseViewModel : BindableBase, IDisposable {
-
-      private readonly IFcModDataLoader _modLoader;
-      private readonly IImmutableList<FcModFileInfo> _modsToLoad;
-      private readonly IImmutableDictionary<string, object> _modSettings;
-      private readonly IconCache _imageCache;
+   public sealed class BrowseStep : BindableBase, IBrowserStep<object> {
+      private readonly IFcModDataLoader _dataLoader;
+      private readonly ILocalizationDirectory _localizationDirectory;
+      private readonly IImmutableDictionary<string, object> _settings;
+      private readonly FcModList _modsToLoad;
 
       private bool _isBusy;
+      private object _viewModel;
 
-      public BrowseViewModel(IFcModDataLoader modLoader, IImmutableList<FcModFileInfo> modsToLoad,
-         IImmutableDictionary<string, object> modSettings) {
-
-         Debug.Assert(modsToLoad != null);
-         _modLoader = modLoader;
+      public BrowseStep(IFcModDataLoader dataLoader, ILocalizationDirectory localizationDirectory,
+         FcModList modsToLoad, IImmutableDictionary<string, object> settings) {
+         _dataLoader = dataLoader;
+         _localizationDirectory = localizationDirectory;
+         _settings = settings;
          _modsToLoad = modsToLoad;
-         _modSettings = modSettings;
-         _imageCache = new IconCache(modsToLoad);
-         _isBusy = false;
-         Items = new ObservableCollection<FcItem>();
-         Recipes = new ObservableCollection<FcRecipe>();
-         Technologies = new ObservableCollection<FcTechnology>();
       }
 
       public bool IsBusy {
@@ -236,6 +232,52 @@ namespace FactorioBrowser.UI.ViewModel {
          private set {
             UpdateProperty(ref _isBusy, value);
          }
+      }
+
+      public object ViewModel {
+         get {
+            return _viewModel;
+         }
+
+         private set {
+            UpdateProperty(ref _viewModel, value);
+         }
+      }
+
+      public async Task<object> Run() {
+         IsBusy = true;
+         try {
+            IImmutableList<FcModFileInfo> modFiles = _modsToLoad.SelectableMods
+               .Select(FcModFileInfo.FromMetaInfo)
+               .ToImmutableList();
+            FcPrototypes prototypes = await Task.Factory.StartNew(() =>
+               _dataLoader.LoadPrototypes(modFiles, _settings));
+            ViewModel = new BrowseViewModel(modFiles, prototypes);
+            return null;
+
+         } finally {
+            IsBusy = false;
+         }
+      }
+   }
+
+   public sealed class BrowseViewModel : BindableBase, IDisposable {
+      private readonly IconCache _imageCache;
+
+      public BrowseViewModel(IImmutableList<FcModFileInfo> modsToLoad, FcPrototypes prototypes) {
+
+         Debug.Assert(modsToLoad != null);
+         _imageCache = new IconCache(modsToLoad);
+
+         Items = new ObservableCollection<FcItem>();
+         Items.AddRange(prototypes.Items);
+
+         Recipes = new ObservableCollection<FcRecipe>();
+         Recipes.AddRange(prototypes.Recipes);
+
+         Technologies = new ObservableCollection<FcTechnology>();
+         Technologies.AddRange(prototypes.Technologies);
+         TechnologyGraph = BuildTechnologyGraph(prototypes.Technologies);
       }
 
       public IconCache ImageCache => _imageCache;
@@ -251,26 +293,6 @@ namespace FactorioBrowser.UI.ViewModel {
       public void Dispose() {
          _imageCache.Dispose();
       }
-
-      public async Task LoadData() {
-         IsBusy = true;
-         try {
-            var unpackedProtos = await Task.Factory.StartNew(LoadAndUnpackData);
-            Items.Clear();
-            Items.AddRange(unpackedProtos.Items);
-
-            Recipes.Clear();
-            Recipes.AddRange(unpackedProtos.Recipes);
-
-            Technologies.Clear();
-            Technologies.AddRange(unpackedProtos.Technologies);
-            TechnologyGraph = BuildTechnologyGraph(unpackedProtos.Technologies);
-
-         } finally {
-            IsBusy = false;
-         }
-      }
-
 
       private TechnologyGraph BuildTechnologyGraph(IImmutableList<FcTechnology> technologies) {
          TechnologyGraph graph = new TechnologyGraph(allowParallelEdges: false,
@@ -300,10 +322,6 @@ namespace FactorioBrowser.UI.ViewModel {
          }
 
          return graph;
-      }
-
-      private FcPrototypes LoadAndUnpackData() {
-         return _modLoader.LoadPrototypes(_modsToLoad, _modSettings);
       }
    }
 }

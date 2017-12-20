@@ -5,10 +5,77 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using FactorioBrowser.Mod.Finder;
 using FactorioBrowser.Mod.Loader;
 using FactorioBrowser.Prototypes;
 
 namespace FactorioBrowser.UI.ViewModel {
+
+   public sealed class ModSettingsStep : BindableBase, IBrowserStep<IImmutableDictionary<string, object>> {
+      private readonly IFcModDataLoader _dataLoader;
+      private readonly ILocalizationDirectory _localizationDirectory;
+      private readonly FcModList _modsToLoad;
+
+      private bool _isBusy;
+      private object _viewModel;
+
+      public ModSettingsStep(IFcModDataLoader dataLoader,
+         ILocalizationDirectory localizationDirectory, FcModList modsToLoad) {
+         _dataLoader = dataLoader;
+         _localizationDirectory = localizationDirectory;
+         _modsToLoad = modsToLoad;
+      }
+
+      public async Task<IImmutableDictionary<string, object>> Run() {
+         var startupSettings = await LoadStartupSettingDefinitions();
+         if (startupSettings.Count > 0) {
+            var runTaskSource = new TaskCompletionSource<IImmutableDictionary<string, object>>();
+            var viewModel = new SettingsViewModel(_localizationDirectory, startupSettings,
+               runTaskSource.SetResult);
+            ViewModel = viewModel;
+            return await runTaskSource.Task;
+
+         } else {
+            return ImmutableDictionary.Create<string, object>();
+         }
+      }
+
+      private async Task<IList<FcModSetting>> LoadStartupSettingDefinitions() {
+         IsBusy = true;
+         try {
+            var settings = await Task.Factory.StartNew(
+               () => _dataLoader.LoadSettings(
+                  _modsToLoad.SelectableMods.Select(FcModFileInfo.FromMetaInfo)));
+            return settings
+               .Where(s => s.SettingType == SettingTypes.Startup)
+               .ToList();
+
+         } finally {
+            IsBusy = false;
+         }
+      }
+
+      public object ViewModel {
+         get {
+            return _viewModel;
+         }
+
+         private set {
+            UpdateProperty(ref _viewModel, value);
+         }
+      }
+
+      public bool IsBusy {
+         get {
+            return _isBusy;
+         }
+
+         private set {
+            UpdateProperty(ref _isBusy, value);
+         }
+      }
+   }
 
    public sealed class FcModSettingValue {
 
@@ -33,55 +100,31 @@ namespace FactorioBrowser.UI.ViewModel {
    public sealed class SettingsViewModel : BindableBase {
       private static readonly IImmutableList<string> DefaultLocalePreference = new[] { "en" }.ToImmutableList();
 
-      private readonly IFcModDataLoader _dataLoader;
-      private readonly IFcLocalizationLoader _localizationLoader;
-      private readonly IImmutableList<FcModFileInfo> _modsToLoad;
+      private readonly ILocalizationDirectory _localizationDirectory;
+      private readonly Action<IImmutableDictionary<string, object>> _submitAction;
 
-      private ILocalizationDirectory _localizationDirectory;
-      private bool _isBusy;
+      public SettingsViewModel(ILocalizationDirectory localizationDirectory,
+         IEnumerable<FcModSetting> settingDefs,
+         Action<IImmutableDictionary<string, object>> submitAction) {
 
-      public SettingsViewModel(IFcModDataLoader dataLoader,
-         IFcLocalizationLoader localizationLoader, IImmutableList<FcModFileInfo> modsToLoad) {
-         _dataLoader = dataLoader;
-         _localizationLoader = localizationLoader;
-         _modsToLoad = modsToLoad;
+         _localizationDirectory = localizationDirectory;
+         _submitAction = submitAction;
          SettingsByMod = new ObservableCollection<IGrouping<string, FcModSettingValue>>();
+         SettingsByMod.AddRange(settingDefs
+            .Select(ToSettingValue)
+            .GroupBy(s => s.Definition.SourceMod));
+         SubmitCommand = new ActionCommand(Submit);
       }
 
-      public IImmutableDictionary<string, object> GetSettingsValues() {
-         return SettingsByMod
-            .SelectMany(group => group.Select(sv => new { sv.Definition.Name, sv.Value }))
-            .ToImmutableDictionary(sv => sv.Name, sv => sv.Value);
-      }
-
-      public bool IsBusy {
-         get {
-            return _isBusy;
-         }
-
-         private set {
-            UpdateProperty(ref _isBusy, value);
-         }
-      }
+      public ICommand SubmitCommand { get; }
 
       public ObservableCollection<IGrouping<string, FcModSettingValue>> SettingsByMod { get; }
 
-      public async Task LoadData() {
-         IsBusy = true;
-         try {
-            _localizationDirectory = await Task.Factory.StartNew(
-               () => _localizationLoader.LoadLocalizationTables(_modsToLoad));
-            var settings = await Task.Factory.StartNew(
-               () => _dataLoader.LoadSettings(_modsToLoad));
-            var groups = settings
-               .Where(s => s.SettingType == SettingTypes.Startup)
-               .Select(ToSettingValue)
-               .GroupBy(s => s.Definition.SourceMod);
-            SettingsByMod.Clear();
-            SettingsByMod.AddRange(groups);
-         } finally {
-            IsBusy = false;
-         }
+      private void Submit() {
+         var settings = SettingsByMod
+            .SelectMany(group => group.Select(sv => new { sv.Definition.Name, sv.Value }))
+            .ToImmutableDictionary(sv => sv.Name, sv => sv.Value);
+         _submitAction.Invoke(settings);
       }
 
       private FcModSettingValue ToSettingValue(FcModSetting definition) {
